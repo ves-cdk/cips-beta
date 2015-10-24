@@ -6,10 +6,11 @@ var layerFromQuery;
 var clusterLayer, clusterLayerClickHandler;
 var measurement;
 var showInfoWindow = "default";
-var statsLoaded = [null,true,false,false,false,false,false,false,false,false,false]; // this is used to initialize stats carousels
-var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
-var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
+//var statsLoaded = [null,true,false,false,false,false,false,false,false,false,false]; // this is used to initialize stats carousels
+//var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
+//var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var tb, epWidget, lineSymbol; // for elevation profile
+var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt;
 
 var testvar; //generic variable for testing
 	
@@ -51,6 +52,8 @@ require([
     "esri/layers/FeatureLayer",
     "esri/dijit/PopupTemplate",
     "esri/request",
+    "esri/SnappingManager",
+    "esri/symbols/CartographicLineSymbol",
     "esri/arcgis/Portal", 
     "esri/arcgis/OAuthInfo", 
     "esri/IdentityManager",
@@ -99,6 +102,8 @@ function(
     FeatureLayer,
     PopupTemplate,
     esriRequest,
+    SnappingManager,
+    CartographicLineSymbol,
     arcgisPortal, 
     OAuthInfo, 
     esriId, 
@@ -563,6 +568,65 @@ function(
 		}
 
 	}; 
+	
+	app.buildGraphicTools = function(mapObj) {
+		mapObj.enableSnapping();
+		editPointSymbol = new SimpleMarkerSymbol();
+		editLineSymbol = new CartographicLineSymbol();
+		editFillSymbol = new SimpleFillSymbol();
+		
+		graphicTb = new Draw(mapObj);
+		graphicTb.on("draw-end", function(evt) {
+			console.log("added event ", evt);
+			// add actions to keep or discard the graphic
+			
+	    	addGraphicEvt = evt;
+			graphicTb.deactivate();
+			switch(evt.geometry.type) {
+				case "polygon":
+					var symbol = editFillSymbol;
+				break;
+				case "point":
+					var symbol = editPointSymbol;
+				break;
+				case "polyline":
+					var symbol = editLineSymbol;
+				break;
+			}
+			
+			//var symbol = editFillSymbol;
+			mapObj.graphics.add(new Graphic(evt.geometry, symbol));
+		});
+	};
+	
+	app.startDraw = function(type, colorOption) {
+		switch (colorOption) {
+			case "orange":
+				editLineSymbol.setColor(new esri.Color("#d66704"));
+				editFillSymbol.setOutline(lineSymbol);
+				editFillSymbol.setColor(new esri.Color([214,103,4,0.4]));
+			break;
+			case "blue":
+				editLineSymbol.setColor(new esri.Color("#488fc3"));
+				editFillSymbol.setOutline(lineSymbol);
+				editFillSymbol.setColor(new esri.Color([4,117,229,0.4]));
+			break;
+		}
+		graphicTb.activate(type);	
+	};
+	
+	app.addGraphic = function(ev, mapObj) {
+		graphicTb.deactivate();
+		var symbol;
+		if (evt.geometry.type === "point" || evt.geometry.type === "multipoint") {
+			symbol = editMarkerSymbol;
+		} else if (evt.geometry.type === "line" || evt.geometry.type === "polyline") {
+			symbol = editLineSymbol;
+		} else {
+			symbol = editFillSymbol;
+		}
+		mapObj.graphics.add(new Graphic(evt.geometry, symbol));
+	};
 	
 	app.syncMaps = function(mapObj) {
 		var mapExtent = mapObj.extent;
