@@ -1072,9 +1072,9 @@ function(
 	};
 
 	app.findRegion = function() {
-		console.log($('#frmSearchRegion').val());
+		//console.log($('#frmSearchRegion').val());
 		//Need the url to a region service for this
-		$.when(app.runQuery("http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS1_WFL/FeatureServer/0", "RB=" + $('#frmSearchRegion').val(), function(callback) {
+		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
 			var extent = callback.features[0].geometry.getExtent();
 			map.setExtent(extent);
 		}));
@@ -1083,7 +1083,7 @@ function(
 	
 	app.findInterpArea = function() {
 		//console.log($('#frmSearchRegion').val());
-		$.when(app.runQuery("http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/Deliverable_20150909/FeatureServer/4", "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
+		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
 			var extent = callback.features[0].geometry.getExtent();
 			map.setExtent(extent);
 		}));

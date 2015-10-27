@@ -94,6 +94,10 @@ a:focus {
 .nav > li > a:hover, .nav > li > a:focus {
 	color: #555;
 } 
+.nav > li.active, .nav > li.active > a {
+	color: #555;
+	background: #eee;
+}
 .nav.navbar-nav.navbar-right > li > a {
 	color: #555;
 }
@@ -357,6 +361,11 @@ a:focus {
 	float: left;
 	padding: 8px 10px;
 }
+/* Editor-specific styles */
+.esriAttributeInspector .atiButtons {
+	display: none !important;
+}
+/* end Editor-specific styles */
 @media (min-width: 768px) {
 	.navbar-right {
 		float: right !important;

@@ -73,6 +73,9 @@
 
 								<ul class="nav navbar-nav">
 									<li>
+										<a href="#menu6" class="tabItems" role="tab" data-toggle="tab" id="menuEdit" onclick="app.menuChange(this);"><i class="fa fa-pencil-square-o fa-lg">&nbsp;</i>Edit Tools</a>
+									</li>
+									<li>
 										<a href="#menu1" class="tabItems" role="tab" data-toggle="tab" id="menuSearch" onclick="app.menuChange(this);"><i class="fa fa-search fa-lg">&nbsp;</i>Search</a>
 									</li>
 									<li>
@@ -81,7 +84,7 @@
 									<li>
 										<a href="#menu3" class="tabItems" role="tab" data-toggle="tab" id="menuBasemap" onclick="app.menuChange(this);"><i class="fa fa-map-o fa-lg">&nbsp;</i>Basemap</a>
 									</li>
-									<li>
+									<li style="display: none">
 										<a href="#menu4" class="tabItems" role="tab" data-toggle="tab" id="menuAnalysis" onclick="app.menuChange(this);"><i class="fa fa-cog fa-lg">&nbsp;</i>Analysis</a>
 									</li>
 									<li>
@@ -231,13 +234,73 @@
 										</div>
 									</div>
 									<div class="panel panel-default">
-										<div class="panel-heading" role="tab" id="menu4panel2">
+										<div class="panel-heading" role="tab" id="menu5panel2">
 											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion5" href="#menu5collapse2" aria-expanded="false" aria-controls="collapseTwo"> Print</a></h4>
 										</div>
 										<div id="menu5collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu5panel2">
 											<div class="panel-body">
 												Print Function under construction
 												<div id="printButton"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- Edit tools -->
+							<div id="menu6" class="tab-pane ribbon-bar-tab">
+								<div class="panel-group" id="accordion6" role="tablist" aria-multiselectable="true">
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu6panel1">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu6collapse1" aria-expanded="false" aria-controls="collapseOne"> I want to:</a></h4>
+										</div>
+										<div id="menu6collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel1">
+											<div class="panel-body">
+												<div class="radio" id="editRadios1">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" onclick="app.startDraw('point', 'red');"> Add a Point</label>
+												</div>
+												<div class="radio" id="editRadios2">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios2" value="option2" onclick="app.startDraw('polyline', 'red');"> Add a Line</label>
+												</div>
+												<div class="radio" id="editRadios3">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" onclick="app.startDraw('polygon', 'red');"> Add a Polygon</label>
+												</div>
+												<div class="radio" id="editRadios4">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios4" value="option4" onclick="app.startDelete();"> Delete a Feature</label>
+												</div>
+												<div class="radio" id="editRadios5">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit();"> Edit a Feature's Attributes</label>
+												</div>
+												
+												<!--<div id="editorDiv"></div>-->
+												<div id="attributesDiv"></div>
+												
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu6panel2">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu6collapse2" aria-expanded="false" aria-controls="collapseTwo"> Instructions</a></h4>
+										</div>
+										<div id="menu6collapse2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel2">
+											<div class="panel-body">
+												<div id="editInstructions">Select an editing option.</div>
+											</div>
+										</div>
+									</div>
+									<div id="editButtons" class="panel panel-default" style="display:none;">
+										<div class="panel-heading" role="tab" id="menu6panel3">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu6collapse3" aria-expanded="false" aria-controls="collapseThree"> Save / Cancel</a></h4>
+										</div>
+										<div id="menu6collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel3">
+											<div class="panel-body">
+												<button id="saveGraphic" onclick="app.saveGraphic();" style="display: none;" class="btn btn-block">Continue</button>
+												<button id="cancelEdit" onclick="app.cancelEdit();" style="display: none;" class="btn btn-block">Cancel</button>
+												<button id="saveFinish" onclick="app.stopEditing()" style="display: none;" class="btn btn-block">Save and Finish</button>
 											</div>
 										</div>
 									</div>

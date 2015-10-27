@@ -18,10 +18,15 @@ appConfig = {
     GROW_POLYS_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/1",
     GROW_POINTS_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0",
     GROW_PREPROC_RESULTS_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/6",
-    PRIORIT_POLYS_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/1",
-    PRIORIT_JOIN_TABLE_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/10",
-	PRIORIT_JOIN_KEY: "PrioritizGrowKey",
+    //PRIORIT_POLYS_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/1",
+    //PRIORIT_JOIN_TABLE_URL: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/10",
+	//PRIORIT_JOIN_KEY: "PrioritizGrowKey",
+	URL_INTERP_AREA: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/2",
+	URL_REGION: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Base/FeatureServer/1",
 	URL_SUMMARY_REGION: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/3", //"http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151015/FeatureServer/20",
-    URL_SUMMARY_INTERP_AREA: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/4", //"http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151015/FeatureServer/11"
+    URL_SUMMARY_INTERP_AREA: "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/4", //"http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151015/FeatureServer/11",
+    URL_EDIT_POINT: "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_20151009/FeatureServer/0",
+    URL_EDIT_POLYLINE: "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_20151009/FeatureServer/1",
+    URL_EDIT_POLYGON: "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_20151009/FeatureServer/2"
     //WEBMAP_ID: "" // Use "" if defining below in WEBMAP_JSON. If an ID is used, the WEBMAP_JSON content below will be ignored.
 };
