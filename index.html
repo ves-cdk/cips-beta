@@ -25,7 +25,12 @@
 				<img class="logo" src="img/logo.png" title="Cannabis Identification and Prioritization System">
 				<!--<a class="navbar-brand" id="appTitle" href="javascript:void(0);"></a>-->
 			</div>
-			<ul class="nav navbar-nav navbar-right">
+			<div class="navbar-header">
+				<button title="Show/hide the top menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target="#headerTabs">
+					<i class="fa fa-bars"></i>
+				</button>
+			</div>
+			<ul class="collapse navbar-collapse nav navbar-nav navbar-right" id="headerTabs">
 				<li id="aboutCips">
 					<a id="about-cips" class="action" style="display: none;"><i class="fa fa-info-circle fa-lg" title="About CIPS"></i></a>
 				</li>
@@ -328,10 +333,8 @@
 								<i class="fa fa-dashboard"></i> Map
 							</div>
 							<div id="ribbon-bar-header" class="navbar-header">
-								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ribbonTabs">
-									<span class="icon-bar"></span>
-									<span class="icon-bar"></span>
-									<span class="icon-bar"></span>
+								<button title="Show/hide Map menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ribbonTabs">
+									<i class="fa fa-bars"></i>
 								</button>
 							</div>
 							<div class="collapse navbar-collapse" id="ribbonTabs">

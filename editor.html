@@ -25,7 +25,12 @@
 				<img class="logo" src="img/app-editor.png" title="Cannabis Identification and Prioritization System">
 				<!--<a class="navbar-brand" id="appTitle" href="javascript:void(0);"></a>-->
 			</div>
-			<ul class="nav navbar-nav navbar-right">
+			<div class="navbar-header">
+				<button title="Show/hide the top menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target="#headerTabs">
+					<i class="fa fa-bars"></i>
+				</button>
+			</div>
+			<ul class="collapse navbar-collapse nav navbar-nav navbar-right" id="headerTabs">
 				<li id="aboutCips">
 					<a id="about-cips" class="action" style="display: none;"><i class="fa fa-info-circle fa-lg" title="About CIPS"></i></a>
 				</li>
@@ -63,10 +68,8 @@
 								<i class="fa fa-dashboard"></i> Map
 							</div>
 							<div id="ribbon-bar-header" class="navbar-header">
-								<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ribbonTabs">
-									<span class="icon-bar"></span>
-									<span class="icon-bar"></span>
-									<span class="icon-bar"></span>
+								<button title="Show/hide Map menu" type="button" class="navbar-toggle" data-toggle="collapse" data-target="#ribbonTabs">
+									<i class="fa fa-bars"></i>
 								</button>
 							</div>
 							<div class="collapse navbar-collapse" id="ribbonTabs">
@@ -254,7 +257,7 @@
 											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu6collapse1" aria-expanded="false" aria-controls="collapseOne"> I want to:</a></h4>
 										</div>
 										<div id="menu6collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel1">
-											<div class="panel-body">
+											<div class="panel-body" id="editOptions">
 												<div class="radio" id="editRadios1">
 													<label>
 														<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" onclick="app.startDraw('point', 'red');"> Add a Point</label>
@@ -273,10 +276,14 @@
 												</div>
 												<div class="radio" id="editRadios5">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit();"> Edit a Feature's Attributes</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit('attribute');"> Edit a Feature's Attributes</label>
+												</div>
+												<div class="radio" id="editRadios6">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios6" value="option6" onclick="app.startEdit('shape')"> Edit a Feature's shape</label>
 												</div>
 												
-												<!--<div id="editorDiv"></div>-->
+												<div id="editorDiv"></div>
 												<div id="attributesDiv"></div>
 												
 											</div>
@@ -299,8 +306,9 @@
 										<div id="menu6collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel3">
 											<div class="panel-body">
 												<button id="saveGraphic" onclick="app.saveGraphic();" style="display: none;" class="btn btn-block">Continue</button>
-												<button id="cancelEdit" onclick="app.cancelEdit();" style="display: none;" class="btn btn-block">Cancel</button>
 												<button id="saveFinish" onclick="app.stopEditing()" style="display: none;" class="btn btn-block">Save and Finish</button>
+												<button id="shapeEditFinished" onclick="app.saveShapeEdit()" style="display: none;" class="btn btn-block">Save</button>
+												<button id="cancelEdit" onclick="app.cancelEdit();" style="display: none;" class="btn btn-block">Cancel</button>
 											</div>
 										</div>
 									</div>

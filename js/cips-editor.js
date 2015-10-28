@@ -11,7 +11,9 @@ var showInfoWindow = "default";
 //var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var tb, epWidget, lineSymbol; // for elevation profile
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo;
+//var saveFeatureShapeEdit = false;
 var token;
+
 
 var testvar; //generic variable for testing
 	
@@ -60,13 +62,14 @@ require([
     "esri/arcgis/Portal", 
     "esri/arcgis/OAuthInfo", 
     "esri/IdentityManager",
-    "esri/dijit/editing/Editor",
+    //"esri/dijit/editing/Editor",
+    "esri/toolbars/edit",
     "esri/dijit/AttributeInspector",
     "./js/ClusterLayer.js", 
     //"./js/clusterfeaturelayer.js",
     "./js/ClusterFeatureLayer2.js",
     "./js/lib/bootstrapmap.js",
-    "dojo/dom", "dojo/on", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/connect", "./js/agsjs/dijit/TOC.js", "dojo/domReady!"], 
+    "dojo/dom", "dojo/on", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/connect", "dojo/_base/event", "./js/agsjs/dijit/TOC.js", "dojo/domReady!"], 
 
 function(
 
@@ -114,12 +117,13 @@ function(
     arcgisPortal, 
     OAuthInfo, 
     esriId, 
-    Editor,
+    //Editor,
+    Edit,
     AttributeInspector,
     ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
-    dom, on, arrayUtil, lang, Connect, TOC) {
+    dom, on, arrayUtil, lang, Connect, event, TOC) {
 
     var basemapGallery, scalebar, locator;
     
@@ -247,7 +251,6 @@ function(
 	    	on(map, "extent-change", function() {
 	    		app.syncMaps(map);
 	    	});
-	    
 	    	
 	    	//hide the popup if its outside the map's extent (use this if not using Bootstrapmap library)
 	        /*map.on("mouse-drag", function(evt) {
@@ -270,54 +273,6 @@ function(
                     app.buildMapItems(response);
                 });
             }
-            
-            // Popup settings when editing features
-            var popup = map.infoWindow;
-            
-            Connect.connect(popup, "onSetFeatures", function() {
-            	console.log("onSetFeatures");
-            	if ($("#optionsRadios4:checked").prop("checked")) {
-            		//console.log("setFeatures", popup);
-            		// hide the popup results
-            		$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		//console.log(editFtr);
-            		if (editFtr._layer._editable) {
-            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
-            				if (result) {
-            					app.deleteFeature(editFtr);
-            				} else {
-            					popup.clearFeatures();
-            				}
-            			});
-            		} else {
-            			popup.clearFeatures();
-            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
-            		}
-            	} else {
-            		if ($("#optionsRadios5:checked").prop("checked")) {
-	            		//console.log("setFeatures", popup);
-	            		// hide the popup results
-	            		$(".esriPopupWrapper").css("display","none");
-	            		var editFtr = popup.getSelectedFeature();
-	            		//console.log(editFtr);
-	            		if (editFtr._layer._editable) {
-	            			bootbox.confirm("Edit the selected feature?", function(result) {
-	            				if (result) {
-	            					app.editFeature(editFtr);
-	            				} else {
-	            					popup.clearFeatures();
-	            				}
-	            			});
-	            		} else {
-	            			bootbox.alert("You cannot edit features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turing off any other layers that might be selected instead.");
-	            			popup.clearFeatures();
-	            		}
-	            	} else {
-	            		$(".esriPopupWrapper").css("display","block");
-	            	}
-	            }	
-            });
 
         }, function(error) {
             alert("An error occurred loading the map. Refresh the page and try again.");
@@ -325,8 +280,89 @@ function(
         });
     };
     
+    app.buildPopup = function () {
+	    // Customize popup behavior when editing features
+        var popup = map.infoWindow;
+        
+        on(popup, "SetFeatures", function() {
+        	// loop through edit options to control what happens with popup
+        	var editRadios = ["optionsRadios4", "optionsRadios5", "optionsRadios6"];
+        	var selectedRadio;
+        	$.each(editRadios, function(i) {
+        		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
+        			//console.log(editRadios[i] + " checked");
+        			selectedRadio = editRadios[i];
+        		};
+        	});
+        	switch (selectedRadio) {
+        		case "optionsRadios4": 
+        		// Delete a feature
+        			esri.show(loading);
+            		$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		if (editFtr._layer._editable) {
+            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
+            				if (result) {
+            					app.deleteFeature(editFtr);
+            					
+            				} else {
+            					popup.clearFeatures();
+            					esri.hide(loading);
+            				}
+            			});
+            		} else {
+            			popup.clearFeatures();
+            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
+            			esri.hide(loading);
+            		}
+        		break;
+        		case "optionsRadios5": 
+        		// Edit feature's attributes
+            		$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		if (editFtr._layer._editable) {
+            			bootbox.confirm("Edit the selected feature?", function(result) {
+            				if (result) {
+            					app.editFeature(editFtr, "attributes");
+            				} else {
+            					popup.clearFeatures();
+            				}
+            			});
+            		} else {
+            			bootbox.alert("You cannot edit features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turing off any other layers that might be selected instead.");
+            			popup.clearFeatures();
+            		}
+        		break;
+        		case "optionsRadios6": 
+        		// Edit feature's shape
+        			$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		if (editFtr._layer._editable) {
+            			bootbox.confirm("Edit the selected feature?", function(result) {
+            				if (result) {
+            					app.editFeature(editFtr, "shape");
+            				} else {
+            					popup.clearFeatures();
+            				}
+            			});
+            		} else {
+            			bootbox.alert("You cannot edit features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turing off any other layers that might be selected instead.");
+            			popup.clearFeatures();
+            		}
+				    
+        		break;
+        		default:
+        		// Default popup behavior
+        			$(".esriPopupWrapper").css("display","block");
+        		break;
+        		
+        	}
+        });
+    };
+    
     app.buildMapItems = function (response) {
 
+    	app.buildPopup();
     	app.buildTOC(response);
     	app.buildBasemap();
     	app.buildSearch();
@@ -631,44 +667,73 @@ function(
 	
 	app.buildEditor = function(callback) {
 		
+		// enable editing shapes on with double-click event;
+		var editLayer = null;
+	    editToolbar = new Edit(map);
+		editToolbar.on("deactivate", function(evt) {
+			//if (saveFeatureShapeEdit === true) {
+				editLayer.applyEdits(null, [evt.graphic], null);
+				//app.cancelEdit();
+			//}
+		});
+		
 		layerInfo = [];
-		var layers = mapResponse.itemInfo.itemData.operationalLayers;
-		arrayUtil.forEach(layers, function (layer) {
-	        layerInfo.push({
-	            "featureLayer": layer.layerObject
-	        });
-	    });
-	
-	    /*
-	    editSettings = {
+		$.each(layers, function(i) { 
+			var lyr = layers[i];
+			if (lyr.layer._editable) {
+				layerInfo.push({
+	            	"featureLayer": lyr.layer
+	        	});
+	        	
+	        	var editingEnabled = false;
+				lyr.layer.on("dbl-click", function(evt) {
+					if ($("#optionsRadios6:checked").prop("checked")) {
+						event.stop(evt);	
+						if (editingEnabled === false) {
+							editingEnabled = true;
+							console.log(evt.graphic);
+							if (evt.graphic.geometry.type === "point") {
+								editToolbar.activate(Edit.MOVE, evt.graphic);
+							} else {
+								editToolbar.activate(Edit.EDIT_VERTICES, evt.graphic);
+							}
+
+						} else {
+							editLayer = this;
+							editToolbar.deactivate();
+							//editLayer.refresh();
+							editingEnabled = false;
+						}
+					}
+				}); 
+
+			}
+		});
+
+	    /*editSettings = {
 	        map: map,
 	        layerInfos: layerInfo,
 	        isEditable: true,
 	        toolbarVisible: true //use if you want to include the editing toolbar
-	    };
+	    };*/
 	
-	    editorWidget = new Editor({
+	    /*editorWidget = new Editor({
 	        settings: editSettings
 	    }, "editorDiv");
-	    editorWidget.startup();
-		*/
+	    editorWidget.startup();*/
+		
 	    attInspector = new AttributeInspector({
 	        layerInfos: layerInfo
 	    }, "attributesDiv");
-	    //attInspector.showDeleteButton = false;
 		$(".atiLayerName").hide();
 	    dojo.connect(attInspector, "onAttributeChange", function (feature, fieldName, newFieldValue) {
 	        feature.attributes[fieldName] = newFieldValue;
 	        feature.getLayer().applyEdits(null, [feature], null);
-	        console.log("onAttributeChange");
 	    });
-	
-	    //attInspector.on("delete", function (evt) {
-	        //var feature = evt.feature;
-	        //feature.getLayer().applyEdits(null, null, [feature]);
-	        //map.infoWindow.hide();
-	    //});
-	    callback("done");
+	    
+	    
+	    
+	    callback("app.buildEditor complete.");
 	    
 	};
 	
@@ -715,6 +780,7 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
+				$("#editRadios6").hide();
 				$("#cancelEdit").show();
 				$("#editInstructions").html("Click on the map to add the point.");
 			break;
@@ -723,6 +789,7 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
+				$("#editRadios6").hide();
 				$("#cancelEdit").show();
 				$("#editInstructions").html("Use single clicks on the map to draw the line. When done, double click.");
 			break;
@@ -731,6 +798,7 @@ function(
 				$("#editRadios2").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
+				$("#editRadios6").hide();
 				$("#cancelEdit").show();
 				$("#editInstructions").html("Use single clicks on the map to draw the polygon. When done, double click.");
 			break;
@@ -762,6 +830,7 @@ function(
 		$("#editRadios2").hide();
 		$("#editRadios3").hide();
 		$("#editRadios5").hide();
+		$("#editRadios6").hide();
 		$("#cancelEdit").show();
 		$("#editInstructions").html("Click on the feature you want to delete.");
 		$("#editButtons").show();
@@ -790,35 +859,78 @@ function(
 	        	app.cancelEdit();
 	        	ftr._layer.clearSelection();
 	        	ftr._layer.refresh();
+	        	esri.hide(loading);
 	        },
 	        error: function (response) {
 	            //callback(response);
 	            bootbox.alert("An error occured, please try again.");
 	            app.cancelEdit();
+	            esri.hide(loading);
 	        }
 	    });
 		
 	};
 	
-	app.startEdit = function() {
-		if (!(clickHandler)) {
-			clickHandler = dojo.connect(map, "onClick", clickListener);
-		};
-		$("#editRadios1").hide();
-		$("#editRadios2").hide();
-		$("#editRadios3").hide();
-		$("#editRadios4").hide();
-		$("#cancelEdit").show();
-		$("#editInstructions").html("Click on the feature you want to edit.");
-		$("#editButtons").show();
+	app.startEdit = function(option) {
+		
+		
+		switch(option) {
+			case "attribute":
+				if (!(clickHandler)) {
+					clickHandler = dojo.connect(map, "onClick", clickListener);
+				};
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios6").hide();
+				$("#cancelEdit").show();
+				$("#editInstructions").html("Click on the feature you want to edit.");
+				$("#editButtons").show();
+			break;
+			case "shape":
+				dojo.disconnect(clickHandler);
+				clickHandler = null;
+				$("#attributesDiv").hide();
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				//$("#saveShapeEdit").show();
+				$("#cancelEdit").show();
+				$("#editInstructions").html("<b>For Polygon and Line features:</b><br/>"
+					+ "Double click on the feature you want to modify.<br/>"
+					+ "The points (vertices) that make up the polygon or line will appear.<br/> Click and drag the points to adjust the boundary<br/>"
+					+ "When done, double click the shape again to save the edits.<br/><br/>"
+					+ "<b>For Point features:</b><br/>"
+					+ "Double click on the feature you want to modify.<br/>"
+					+ "Your cursor should change to a hand when hovering over the point.<br/>"
+					+ "Click and drag to move the point to a new location.<br/>"
+					+ "When done, double click the shape again to save the edits.");
+				$("#editButtons").show();
+			break;
+		}
 	};
 	
-	app.editFeature = function(ftr) {
-		$("#attributesDiv").show();
-		$("#cancelEdit").show();
-		$("#editInstructions").html("Enter any changes to the attributes, then click Finish.");
-		$("#saveFinish").show();
-		$("#editButtons").show();
+	app.editFeature = function(ftr, type) {
+		switch(type) {
+			case "attributes":
+				$("#attributesDiv").show();
+				$("#cancelEdit").show();
+				$("#editInstructions").html("Enter any changes to the attributes, then click Finish.");
+				$("#saveFinish").show();
+				$("#editButtons").show();
+			break;
+			case "shape":
+				console.log("edit shape", ftr);
+				var shapeId = ftr.attributes.OBJECTID;
+				console.log(shapeId);
+				
+			break;
+			
+		}
+		
 	};
 	
 	app.addGraphic = function(ev, mapObj) {
@@ -838,6 +950,7 @@ function(
 	};
 	
 	app.saveGraphic = function () {
+		esri.show(loading);
 		console.log("save edit");
 		$("#attributesDiv").show();
 		//$("#editInstructions").html("");
@@ -845,18 +958,21 @@ function(
 			// save point
 			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POINT, function(callback) {
 				console.log(callback);
+				esri.hide(loading);
 			}));
 		}
-		if ($("#optionsRadios1:checked").prop("checked")) {
+		if ($("#optionsRadios2:checked").prop("checked")) {
 			// save point
 			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYLINE, function(callback) {
 				console.log(callback);
+				esri.hide(loading);
 			}));
 		}
-		if ($("#optionsRadios1:checked").prop("checked")) {
+		if ($("#optionsRadios3:checked").prop("checked")) {
 			// save point
 			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYGON, function(callback) {
 				console.log(callback);
+				esri.hide(loading);
 			}));
 		}
 		$("#saveGraphic").hide();
@@ -865,6 +981,12 @@ function(
 	};
 	
 	app.cancelEdit = function () {
+		
+		/*if (shapeEditOption === "yes") {
+			saveFeatureShapeEdit = true;
+		} else {
+			saveFeatureShapeEdit = false;
+		};*/
 		//console.log("discard edit");
 		map.graphics.clear();
 		graphicTb.deactivate();
@@ -873,39 +995,43 @@ function(
 		$("#editRadios3").show();
 		$("#editRadios4").show();
 		$("#editRadios5").show();
+		$("#editRadios6").show();
 		$("#saveGraphic").hide();
 		$("#saveFinish").hide();
 		$("#cancelEdit").hide();
+		$("#saveShapeEdit").hide();
 		$("#optionsRadios1:checked").prop("checked",false);
 		$("#optionsRadios2:checked").prop("checked",false);
 		$("#optionsRadios3:checked").prop("checked",false);
 		$("#optionsRadios4:checked").prop("checked",false);
 		$("#optionsRadios5:checked").prop("checked",false);
-		/*document.getElementById('optionsRadios1').checked = false;
-    	document.getElementById('optionsRadios2').checked = false;
-    	document.getElementById('optionsRadios3').checked = false;
-    	document.getElementById('optionsRadios4').checked = false;
-    	document.getElementById('optionsRadios5').checked = false;*/
+		$("#optionsRadios6:checked").prop("checked",false);
     	$("#editInstructions").html("Select an editing option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
 		};
 		$("#attributesDiv").hide();
 		$("#editButtons").hide();
+		$.each(layerInfo, function(i) {
+			layerInfo[i].featureLayer.refresh();
+		});
+		//saveFeatureShapeEdit = false;
 	};
 	
 	app.stopEditing = function () {
-		//if (editorWidget) {  
-		//	editorWidget.destroy();  
-		//	editorWidget = null;  
-		//};
-		/*if (attInspector) {
-			attInspector.destroy();  
-			attInspector = null;  
-		}*/
-		
 		app.cancelEdit();
 	};
+	
+	app.saveShapeEdit = function () {
+	//	saveFeatureShapeEdit = true;
+		app.cancelEdit();
+	};
+	
+	//app.cancelShapeEdits = function () {
+	//	
+	//}
+	
+	
 	
 	app.createNewFeature = function(graphic, lyrSource, callback) {
 		var type = graphic.geometry.type;

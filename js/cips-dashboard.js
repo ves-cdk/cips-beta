@@ -557,35 +557,40 @@ function(
 	
 	
 	app.buildElevProfile = function() {
-
-		$("#elev-toggle").change(function() {
-			//$("#sumWshd-toggle").bootstrapToggle("off");
-			if ($("#elev-toggle").prop('checked') === true) {
-				app.initElevToolbar("polyline");
-				dojo.disconnect(clickHandler);
-			} else {
-				app.disableElevTool();
-
-			}
-		});
-
-		on(dom.byId("unitsSelect"), "change", function(evt) {
-			if (epWidget) {
-				epWidget.set("measureUnits", evt.target.options[evt.target.selectedIndex].value);
-			}
-		});
-
-		// lineSymbol used for freehand polyline and line.
+		
+		// Create the profile widget the first time loaded
 		if (!(epWidget)) {
-			lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([38, 110, 235]), 4);
-
-			var profileParams = {
-				map : map,
-				profileTaskUrl : "https://elevation.arcgis.com/arcgis/rest/services/Tools/ElevationSync/GPServer",
-				scalebarUnits : Units.MILES
-			};
-			epWidget = new ElevationsProfileWidget(profileParams, dom.byId("profileChartNode"));
-			epWidget.startup();
+			$("#elev-toggle").change(function() {
+				//$("#sumWshd-toggle").bootstrapToggle("off");
+				if ($("#elev-toggle").prop('checked') === true) {
+					app.initElevToolbar("polyline");
+					dojo.disconnect(clickHandler);
+					$("#sumWshd-toggle").bootstrapToggle("off");
+				} else {
+					app.disableElevTool();
+	
+				}
+			});
+	
+			on(dom.byId("unitsSelect"), "change", function(evt) {
+				if (epWidget) {
+					epWidget.set("measureUnits", evt.target.options[evt.target.selectedIndex].value);
+				}
+			});
+	
+			// lineSymbol used for freehand polyline and line.
+			if (!(epWidget)) {
+				lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([38, 110, 235]), 4);
+	
+				var profileParams = {
+					map : map,
+					profileTaskUrl : "https://elevation.arcgis.com/arcgis/rest/services/Tools/ElevationSync/GPServer",
+					scalebarUnits : Units.MILES
+				};
+				epWidget = new ElevationsProfileWidget(profileParams, dom.byId("profileChartNode"));
+				epWidget.startup();
+			}
+			tb = new Draw(map);
 		}
 
 	}; 
@@ -608,7 +613,7 @@ function(
 		//Clear profile
 
 		map.graphics.clear();
-		tb = new Draw(map);
+		//tb = new Draw(map);
 		tb.on("draw-end", app.addElevGraphic);
 		tb.activate(toolName);
 		map.disableMapNavigation();
@@ -2099,6 +2104,7 @@ function(
 			esriId.checkSignInStatus(info.portalUrl + "/sharing").then(
 				function (){
 					console.log("signed in");
+					
 					$("#appContent").show();
 					$("#appInit").hide();
 					$("#sign-out").show();
@@ -2226,8 +2232,7 @@ function(
 
 		$.unblockUI();
 		
-		
-		
+				
         // Close menu
         /*$('#topTabs a').on('click', function() {
             if ($(".navbar-toggle").css('display') !== 'none') {
