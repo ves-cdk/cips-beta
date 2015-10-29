@@ -35,7 +35,7 @@
 					<a id="about-cips" class="action" style="display: none;"><i class="fa fa-info-circle fa-lg" title="About CIPS"></i></a>
 				</li>
 				<li>
-				<a id="cips-dashboard" class="action" href="index.html"><i class="fa fa-dashboard fa-lg" title="Return to CIPS Dashboard"></i></a>
+				<a id="cips-dashboard" class="action" href="index.html" style="display: none;"><i class="fa fa-dashboard fa-lg" title="Return to CIPS Dashboard"></i></a>
 				</li>
 				<li id="personalizedPanel">
 					<a id="sign-out" class="action" style="display: none;"><i class="fa fa-sign-out fa-lg" title="Sign Out"></i></a>
@@ -306,9 +306,8 @@
 										<div id="menu6collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu6panel3">
 											<div class="panel-body">
 												<button id="saveGraphic" onclick="app.saveGraphic();" style="display: none;" class="btn btn-block">Continue</button>
-												<button id="saveFinish" onclick="app.stopEditing()" style="display: none;" class="btn btn-block">Save and Finish</button>
-												<button id="shapeEditFinished" onclick="app.saveShapeEdit()" style="display: none;" class="btn btn-block">Save</button>
-												<button id="cancelEdit" onclick="app.cancelEdit();" style="display: none;" class="btn btn-block">Cancel</button>
+												<button id="saveEdits" onclick="app.saveEdits()" style="display: none;" class="btn btn-block">Save</button>
+												<button id="stopEdit" onclick="app.stopEdit();" style="display: none;" class="btn btn-block">Cancel</button>
 											</div>
 										</div>
 									</div>

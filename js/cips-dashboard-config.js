@@ -7,9 +7,10 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Dashboard",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">DASHBOARD</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System</br></br>Version: Beta 1.01",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Dashboard</br></br>Version: Beta 1.1",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
-    PROXY_PAGE: "",
+    PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
+    //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
     PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
     INIT_EXTENT: { xmin: 	-14295287.001905905, ymin: 4652688.941886589, xmax: -12901075.60598466, ymax: 5203035.545539711, spatialReference: { wkid: 102100 } },
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server

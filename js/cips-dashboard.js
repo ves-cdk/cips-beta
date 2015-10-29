@@ -119,20 +119,19 @@ function(
     esriConfig.defaults.io.corsEnabledServers.push("tasks.arcgisonline.com");
     //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver2.vestra.com");
-    esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");      
+    esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");    
+    esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");     
     //esriConfig.defaults.io.corsEnabledServers.push("localhost");  
-    esriConfig.defaults.io.timeout = 120000;   
+    //esriConfig.defaults.io.timeout = 120000;   
     //esriConfig.defaults.io.proxyUrl = "http://localhost/apps/cipsproxy/DotNet/proxy.ashx";
     
     urlUtils.addProxyRule({
 	  urlPrefix: "tasks.arcgisonline.com",
-	  proxyUrl: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx"
-	  //proxyUrl: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx"
+	  proxyUrl: appConfig.PROXY_PAGE
 	});
 	urlUtils.addProxyRule({
 	  urlPrefix: "mapserver.vestra.com",
-	  proxyUrl: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx"
-	  //proxyUrl: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx"
+	  proxyUrl: appConfig.PROXY_PAGE
 	});
 
 	// Carousel settings - for charts to work, they have to be initialized after the slide is loaded.
@@ -473,10 +472,16 @@ function(
         }, "basemapGallery");
         basemapGallery.startup();
         
+        basemapGallery.on("error", function() {
+			bootbox.alert("An error occured while trying to load the basemap.<br/><br/>Please try a different basemap.");
+			//console.log("error loading basemap");
+		});
+        
         // set a listener for changing the basemap. if changed, save this to localStorage to be used next time the app loads
 	    basemapGallery.on("selection-change", function(){  
 			var currentBasemap = basemapGallery.getSelected();
 		  	localStorage.currentBasemap = currentBasemap.id;
+		  	esri.hide(loading);
 		});
 		
 		if (localStorage.currentBasemap) {
@@ -557,18 +562,17 @@ function(
 	
 	
 	app.buildElevProfile = function() {
-		
+		//app.summarizeWshd(false);
 		// Create the profile widget the first time loaded
 		if (!(epWidget)) {
 			$("#elev-toggle").change(function() {
-				//$("#sumWshd-toggle").bootstrapToggle("off");
 				if ($("#elev-toggle").prop('checked') === true) {
 					app.initElevToolbar("polyline");
-					dojo.disconnect(clickHandler);
 					$("#sumWshd-toggle").bootstrapToggle("off");
+					dojo.disconnect(clickHandler);
+					clickHandler = null;
 				} else {
 					app.disableElevTool();
-	
 				}
 			});
 	
@@ -602,21 +606,25 @@ function(
 	};
 
 	app.disableElevTool = function() {
+		console.log("disableElevTool");
 		tb.deactivate();
 		epWidget.clearProfile();
 		map.graphics.clear();
-		clickHandler = dojo.connect(map, "onClick", clickListener);
+		if ($("#sumWshd-toggle").prop('checked') === false) {
+			clickHandler = dojo.connect(map, "onClick", clickListener);
+		};
 	};
 	
 	app.initElevToolbar = function(toolName) {
 		epWidget.clearProfile();
 		//Clear profile
-
+		dojo.disconnect(clickHandler);
+		clickHandler = null;
 		map.graphics.clear();
 		//tb = new Draw(map);
 		tb.on("draw-end", app.addElevGraphic);
 		tb.activate(toolName);
-		map.disableMapNavigation();
+		//map.disableMapNavigation();
 	};
 
 	app.addElevGraphic = function(evt) {
@@ -1594,6 +1602,7 @@ function(
 		};
 	
 	app.summarizeWshd = function(option) {
+		console.log("summarizeWshd", option);
 		switch(option) {
 			case true:
 				if (epWidget) {
@@ -1679,7 +1688,6 @@ function(
 				}
 				showInfoWindow = "default";
 				$("#sumWshdText").html("Click on a watershed boundary to display summary.");
-				//map.on("click")
 			break;
 			
 		}
@@ -2109,6 +2117,7 @@ function(
 					$("#appInit").hide();
 					$("#sign-out").show();
 					$("#about-cips").show();
+					$("#open-editor").show();
 					//app.buildMap();
 					//app.initStats();
 					app.initStats();
@@ -2128,6 +2137,7 @@ function(
 					$("#appInit").show();
 					$("#sign-out").hide();
 					$("#about-cips").hide();
+					$("#open-editor").hide();
 					$("#sign-in").show();
 					//app.signOut();
 				 //$('#personalizedPanel').css("display", "none");
@@ -2267,7 +2277,7 @@ function(
         //});
         
         $("#sumWshd-toggle").change(function() {
-	    	app.summarizeWshd($(this).prop("checked"));
+	    	app.summarizeWshd($("#sumWshd-toggle").prop('checked'));
 	    });
 
     });
