@@ -656,10 +656,22 @@ function(
 		// control when a save is made - using Save or Cancel buttons and not double-click
 		editToolbar.on("deactivate", function(evt) {
 			if (shapeEditStatus === true) {
-				shapeEditLayer.applyEdits(null, [evt.graphic], null);
-				shapeEditStatus = null;
-				shapeEditBackup = null;
-				app.stopEdit();
+				//console.log(shapeEditStatus);
+				shapeEditLayer.applyEdits(null, [evt.graphic], null, function success() {
+					console.log("update feature successful");
+					shapeEditStatus = null;
+					shapeEditBackup = null;
+					app.stopEdit();
+					shapeEditLayer.refresh();	
+				}, function error() {
+					console.log("error");
+				});
+				
+				
+			} else {
+				$.each(layerInfo, function(i) {
+					layerInfo[i].featureLayer.refresh();
+				});
 			}
 		});
 
@@ -934,10 +946,16 @@ function(
 		if ($("#optionsRadios6:checked").prop("checked")) {
 			if (shapeEditStatus) {
 				//console.log("shape edits discarded");
-				shapeEditLayer.applyEdits(null, shapeEditBackup, null);
-				shapeEditStatus = null;
-				shapeEditBackup = null;
-				editToolbar.deactivate();
+				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
+					console.log("update feature successful");
+					shapeEditStatus = null;
+					shapeEditBackup = null;
+					//app.stopEdit();
+					shapeEditLayer.refresh();
+					editToolbar.deactivate();	
+				}, function error() {
+					console.log("error");
+				});
 			}
 		}
 
@@ -966,9 +984,7 @@ function(
 		};
 		$("#attributesDiv").hide();
 		$("#editButtons").hide();
-		$.each(layerInfo, function(i) {
-			layerInfo[i].featureLayer.refresh();
-		});
+		
 	};
 	
 	app.saveEdits = function () {
