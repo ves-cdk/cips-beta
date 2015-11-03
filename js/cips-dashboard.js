@@ -298,7 +298,7 @@ function(
     	//app.buildGraphicEditTools();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 288895, null, function(callback) {
+    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 72000, null, function(callback) {
 		}));
     	//console.log(esriId.credentials);
     	//map.addLayer(graphicLayer);
