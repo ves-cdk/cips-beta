@@ -9,6 +9,7 @@ var showInfoWindow = "default";
 var tb, epWidget, lineSymbol; // for elevation profile
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo;
 var shapeEditLayer, shapeEditStatus, shapeEditBackup;
+var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
 var token;
 
 var testvar; //generic variable for testing
@@ -226,10 +227,18 @@ function(
             	if (i > 0) {
             		lyr.layer.advancedQueryCapabilities.supportsPagination = true;
             	}
+            	if (lyr.title === "Interpretation Areas") {
+            		interpLyrIndex = i;
+            	}
+            	if (lyr.title === "SWRCB Regions") {
+            		regionLyrIndex = i;
+            	}
             });
  
             clickHandler = response.clickEventHandle;
             clickListener = response.clickEventListener;
+            
+             map.disableDoubleClickZoom();
             
             on(map, "update-start", function() {
 	        	esri.show(loading);
@@ -274,7 +283,7 @@ function(
         
         on(popup, "SetFeatures", function() {
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios4", "optionsRadios5", "optionsRadios6"];
+        	var editRadios = ["optionsRadios5", "optionsRadios6", "optionsRadios7"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -282,27 +291,6 @@ function(
         		};
         	});
         	switch (selectedRadio) {
-        		case "optionsRadios4": 
-        		// Delete a feature
-        			esri.show(loading);
-            		$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		if (editFtr._layer._editable) {
-            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
-            				if (result) {
-            					app.deleteFeature(editFtr);
-            					
-            				} else {
-            					popup.clearFeatures();
-            					esri.hide(loading);
-            				}
-            			});
-            		} else {
-            			popup.clearFeatures();
-            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
-            			esri.hide(loading);
-            		}
-        		break;
         		case "optionsRadios5": 
         		// Edit feature's attributes
             		$(".esriPopupWrapper").css("display","none");
@@ -311,6 +299,7 @@ function(
             			bootbox.confirm("Edit the selected feature?", function(result) {
             				if (result) {
             					app.editFeature(editFtr, "attributes");
+            					console.log(editFtr);
             				} else {
             					popup.clearFeatures();
             				}
@@ -337,6 +326,27 @@ function(
             			popup.clearFeatures();
             		}
         		break;
+        		case "optionsRadios7": 
+        		// Delete a feature
+        			esri.show(loading);
+            		$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		if (editFtr._layer._editable) {
+            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
+            				if (result) {
+            					app.deleteFeature(editFtr);
+            					
+            				} else {
+            					popup.clearFeatures();
+            					esri.hide(loading);
+            				}
+            			});
+            		} else {
+            			popup.clearFeatures();
+            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
+            			esri.hide(loading);
+            		}
+        		break;
         		default:
         		// Default popup behavior
         			$(".esriPopupWrapper").css("display","block");
@@ -354,7 +364,7 @@ function(
     	app.buildSearchWatershed();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 288895, null, function(callback) {
+    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 80000, null, function(callback) {
 			$.when(app.buildEditor(function(buildCallback) {
 			}));
 		}));
@@ -749,40 +759,46 @@ function(
 		});
 	};
 	
-	app.startDraw = function(type, colorOption) {
+	app.startDraw = function(colorOption, source) {
 		// editing - user is adding features
-		// the colorOption variable defines what color the added graphic is shown with. Current options are red or blue.
+		// the colorOption variable defines what color the added temporary graphic is shown with. Current options are red or blue.
 		dojo.disconnect(clickHandler);
 		clickHandler = null;
+		var type;
+		
+		$("#editRadios1").hide();
+		$("#editRadios2").hide();
+		$("#editRadios3").hide();
+		$("#editRadios4").hide();
+		$("#editRadios5").hide();
+		$("#editRadios6").hide();
+		$("#editRadios7").hide();
+		$("#editLabelEdit").hide();
+		$("#editLabelDelete").hide();
+		$("#stopEdit").show();
+		$("#editButtons").show();
 		
 		// hide options that are not selected
-		switch(type) {
-			case "point":
-				$("#editRadios2").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Click on the map to add the point.");
+		switch(source) {
+			case "grow":
+				type = "polygon";
+				$("#editRadios1").show();
+				$("#editInstructions").html("Use single clicks to trace around the production area of a Grow. When done, double click.");
 			break;
-			case "polyline":
-				$("#editRadios1").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Use single clicks on the map to draw the line. When done, double click.");
+			case "disturbed":
+				type = "polygon";
+				$("#editRadios2").show();
+				$("#editInstructions").html("Use single clicks to trace around the disturbed/graded area. When done, double click.");
 			break;
-			case "polygon":
-				$("#editRadios1").hide();
-				$("#editRadios2").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Use single clicks on the map to draw the polygon. When done, double click.");
+			case "tank":
+				type = "point";
+				$("#editRadios3").show();
+				$("#editInstructions").html("Single click on the Water Tank location.");
+			break;
+			case "reservoir":
+				type = "polygon";
+				$("#editRadios4").show();
+				$("#editInstructions").html("Use single clicks to trace the Reservoir. When done, double click.");
 			break;
 		}
 		switch (colorOption) {
@@ -812,8 +828,11 @@ function(
 		$("#editRadios1").hide();
 		$("#editRadios2").hide();
 		$("#editRadios3").hide();
+		$("#editRadios4").hide();
 		$("#editRadios5").hide();
 		$("#editRadios6").hide();
+		$("#editLabelEdit").hide();
+		$("#editLabelAdd").hide();
 		$("#stopEdit").show();
 		$("#editInstructions").html("Click on the feature you want to delete.");
 		$("#editButtons").show();
@@ -864,8 +883,11 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios6").hide();
+				$("#editRadios7").hide();
 				$("#stopEdit").show();
-				$("#editInstructions").html("Click on the feature you want to edit.");
+				$("#editLabelAdd").hide();
+				$("#editLabelDelete").hide();
+				$("#editInstructions").html("Click on the feature you want to edit.<br/>For polygons, click on outline of the shape (not inside) to select the feature.");
 				$("#editButtons").show();
 			break;
 			case "shape":
@@ -877,10 +899,14 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
+				$("#editRadios7").hide();
+				$("#editLabelAdd").hide();
+				$("#editLabelDelete").hide();
 				$("#saveEdits").show();
 				$("#stopEdit").show();
 				$("#editInstructions").html("<b>For Polygon and Line features:</b><br/>"
 					+ "Double click on the feature you want to modify.<br/>"
+					+ "For polygons, click on the outline of the shape (not inside) to select the feature.<br/>"
 					+ "The points (vertices) that make up the polygon or line will appear.<br/> Click and drag the points to adjust the boundary<br/>"
 					+ "When done, click Save to record the edits.<br/><br/>"
 					+ "<b>For Point features:</b><br/>"
@@ -914,28 +940,156 @@ function(
 		esri.show(loading);
 		$("#attributesDiv").show();
 		
-		if ($("#optionsRadios1:checked").prop("checked")) {
-			// save point
-			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POINT, function(callback) {
-				esri.hide(loading);
-			}));
+		// Get the region that this new feature falls within
+		var center = addGraphicEvt.geometry.getCentroid();
+		var query = new Query();
+		query.geometry = center;
+		layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+			var regionId = featureset.features[0].attributes.RB;
+			console.log("new feature falls within Region " + regionId);
+			
+			if ($("#optionsRadios1:checked").prop("checked")) {
+				// save grow
+				// NEED TO GET NEXT GROW NUMBER, GET REGION, ETC.
+				layers[interpLyrIndex].layer.queryFeatures(query, function(featureset) {
+					var interpId = featureset.features[0].attributes.InterpAreaID;
+					console.log("new feature falls within Interp Area " + interpId);
+					
+					$.when(app.runQuery(appConfig.URL_GROW_NUM, "0=0", function(callback) {
+						console.log("grow num", callback);
+						var regAttr = "Reg" + regionId.toString() + "LastInterpAreaIDAssigned"; // LastPrioritizAreaIDAssigned 
+							$.each(callback.features[0].attributes, function(i) { 
+								if (i === regAttr) {
+									var lastRegNum = callback.features[0].attributes[i];
+									var objId = callback.features[0].attributes.OBJECTID;
+									lastRegNum += 1;
+									//console.log(regAttr, lastRegNum);
+									$.when(app.createNewPolyFeature("grow", lastRegNum, regionId, addGraphicEvt.geometry, appConfig.URL_EDIT_GROW_FOOTPRINTS, function(callback) {
+										$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, function(callback) {
+											esri.hide(loading);
+											//bootbox.alert(newFeatureName + " Prioritization Area successfully created.");
+											//app.stopEdit();
+										}));
+									}));
+								}
+							});	
+						}));
+					//$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_GROW_FOOTPRINTS, function(callback) {
+					//	esri.hide(loading);
+					//}));
+				});
+			}
+			if ($("#optionsRadios2:checked").prop("checked")) {
+				// save disturbed area
+				$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_DISTURBED_AREA, function(callback) {
+					//console.log(callback);
+					esri.hide(loading);
+				}));
+			}
+			if ($("#optionsRadios3:checked").prop("checked")) {
+				// save water tank
+				$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_WATER_TANK, function(callback) {
+					//console.log(callback);
+					esri.hide(loading);
+				}));
+			}
+			if ($("#optionsRadios4:checked").prop("checked")) {
+				// save reservoir
+				$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_RESERVOIR, function(callback) {
+					//console.log(callback);
+					esri.hide(loading);
+				}));
+			}
+			$("#saveGraphic").hide();
+			$("#saveEdits").show();
+		});
+	};
+	
+	app.createNewPolyFeature = function(source, param1, param2, graphic, lyrSource, callback) {
+		// Create object for writing new feature to the layer
+
+		switch(source) {
+			case "grow":
+				var polygon = new Polygon(graphic.rings);
+				var addFeature = {
+					"attributes": {
+						//InterpAreaName: newFeatureName,
+						PreProcStatus: "Not PreProcessed",
+						InterpMethod: "Aerial Imagery",
+						StatusInterpArea: "In Initial Review",
+						GrowKey: param2 + "_" + param1,
+						SWRCBRegID: param2,
+						GrowID: param1
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
+			break;
+			/*case "prioritization":
+				var polygon = new Polygon(graphic.rings);
+				var addFeature = {
+					"attributes": {
+						PrioritizAreaName: newFeatureName,
+						StatusPrioritizArea: "Approved for Modeling",
+						PrioritizAreaKey: param2 + "_" + param1,
+						SWRCBRegID: param2,
+						PrioritizAreaID: param1
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
+			break;*/
 		}
-		if ($("#optionsRadios2:checked").prop("checked")) {
-			// save point
-			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYLINE, function(callback) {
-				//console.log(callback);
-				esri.hide(loading);
-			}));
-		}
-		if ($("#optionsRadios3:checked").prop("checked")) {
-			// save point
-			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYGON, function(callback) {
-				//console.log(callback);
-				esri.hide(loading);
-			}));
-		}
-		$("#saveGraphic").hide();
-		$("#saveEdits").show();
+		
+		$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
+			
+			map.graphics.clear();
+			// loop through map layers to find matching edited layer, then refresh it.
+			$.each(layers, function(layer) {
+				//console.log(layers[layer].layer.url);
+				if (layers[layer].layer.url === lyrSource) {
+					layers[layer].layer.refresh();
+					var query = new Query();
+					query.where = "objectId = " + saveCallback.addResults[0].objectId;
+					layers[layer].layer.selectFeatures(query);
+				}
+			});
+			callback("createNewPolyFeature complete");
+			//$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
+		}));	
+	};
+	
+	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {		
+		
+		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
+		//console.log(updateAttributes);			
+
+		var url = ftrUrl + "/updateFeatures";
+		var updString = {
+	        f: 'json',
+	        //where: "objectId=" + objId,
+	        features: updFeature,
+	        token: token
+	    };
+		//console.log(updFeature, url, updString);
+			
+	    // Query feature
+	    $.ajax({
+	        url: url,
+	        type: "POST",
+	        dataType: "json",
+	        data: updString,
+	        success: function (data) {
+	        	callback("success");
+	        },
+	        error: function (response) {
+	        	bootbox.alert("An error occurred during saving. Please notify CIPS IT/GIS staff.");
+	        	//console.log("error updating features");
+	            //callback(response);
+	        }
+	    });
 	};
 	
 	app.stopEdit = function () {
@@ -968,6 +1122,10 @@ function(
 		$("#editRadios4").show();
 		$("#editRadios5").show();
 		$("#editRadios6").show();
+		$("#editRadios7").show();
+		$("#editLabelAdd").show();
+		$("#editLabelEdit").show();
+		$("#editLabelDelete").show();
 		$("#saveGraphic").hide();
 		$("#saveEdits").hide();
 		$("#stopEdit").hide();
@@ -978,6 +1136,7 @@ function(
 		$("#optionsRadios4:checked").prop("checked",false);
 		$("#optionsRadios5:checked").prop("checked",false);
 		$("#optionsRadios6:checked").prop("checked",false);
+		$("#optionsRadios7:checked").prop("checked",false);
     	$("#editInstructions").html("Select an editing option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
@@ -1001,8 +1160,10 @@ function(
 	};
 	
 	app.createNewFeature = function(graphic, lyrSource, callback) {
+		console.log(lyrSource);
 		// Create object for writing new feature to the layer
 		var type = graphic.geometry.type;
+		console.log(type);
 		switch(type) {
 			case "point":
 				$("#stopEdit").hide();
@@ -1017,8 +1178,10 @@ function(
 				};
 				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
 					map.graphics.clear();
+					esri.hide(loading);
 					// Loop through map layers to find matching edited layer, then refresh it.
 					$.each(layers, function(layer) {
+						console.log(layers[layer].layer.url, lyrSource);
 						if (layers[layer].layer.url === lyrSource) {
 							layers[layer].layer.refresh();
 							var query = new Query();
@@ -1042,6 +1205,7 @@ function(
 				};
 				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
 					map.graphics.clear();
+					esri.hide(loading);
 					// loop through map layers to find matching edited layer, then refresh it.
 					$.each(layers, function(layer) {
 						if (layers[layer].layer.url === lyrSource) {
@@ -1055,6 +1219,7 @@ function(
 				}));
 			break;
 			case "polygon":
+				console.log(graphic);
 				$("#stopEdit").hide();
 				var polygon = new Polygon(graphic.geometry.rings);
 				var addFeature = {
@@ -1067,10 +1232,12 @@ function(
 				};
 				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
 					map.graphics.clear();
+					esri.hide(loading);
 					// loop through map layers to find matching edited layer, then refresh it.
 					$.each(layers, function(layer) {
-						//console.log(layers[layer].layer.url);
+						console.log(layers[layer].layer.url, lyrSource, saveCallback.addResults[0].objectId);
 						if (layers[layer].layer.url === lyrSource) {
+							console.log("match");
 							layers[layer].layer.refresh();
 							var query = new Query();
 							query.where = "objectId = " + saveCallback.addResults[0].objectId;
@@ -1190,7 +1357,7 @@ function(
 		// Create clustered layer for grow locations
 		clusterLayer = new ClusterFeatureLayer({
 			"url" : sourceUrl,
-			"distance" : 40,
+			"distance" : 20,
 			"id" : newLyrName,
 			"labelColor" : "#fff",
 			"labelOffset" : -5,
@@ -1203,9 +1370,9 @@ function(
 		});
 		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
 		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
-		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.5]));
-		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.5]));
-		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.5]));
+		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.7]));
+		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.7]));
+		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.7]));
 
 		renderer.addBreak(2, 5, group1);
 		renderer.addBreak(5, 20, group2);

@@ -129,7 +129,7 @@ function(
     
     var app = dojo.getObject('app', true); // global object to allow function calls from the app.
     
-    geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+    geometryService = new GeometryService(appConfig.GEOMETRY_SERVICE);
     
     // Proxy settings
     //esriConfig.defaults.geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
@@ -146,6 +146,10 @@ function(
     
     urlUtils.addProxyRule({
 	  urlPrefix: "tasks.arcgisonline.com",
+	  proxyUrl: appConfig.PROXY_PAGE
+	});
+	urlUtils.addProxyRule({
+	  urlPrefix: "sampleserver6.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
 	urlUtils.addProxyRule({
@@ -248,6 +252,8 @@ function(
             clickHandler = response.clickEventHandle;
             clickListener = response.clickEventListener;
             
+            map.disableDoubleClickZoom();
+            
             on(map, "update-start", function() {
 	        	esri.show(loading);
 	        });
@@ -332,14 +338,70 @@ function(
 								if (!(result)) {
 									map.graphics.clear();
 								} else {
-									bootbox.alert("saving new Prioritization Area.");
+									//bootbox.alert("saving new Prioritization Area."
 									// ADD CODE TO SAVE BOUNDARY TO PRIORITIZATON AREA
+									app.saveEdits();
 								}
 							});
 							esri.hide(loading);
 						}
 					});
 				};
+			
+			
+			if ($("#optionsRadios3:checked").prop("checked")) {
+				esri.show(loading);
+				// User is creating a new Prioritization Area. Changing the map's onClick behavior to only select from the HUC 12 watershed layer.
+				var query = new Query();
+				query.geometry = evt.mapPoint;
+
+				// first query the interp area
+				layers[interpLyrIndex].layer.queryFeatures(query, function(featuresetI) {
+					//console.log(featureset);
+					if (featuresetI.features.length === 0) {
+						bootbox.alert("Prioritization Areas <b>must</b> fall within existing Interpretation Area boundaries. Please try again.");
+						esri.hide(loading);
+					} else {
+
+						layers[wshdLyrIndex].layer.queryFeatures(query, function(featureset) {
+							//console.log("query results", featureset);
+							var evt = featureset.features[0];
+							var addOrRemove;
+							//console.log(evt);
+							var symbol = editFillSymbol;
+							var evtID = evt.attributes.OBJECTID;
+							var graphicLen = map.graphics.graphics.length;
+							var runCount = 0;
+							if (graphicLen > 1) {
+								$.each(map.graphics.graphics, function(i) {
+									runCount += 1;
+									if (map.graphics.graphics[i].attributes) {
+
+										var graphID = map.graphics.graphics[i].attributes.OBJECTID;
+										//console.log(graphID, evtID);
+										if (graphID === evtID) {
+											map.graphics.remove(map.graphics.graphics[i]);
+											esri.hide(loading);
+											addOrRemove = "remove";
+											return false;
+										}
+										if (runCount === graphicLen) {
+											if (!(addOrRemove === "remove")) {
+												map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+												esri.hide(loading);
+											}
+										}
+									}
+								});
+							} else {
+								map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+								esri.hide(loading);
+							}
+						});
+					}
+				});
+			}
+			
 			}); 
 
             mapNav = new Navigation(map);
@@ -922,19 +984,38 @@ function(
 						if (layers[wshdLyrIndex].layer.visible) {
 							layers[wshdLyrIndex].layer.setVisibility(false);
 						}
-						$("#editInstructions").html("Click on an Interpretation Area boundary.<br/>>br/>Once a boundary is selected, you'll be prompted for the next step");
+						$("#editInstructions").html("Click on an Interpretation Area boundary.<br/>Once a boundary is selected, you'll be prompted for the next step");
 					}
 				});
 			break;
 			case "optionsRadios3":
 				dojo.disconnect(clickHandler);
 				clickHandler = null;
-				$("#editRadios1").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editButtons").show();
-				$("#editInstructions").html("New Interp from Watershed.");
+				bootbox.prompt("Enter a name for the new Prioritization Area.", function(result) {
+					if (!(result)) {
+						app.stopEdit();
+					} else {
+						newFeatureName = result;
+						$("#editRadios1").hide();
+						$("#editRadios2").hide();
+						$("#editRadios4").hide();
+						$("#editRadios5").hide();
+						$("#editButtons").show();
+						$("#stopEdit").show();
+						$("#saveEdits").show();
+						// Make sure watershed boundary layer is visible
+						if (!(layers[interpLyrIndex].layer.visible)) {
+							layers[interpLyrIndex].layer.setVisibility(true);
+						}
+						if (!(layers[wshdLyrIndex].layer.visible)) {
+							layers[wshdLyrIndex].layer.setVisibility(true);
+						}
+						$("#editInstructions").html("Click on one or more Watersheds.<br/>"
+							+ "All Watersheds need to be within an Interpretation Area boundary.<br/><br/>"
+							+ "If you don't see the blue Watershed Boundaries, zoom in until you do.<br/><br/>"
+							+ "When done, click the Save button.");
+					}
+				});
 			break;
 			case "optionsRadios4":
 				$("#editRadios1").hide();
@@ -972,7 +1053,7 @@ function(
 				case "interpretation":
 					// new interpretation area being created
 					console.log("save interpretation ", newFeatureName, result);
-					testObj = result;
+					//testObj = result;
 					var center = result.getCentroid();
 					
 					//get the Region that the new interp area falls within
@@ -1009,6 +1090,39 @@ function(
 				break;
 				case "prioritization":
 					console.log("save prioritization ", newFeatureName, result);
+					var center = result.getCentroid();
+					
+					//get the Region that the new interp area falls within
+					var query = new Query();
+					query.geometry = center;
+					layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+						console.log("region query results", featureset);
+						var regionId = featureset.features[0].attributes.RB;
+						console.log("regionid", regionId);
+						$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", function(callback) {
+							//console.log("interp num callback", callback);
+							//testObj = callback.features[0];
+							
+							//var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+							//console.log(lastNum);
+							var regAttr = "R" + regionId.toString() + "LastPrioritizAreaIDAssigned"; // LastPrioritizAreaIDAssigned 
+							$.each(callback.features[0].attributes, function(i) { 
+								if (i === regAttr) {
+									var lastRegNum = callback.features[0].attributes[i];
+									var objId = callback.features[0].attributes.OBJECTID;
+									lastRegNum += 1;
+									//console.log(regAttr, lastRegNum);
+									$.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_PRIOR_AREA, function(callback) {
+										$.when(app.updateAttributes(appConfig.URL_PRIOR_AREA_NUM, objId, i, lastRegNum, function(callback) {
+											esri.hide(loading);
+											bootbox.alert(newFeatureName + " Prioritization Area successfully created.");
+											app.stopEdit();
+										}));
+									}));
+								}
+							});
+						}));
+					});
 				break;
 			}
 		}, function(error) {
@@ -1027,7 +1141,7 @@ function(
 						InterpAreaName: newFeatureName,
 						StatusInterpArea: "In Initial Review",
 						InterpAreaKey: param2 + "_" + param1,
-						SQRCBRegID: param2,
+						SWRCBRegID: param2,
 						InterpAreaID: param1
 					},
 					"geometry": {
@@ -1036,6 +1150,19 @@ function(
 				};
 			break;
 			case "prioritization":
+				var polygon = new Polygon(graphic.rings);
+				var addFeature = {
+					"attributes": {
+						PrioritizAreaName: newFeatureName,
+						StatusPrioritizArea: "Approved for Modeling",
+						PrioritizAreaKey: param2 + "_" + param1,
+						SWRCBRegID: param2,
+						PrioritizAreaID: param1
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
 			break;
 		}
 		
@@ -1336,18 +1463,16 @@ function(
 	app.saveEdits = function () {
 		// For attribute and shape editing
 		
-		// Shape edit - on-deactivate, the editorToolbar will save the change to the shape
 		if ($("#optionsRadios1:checked").prop("checked")) {
-			//editToolbar.deactivate();
 			app.unionPolygons("interpretation");
-		// All other edits are already recorded, just reset the menu
-		} else {
-			if ($("#optionsRadios2:checked").prop("checked")) {
-				app.unionPolygons("prioritization");
-			} else {
-				app.stopEdit();
-			}
-		};	
+		}
+		if ($("#optionsRadios2:checked").prop("checked")) {
+			app.unionPolygons("prioritization");
+		}
+		if ($("#optionsRadios3:checked").prop("checked")) {
+			app.unionPolygons("prioritization");
+		}
+		
 			
 	};
 	
