@@ -512,6 +512,22 @@
 											</div>
 										</div>
 									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu4panel3">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion5" href="#menu5collapse3" aria-expanded="false" aria-controls="collapseTwo"> Time Slider</a></h4>
+										</div>
+										<div id="menu5collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu5panel3">
+											<div class="panel-body">
+												<button id="enable-time" onclick="app.buildTimeSlider();" class="btn btn-block" title="Enable the Time Slider, allowing you to view time-enabled layers by year.">
+													Enable Time Slider
+												</button><br/>
+												When enabled, the Time Slider will display at the bottom of the map.<br/><br/>
+												The following layers are time-enabled:<br/>
+												- Timber Harvest Plans<br/>
+												- Nonindustrial Timber Management Plans
+											</div>
+										</div>
+									</div>
 								</div>
 
 							</div>
@@ -522,7 +538,10 @@
 
 						<!-- Bootstrap-map-js -->
 						<div id="mapDiv"></div>
-						<img id="mapLoading" src='img/loading.gif' class='loadingImg' />
+						<img id="mapLoading" src="img/loading.gif" class="loadingImg" />
+						<div id="timeInfo" class="time-slider" style="display: none;">
+				          	<div id="timeSliderDiv"></div>
+				        </div>
 
 						<div id="coordsBox">
 							Map Coords: <span id="coordsText"> </span>

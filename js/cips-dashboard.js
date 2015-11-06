@@ -3,13 +3,14 @@ var layers, clickHandler, clickListener, lyrInfoTemplate = []; // used for popup
 var cred = "esri_jsapi_id_manager_data"; // cookie/localStorage variable for ArcGIS for Server authentication
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer;
 var layerFromQuery;
-var clusterLayer, clusterLayerClickHandler;
-var measurement;
+var clusterLayer, clusterLayerClickHandler; // used for clustered grow location display
+var measurement; // Measurement widget
 var showInfoWindow = "default";
 var statsLoaded = [null,true,false,false,false,false,false,false,false,false,false]; // this is used to initialize stats carousels
 var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
 var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var tb, epWidget, lineSymbol; // for elevation profile
+var timeSlider; // Time slider widget
 
 var testvar; //generic variable for testing
 	
@@ -54,6 +55,8 @@ require([
     "esri/arcgis/Portal", 
     "esri/arcgis/OAuthInfo", 
     "esri/IdentityManager",
+    "esri/TimeExtent",
+    "esri/dijit/TimeSlider",
     "./js/ClusterLayer.js", 
     //"./js/clusterfeaturelayer.js",
     "./js/ClusterFeatureLayer2.js",
@@ -102,6 +105,8 @@ function(
     arcgisPortal, 
     OAuthInfo, 
     esriId, 
+    TimeExtent,
+    TimeSlider,
     ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
@@ -236,18 +241,19 @@ function(
            	$.each(layers, function(i, lyr) {
             	//console.log(i, lyr);
             	lyrInfoTemplate.push({infoTemplate: lyr.layer.infoTemplate,lyrTitle: lyr.title});
-            	if (i > 0) {
-            		lyr.layer.advancedQueryCapabilities.supportsPagination = true;
-            	}
+            	//if (i > 0) {
+            	//	lyr.layer.advancedQueryCapabilities.supportsPagination = true;
+            	//}
             });
  
             clickHandler = response.clickEventHandle;
             clickListener = response.clickEventListener;
            	
-           	//on(map, "click", function(evt) {
-           	//	console.log(evt);
+           	/*on(map, "click", function(evt) {
+           		console.log(evt);
+           		testvar = evt;
            		// This is used for editing dialogs - turning on/off map click functionality
-           	//});
+           	});*/
             
             on(map, "update-start", function() {
 	        	esri.show(loading);
@@ -298,7 +304,7 @@ function(
     	//app.buildGraphicEditTools();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 72000, null, function(callback) {
+    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 73000, null, function(callback) {
 		}));
     	//console.log(esriId.credentials);
     	//map.addLayer(graphicLayer);
@@ -485,7 +491,7 @@ function(
 		});
 		
 		if (localStorage.currentBasemap) {
-			console.log(localStorage.currentBasemap, basemapGallery.getSelected());
+			//console.log(localStorage.currentBasemap, basemapGallery.getSelected());
 			if (!(localStorage.currentBasemap === "basemap_0")) {
 				basemapGallery.select(localStorage.currentBasemap);
 			};
@@ -599,6 +605,39 @@ function(
 
 	}; 
 	
+	app.buildTimeSlider = function() {
+          timeSlider = new TimeSlider({
+            style: "width: 100%;"
+          }, dom.byId("timeSliderDiv"));
+          map.setTimeSlider(timeSlider);
+          
+          var timeExtent = new TimeExtent();
+          timeExtent.startTime = new Date("1/1/1997 UTC");
+          timeExtent.endTime = new Date("12/31/2015 UTC");
+          timeSlider.setThumbCount(2);
+          timeSlider.createTimeStopsByTimeInterval(timeExtent, 1, "esriTimeUnitsYears");
+          timeSlider.setThumbIndexes([17,17]);
+          timeSlider.setThumbMovingRate(4000);
+          timeSlider.startup();
+          
+          //add labels for every other time stop
+          var labels = arrayUtil.map(timeSlider.timeStops, function(timeStop, i) { 
+            if ( i % 2 === 0 ) {
+              return timeStop.getUTCFullYear(); 
+            } else {
+              return "";
+            }
+          }); 
+          
+          timeSlider.setLabels(labels);
+          
+          timeSlider.on("time-extent-change", function(evt) {
+            var startValString = evt.startTime.getUTCFullYear();
+            var endValString = evt.endTime.getUTCFullYear();
+            dom.byId("daterange").innerHTML = "<i>" + startValString + " and " + endValString  + "<\/i>";
+          });
+    };
+	
 	app.syncMaps = function(mapObj) {
 		var mapExtent = mapObj.extent;
 		var mapCetner = mapObj.extent.getCenter;
@@ -606,7 +645,7 @@ function(
 	};
 
 	app.disableElevTool = function() {
-		console.log("disableElevTool");
+		//console.log("disableElevTool");
 		tb.deactivate();
 		epWidget.clearProfile();
 		map.graphics.clear();
@@ -956,6 +995,7 @@ function(
  	};
  	
  	app.toggleBox = function(item, element) {
+ 		$("#timeInfo").show();
  		//console.log(element);
  		if ($("#" + item).css('display') !== 'none') {
             $("#" + item).hide();
@@ -1158,7 +1198,7 @@ function(
 			$.when(app.createPolyFC("Test Poly", qryResultsLyr, function(createdFC) {
 				//console.log(createdFC);
 				$.when(app.addToFeature(createdFC, qryResultsLyr, function(callback) {
-					console.log("createLayerFromQuery", callback);
+					//console.log("createLayerFromQuery", callback);
 					layerFromQuery = callback;
 				}));
 			}));
@@ -1169,7 +1209,7 @@ function(
 		
 		$.when(app.runQuery(appConfig.GROW_POLYS_URL, "0=0", function(qryResultsLyr) {
 			$.when(app.appendRecsToPoint(appConfig.GROW_PREPROC_RESULTS_URL, "PreProcDataSourceName='Cultivated Area'", qryResultsLyr, "GrowID", function(ftrLayerCallback) {
-				console.log(ftrLayerCallback);
+				//console.log(ftrLayerCallback);
 			}));
 		}));
 	};
@@ -1245,7 +1285,7 @@ function(
 					var count = 0;
 					$.each(qryResultsLyr.features, function(i) {
 						$.when(geometryService.labelPoints([qryResultsLyr.features[i].geometry], function(callback) {
-							console.log("geometryService callback", callback);
+							//console.log("geometryService callback", callback);
 							var geometry = callback;
 
 							var graphic = new Graphic();
@@ -1416,7 +1456,7 @@ function(
 								};
 							});
 
-							console.log(inputInfo);
+							//console.log(inputInfo);
 
 							var popupInfo = generateDefaultPopupInfo(ftrLayerCallback.fields);
 							var infoTemplate = new InfoTemplate(buildInfoTemplate(popupInfo));
@@ -1464,145 +1504,129 @@ function(
 		
 		
 		function generateDefaultPopupInfo(fields) {
-			console.log(fields);
-					//var fields = featureCollection;
-					var decimal = {
-						'esriFieldTypeDouble' : 1,
-						'esriFieldTypeSingle' : 1
-					};
-					var integer = {
-						'esriFieldTypeInteger' : 1,
-						'esriFieldTypeSmallInteger' : 1
-					};
-					var dt = {
-						'esriFieldTypeDate' : 1
-					};
-					var displayField = null;
-					var fieldInfos = arrayUtil.map(fields, lang.hitch(this, function(item) {
-						if (item.name.toUpperCase() === "NAME") {
-							displayField = item.name;
-						}
-						var visible = (item.type !== "esriFieldTypeOID" && item.type !== "esriFieldTypeGlobalID" && item.type !== "esriFieldTypeGeometry");
-						var format = null;
-						if (visible) {
-							var f = item.name.toLowerCase();
-							var hideFieldsStr = ",stretched value,fnode_,tnode_,lpoly_,rpoly_,poly_,subclass,subclass_,rings_ok,rings_nok,";
-							if (hideFieldsStr.indexOf("," + f + ",") > -1 || f.indexOf("area") > -1 || f.indexOf("length") > -1 || f.indexOf("shape") > -1 || f.indexOf("perimeter") > -1 || f.indexOf("objectid") > -1 || f.indexOf("_") == f.length - 1 || f.indexOf("_i") == f.length - 2) {
-								visible = false;
-							}
-							if (item.type in integer) {
-								format = {
-									places : 0,
-									digitSeparator : true
-								};
-							} else if (item.type in decimal) {
-								format = {
-									places : 2,
-									digitSeparator : true
-								};
-							} else if (item.type in dt) {
-								format = {
-									dateFormat : 'shortDateShortTime'
-								};
-							}
-						}
-						return lang.mixin({}, {
-							fieldName : item.name,
-							label : item.alias,
-							isEditable : false,
-							tooltip : "",
-							visible : visible,
-							format : format,
-							stringFieldOption : 'textbox'
-						});
-					}));
-					var popupInfo = {
-						title : displayField ? '{' + displayField + '}' : '',
-						fieldInfos : fieldInfos,
-						description : null,
-						showAttachments : false,
-						mediaInfos : []
-					};
-					return popupInfo;
+			//console.log(fields);
+			//var fields = featureCollection;
+			var decimal = {
+				'esriFieldTypeDouble' : 1,
+				'esriFieldTypeSingle' : 1
+			};
+			var integer = {
+				'esriFieldTypeInteger' : 1,
+				'esriFieldTypeSmallInteger' : 1
+			};
+			var dt = {
+				'esriFieldTypeDate' : 1
+			};
+			var displayField = null;
+			var fieldInfos = arrayUtil.map(fields, lang.hitch(this, function(item) {
+				if (item.name.toUpperCase() === "NAME") {
+					displayField = item.name;
 				}
-
-				function buildInfoTemplate(popupInfo) {
-					var json = {
-						content : "<table>"
-					};
-
-					json.content += "<div class='popup-header'>" + newLyrName + "<\/div><div class='popup-hz-line'><\/div>";
-
-					arrayUtil.forEach(popupInfo.fieldInfos, function(field) {
-						if (field.visible) {
-							json.content += "<tr><td valign='top'>" + field.label + ": <\/td><td valign='top'>${" + field.fieldName + "}<\/td><\/tr>";
-						}
-					});
-					json.content += "<\/table>";
-					return json;
+				var visible = (item.type !== "esriFieldTypeOID" && item.type !== "esriFieldTypeGlobalID" && item.type !== "esriFieldTypeGeometry");
+				var format = null;
+				if (visible) {
+					var f = item.name.toLowerCase();
+					var hideFieldsStr = ",stretched value,fnode_,tnode_,lpoly_,rpoly_,poly_,subclass,subclass_,rings_ok,rings_nok,";
+					if (hideFieldsStr.indexOf("," + f + ",") > -1 || f.indexOf("area") > -1 || f.indexOf("length") > -1 || f.indexOf("shape") > -1 || f.indexOf("perimeter") > -1 || f.indexOf("objectid") > -1 || f.indexOf("_") == f.length - 1 || f.indexOf("_i") == f.length - 2) {
+						visible = false;
+					}
+					if (item.type in integer) {
+						format = {
+							places : 0,
+							digitSeparator : true
+						};
+					} else if (item.type in decimal) {
+						format = {
+							places : 2,
+							digitSeparator : true
+						};
+					} else if (item.type in dt) {
+						format = {
+							dateFormat : 'shortDateShortTime'
+						};
+					}
 				}
+				return lang.mixin({}, {
+					fieldName : item.name,
+					label : item.alias,
+					isEditable : false,
+					tooltip : "",
+					visible : visible,
+					format : format,
+					stringFieldOption : 'textbox'
+				});
+			}));
+			var popupInfo = {
+				title : displayField ? '{' + displayField + '}' : '',
+				fieldInfos : fieldInfos,
+				description : null,
+				showAttachments : false,
+				mediaInfos : []
+			};
+			return popupInfo;
+		}
+
+		function buildInfoTemplate(popupInfo) {
+			var json = {
+				content : "<table>"
+			};
+
+			json.content += "<div class='popup-header'>" + newLyrName + "<\/div><div class='popup-hz-line'><\/div>";
+
+			arrayUtil.forEach(popupInfo.fieldInfos, function(field) {
+				if (field.visible) {
+					json.content += "<tr><td valign='top'>" + field.label + ": <\/td><td valign='top'>${" + field.fieldName + "}<\/td><\/tr>";
+				}
+			});
+			json.content += "<\/table>";
+			return json;
+		}
 	}; 
 
 	app.buildClusterLayer = function(newLyrName, sourceUrl, maxScale, minScale, callback) {
-			// app.buildClusterLayer("Grow Locations", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0");
-			// cluster layer that uses OpenLayers style clustering
-			
-			//var popupInfo = generateDefaultPopupInfo(ftrLayerCallback.fields);
-			//var infoTemplate = new InfoTemplate(buildInfoTemplate(popupInfo));
-			
-			clusterLayer = new ClusterFeatureLayer({
-				"url" : sourceUrl,
-				"distance" : 40,
-				"id" : newLyrName,
-				"labelColor" : "#fff",
-				"labelOffset" : -5,
-				"resolution" : map.extent.getWidth() / map.width,
-				"useDefaultSymbol": false,
-				"singleColor" : "#888"//,
-				//"showSingles" : true,
-				//"webmap" : true//,
-				//"singleTemplate" : infoTemplate
-			});
-			//var defaultSym = new esri.symbol.PictureMarkerSymbol("http://static.arcgis.com/images/Symbols/Shapes/RedCircleLargeB.png", 12, 12);
-			var defaultSym = new SimpleMarkerSymbol('circle', 10,
-                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252,174,145,0.5]), 6),
-                        new Color([165,15,21,1]));
-            var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
-			//var group1 = new esri.symbol.PictureMarkerSymbol("http://static.arcgis.com/images/Symbols/Shapes/RedCircleLargeB.png", 30, 30);
-			//var group2 = new esri.symbol.PictureMarkerSymbol("http://static.arcgis.com/images/Symbols/Shapes/RedCircleLargeB.png", 42, 42); //GreenCircleLargeB
-			//var group3 = new esri.symbol.PictureMarkerSymbol("http://static.arcgis.com/images/Symbols/Shapes/RedCircleLargeB.png", 54, 54); //RedCircleLargeB
-			var group1 = new SimpleMarkerSymbol('circle', 15,
-                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251,106,74,0.25]), 10),
-                        new Color([251,106,74,0.5]));
+		// Create clustered layer for grow locations
+		clusterLayer = new ClusterFeatureLayer({
+			"url" : sourceUrl,
+			"distance" : 20,
+			"id" : newLyrName,
+			"labelColor" : "#fff",
+			"labelOffset" : -5,
+			"resolution" : map.extent.getWidth() / map.width,
+			"useDefaultSymbol" : false,
+			"singleColor" : "#888"//,
+			//"showSingles" : true,
+			//"webmap" : true//,
+			//"singleTemplate" : infoTemplate
+		});
+		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
+		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
+		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.7]));
+		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.7]));
+		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.7]));
 
-            var group2 = new SimpleMarkerSymbol('circle', 20,
-                         new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222,45,38,0.25]), 15),
-                         new Color([222,45,38,0.5]));
-            var group3 = new SimpleMarkerSymbol('circle', 30,
-                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165,15,21,0.25]), 15),
-                        new Color([165,15,21,0.5]));
+		renderer.addBreak(2, 5, group1);
+		renderer.addBreak(5, 20, group2);
+		renderer.addBreak(20, 50000, group3);
+		clusterLayer.setRenderer(renderer);
+		if (maxScale) {
+			clusterLayer.setMaxScale(maxScale);
+		}
+		if (minScale) {
+			clusterLayer.setMinScale(minScale);
+		}
+		map.addLayers([clusterLayer]);
+		toc.layerInfos.push({
+			"layer" : clusterLayer,
+			"title" : newLyrName
+		});
+		toc.refresh();
 			
-			//renderer.addBreak(0, 1, defaultSym);
-			renderer.addBreak(2, 5, group1);
-			renderer.addBreak(5, 20, group2);
-			renderer.addBreak(20, 50000, group3);
-			clusterLayer.setRenderer(renderer);
-			if (maxScale) {
-				clusterLayer.setMaxScale(maxScale);
-			}
-			if (minScale) {
-				clusterLayer.setMinScale(minScale);
-			}
-			//clusterLayerClickHandler = clusterLayer._onClickHandler;
-			map.addLayers([clusterLayer]);
-			toc.layerInfos.push({"layer": clusterLayer, "title": newLyrName});
-			toc.refresh();
-			callback("clusterLayer complete");
-			
-		};
+	};
+		
+		
 	
 	app.summarizeWshd = function(option) {
-		console.log("summarizeWshd", option);
+		//console.log("summarizeWshd", option);
 		switch(option) {
 			case true:
 				if (epWidget) {
@@ -1866,7 +1890,7 @@ function(
 					$.when(app.createPolyFC(featureName, ftrLayer, function(createdFC) {
 						//console.log(createdFC);
 						$.when(app.addToFeature(createdFC, ftrLayer, function(addedFeature) {
-							console.log("Create feature complete: ", addedFeature);
+							//console.log("Create feature complete: ", addedFeature);
 							addLayers.push(addedFeature);
 							$.each(addLayers[0].fields, function(i) {
 								var fldName = addLayers[0].fields[i].name;
@@ -1882,7 +1906,7 @@ function(
 					$.when(app.createPointFC(featureName, ftrLayer, function(createdFC) {
 						//console.log(createdFC);
 						$.when(app.addToFeature(createdFC, ftrLayer, function(addedFeature) {
-							console.log("Create feature complete: ", addedFeature);
+							//console.log("Create feature complete: ", addedFeature);
 							addLayers.push(addedFeature);
 							$.each(addLayers[0].fields, function(i) {
 								var fldName = addLayers[0].fields[i].name;
@@ -2111,7 +2135,7 @@ function(
 	
 			esriId.checkSignInStatus(info.portalUrl + "/sharing").then(
 				function (){
-					console.log("signed in");
+					//console.log("signed in");
 					
 					$("#appContent").show();
 					$("#appInit").hide();
@@ -2131,7 +2155,7 @@ function(
 			).otherwise(
 				function (){
 					//$("#sign-in").show();
-					console.log("not signed in");
+					//console.log("not signed in");
 					$("#appContent").html("");
 					$("#appContent").hide();
 					$("#appInit").show();
@@ -2146,7 +2170,7 @@ function(
 			);
 	
 			on(dom.byId("sign-in"), "click", function() {
-				console.log("click", arguments);
+				//console.log("click", arguments);
 				// user will be shown the OAuth Sign In page
 				esriId.getCredential(info.portalUrl, {
 					oAuthPopupConfirmation : false

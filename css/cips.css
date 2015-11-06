@@ -113,6 +113,15 @@ a:focus {
 	-moz-border-radius: 3px;
 	font-size: 11px;
 }
+.time-slider {
+	position: absolute;
+	bottom: 10px;
+	z-index: 1500;
+	background: #fff;
+	padding: 5px;
+	width: 98%;
+	left: 10px;
+}
 .panel-heading {
 	padding: 6px;
 }

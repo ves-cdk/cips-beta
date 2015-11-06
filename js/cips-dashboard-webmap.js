@@ -12,22 +12,1545 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.4449,
-        38.3979
+        -126.0639,
+        38.6577
       ],
       [
-        -119.4519,
-        41.7511
+        -119.1699,
+        42.0147
       ]
     ]
   },
   "itemData": {
     "operationalLayers": [
       {
+        "id": "World_Hillshade_7117",
+        "layerType": "ArcGISTiledMapServiceLayer",
+        "url": "http://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer",
+        "visibility": false,
+        "opacity": 1,
+        "title": "World Hillshade",
+        "itemId": "1b243539f4514b6ba35e7d995890db1d"
+      },
+      {
+        "id": "USA_Soil_Mapunits_2014_1274",
+        "layerType": "ArcGISMapServiceLayer",
+        "url": "http://landscape1.arcgis.com/arcgis/rest/services/USA_Soil_Mapunits_2014/MapServer",
+        "visibility": false,
+        "opacity": 1,
+        "title": "USA_Soil_Mapunits_2014",
+        "layers": [
+          {
+            "id": 0,
+            "popupInfo": {
+              "title": "Soil Map Units: {muname}",
+              "fieldInfos": [
+                {
+                  "fieldName": "objectid",
+                  "label": "OBJECTID",
+                  "tooltip": "",
+                  "visible": false,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "areasymbol",
+                  "label": "Area Symbol",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "spatialver",
+                  "label": "Spatial Version",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "musym",
+                  "label": "Mapunit Symbol",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "muname",
+                  "label": "Mapunit Name",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "mukind",
+                  "label": "Mapunit Kind",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "farmlndcl",
+                  "label": "Farmland Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "interpfocus",
+                  "label": "Interpretive Focus",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "invesintens",
+                  "label": "Intensity of Mapping",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "iacornsr",
+                  "label": "Iowa Corn Suitability Rating",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "projectscale",
+                  "label": "Project Scale",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "saversion",
+                  "label": "Survey Area Version",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "tabularversion",
+                  "label": "Tabular Version",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slopegraddcp",
+                  "label": "Slope Gradient - Dominant Component",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slopegradwta",
+                  "label": "Slope Gradient - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "brockdepmin",
+                  "label": "Bedrock Depth - Minimum",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wtdepannmin",
+                  "label": "Water Table Depth - Annual Minimum",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wtdepaprjunmin",
+                  "label": "Water Table Depth - April to June Minimum",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "flodfreqdcd",
+                  "label": "Flooding Frequency - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "flodfreqmax",
+                  "label": "Flooding Frequency - Maximum",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "pondfreqprs",
+                  "label": "Ponding Frequency - Presence",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aws025wta",
+                  "label": "Available Water Storage 0-25 cm - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aws050wta",
+                  "label": "Available Water Storage 0-50 cm - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aws0100wta",
+                  "label": "Available Water Storage 0-100 cm - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aws0150wta",
+                  "label": "Available Water Storage 0-150 cm - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "drclassdcd",
+                  "label": "Drainage Class - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "drclasswettest",
+                  "label": "Drainage Class - Wettest",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "hydgrpdcd",
+                  "label": "Hydrologic Group - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "iccdcd",
+                  "label": "Irrigated Capability Class - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "iccdcdpct",
+                  "label": "Irrigated Capability Class - Proportion of Mapunit with Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "niccdcd",
+                  "label": "Non-Irrigated Capability Class - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "niccdcdpct",
+                  "label": "Non-Irrigated Capability Class - Proportion of Mapunit with Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engdwobdcd",
+                  "label": "Rating for Buildings without Basements - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engdwbdcd",
+                  "label": "Rating for Buildings with Basements - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engdwbll",
+                  "label": "Rating for Buildings with Basements - Least Limiting",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engdwbml",
+                  "label": "Rating for Buildings with Basements - Most Limiting",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engstafdcd",
+                  "label": "Rating for Septic Tank Absorption Fields - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engstafll",
+                  "label": "Rating for Septic Tank Absorption Fields - Least Limiting",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engstafml",
+                  "label": "Rating for Septic Tank Absorption Fields - Most Limiting",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engsldcd",
+                  "label": "Rating for Sewage Lagoons - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engsldcp",
+                  "label": "Rating for Sewage Lagoons - Dominant Component",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "englrsdcd",
+                  "label": "Rating for Roads and Streets - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engcmssdcd",
+                  "label": "Rating for Sand Source - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "engcmssmp",
+                  "label": "Rating for Sand Source - Most Probable",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "urbrecptdcd",
+                  "label": "Rating for Paths and Trails - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "urbrecptwta",
+                  "label": "Rating for Paths and Trails - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "forpehrtdcp",
+                  "label": "Erosion Hazard of Forest Roads and Trails - Dominant Component",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "hydclprs",
+                  "label": "Hydric Classification - Presence",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "awmmfpwwta",
+                  "label": "Rating for Manure and Food Processing Waste - Weighted Average",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "comppct_l",
+                  "label": "Component Percentage - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "comppct_r",
+                  "label": "Component Percentage - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "comppct_h",
+                  "label": "Component Percentage - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "compname",
+                  "label": "Component Name",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "compkind",
+                  "label": "Component Kind",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "otherph",
+                  "label": "Other Criteria Used to Identify Components",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "localphase",
+                  "label": "Criteria Used to Identify Components at the Local Level",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "runoff",
+                  "label": "Runoff Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "tfact",
+                  "label": "Soil loss tolerance factor",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wei",
+                  "label": "Wind Erodibility Index",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "weg",
+                  "label": "Wind Erodibility Group",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "erocl",
+                  "label": "Erosion Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "earthcovkind1",
+                  "label": "Earth Cover 1",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "earthcovkind2",
+                  "label": "Earth Cover 2",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "hydricon",
+                  "label": "Hydric Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "hydricrating",
+                  "label": "Hydric Rating",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aspectccwise",
+                  "label": "Aspect Range - Counter Clockwise Limit",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aspectrep",
+                  "label": "Aspect - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aspectcwise",
+                  "label": "Aspect Range - Clockwise Limit",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "geomdesc",
+                  "label": "Geomorphic Description",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "nirrcapscl",
+                  "label": "Non-Irrigated Capability Subclass",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "nirrcapunit",
+                  "label": "Non-Irrigated Unit Capability Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "irrcapscl",
+                  "label": "Irrigated Capability Subclass",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "irrcapunit",
+                  "label": "Irrigated Unit Capability Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "constreeshrubgrp",
+                  "label": "Conservation Tree Shrub Group",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlgrain",
+                  "label": "Grain Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlgrass",
+                  "label": "Grass Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlherbaceous",
+                  "label": "Herbaceous Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlshrub",
+                  "label": "Shrub Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlconiferous",
+                  "label": "Conifer Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlhardwood",
+                  "label": "Hardwood Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlwetplant",
+                  "label": "Wetland Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlshallowwat",
+                  "label": "Shallow Water Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlrangeland",
+                  "label": "Rangeland Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlopenland",
+                  "label": "Openland Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlwoodland",
+                  "label": "Woodland Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "wlwetland",
+                  "label": "Wetland Wildlife Habitat",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "soilslippot",
+                  "label": "Soil Slip Potential",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "frostact",
+                  "label": "Susceptibility to Frost Heaving",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "corcon",
+                  "label": "Concrete Corrosion",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "corsteel",
+                  "label": "Steel Corrosion",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxclname",
+                  "label": "Taxonomic Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxorder",
+                  "label": "Taxonomic Order",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxsuborder",
+                  "label": "Taxonomic Suborder",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxgrtgroup",
+                  "label": "Great Group",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxsubgrp",
+                  "label": "Subgroup",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxpartsize",
+                  "label": "Particle Size",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxpartsizemod",
+                  "label": "Particle Size Mod",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxceactcl",
+                  "label": "Cation Exchange Activity Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxreaction",
+                  "label": "Carbonate Reaction",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxtempcl",
+                  "label": "Temperature Class",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxmoistscl",
+                  "label": "Moist Subclass",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "taxtempregime",
+                  "label": "Soil Temperature Regime",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "soiltaxedition",
+                  "label": "Edition of Keys to Soil Taxonomy Used to Classify Soil",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "castorieindex",
+                  "label": " California Storie Index",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 0,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "cokey",
+                  "label": "Component Key",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slope_l",
+                  "label": "Slope Gradient - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slope_r",
+                  "label": "Slope Gradient - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slope_h",
+                  "label": "Slope Gradient - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slopelen_l",
+                  "label": "Slope Length USLE - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slopelen_r",
+                  "label": "Slope Length USLE - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "slopelen_h",
+                  "label": "Slope Length USLE - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "elev_l",
+                  "label": "Elevation - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "elev_r",
+                  "label": "Elevation - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "elev_h",
+                  "label": "Elevation - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "albedodry_l",
+                  "label": "Albedo - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "albedodry_r",
+                  "label": "Albedo - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "albedodry_h",
+                  "label": "Albedo - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "airtempa_l",
+                  "label": "Mean Annual Air Temperature - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "airtempa_r",
+                  "label": "Mean Annual Air Temperature - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "airtempa_h",
+                  "label": "Mean Annual Air Temperature - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "map_l",
+                  "label": "Mean Annual Precipitation - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "map_r",
+                  "label": "Mean Annual Precipitation - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "map_h",
+                  "label": "Mean Annual Precipitation - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "reannualpr_l",
+                  "label": "Relative Effective Annual Precipitation - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "reannualpr_r",
+                  "label": "Relative Effective Annual Precipitation - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "reannualpr_h",
+                  "label": "Relative Effective Annual Precipitation - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "ffd_l",
+                  "label": "Days between Last and First Frost - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "ffd_r",
+                  "label": "Days between Last and First Frost - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "ffd_h",
+                  "label": "Days between Last and First Frost - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "rsprod_l",
+                  "label": "Range Forage Annual Potential Production - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "rsprod_r",
+                  "label": "Range Forage Annual Potential Production - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "rsprod_h",
+                  "label": "Range Forage Annual Potential Production - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "initsub_l",
+                  "label": "Initial Subsidence - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "initsub_r",
+                  "label": "Initial Subsidence - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "initsub_h",
+                  "label": "Initial Subsidence - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "totalsub_l",
+                  "label": "Total Subsidence - Low Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "totalsub_r",
+                  "label": "Total Subsidence - Representative Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "totalsub_h",
+                  "label": "Total Subsidence - High Value",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "cropprodindex",
+                  "label": "Crop Productivity Index",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "esrisymbology",
+                  "label": "Esri Symbology",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "kffact",
+                  "label": "K-Factor Rock Free",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "alfisols_pct",
+                  "label": "Percent Alfisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "andisols_pct",
+                  "label": "Percent Andisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "aridisols_pct",
+                  "label": "Percent Aridisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "entisols_pct",
+                  "label": "Percent Entisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "gelisols_pct",
+                  "label": "Percent Gelisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "histosols_pct",
+                  "label": "Percent Histosols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "inceptisols_pct",
+                  "label": "Percent Inceptisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "mollisols_pct",
+                  "label": "Percent Mollisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "spodosols_pct",
+                  "label": "Percent Spodosols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "ultisols_pct",
+                  "label": "Percent Ultisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "vertisols_pct",
+                  "label": "Percent Vertisols",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "soilorderdomcond",
+                  "label": "Soil Order - Dominant Condition",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "mukey_1",
+                  "label": "Mapunit Key",
+                  "tooltip": "",
+                  "visible": true,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "shape",
+                  "label": "Shape",
+                  "tooltip": "",
+                  "visible": false,
+                  "format": null,
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "st_area(shape)",
+                  "label": "st_area(shape)",
+                  "tooltip": "",
+                  "visible": false,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                },
+                {
+                  "fieldName": "st_length(shape)",
+                  "label": "st_length(shape)",
+                  "tooltip": "",
+                  "visible": false,
+                  "format": {
+                    "places": 2,
+                    "digitSeparator": true
+                  },
+                  "stringFieldOption": "textbox"
+                }
+              ],
+              "description": null,
+              "showAttachments": true,
+              "mediaInfos": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "USA_Geology_Units_9422",
+        "layerType": "ArcGISMapServiceLayer",
+        "url": "http://landscape1.arcgis.com/arcgis/rest/services/USA_Geology_Units/MapServer",
+        "visibility": false,
+        "opacity": 1,
+        "title": "USA Geology Units",
+        "itemId": "65f1f4f412d94f55920e376db410f3fd"
+      },
+      {
         "id": "CIPS_Heat_Maps_2432",
         "layerType": "ArcGISMapServiceLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Heat_Maps/MapServer",
-        "visibility": true,
+        "visibility": false,
         "visibleLayers": [
           0,
           3,
@@ -40,6 +1563,391 @@ appWebMap = {
         "title": "Heat Map Modeling",
         "minScale": 12693945,
         "maxScale": 320284
+      },
+      {
+        "id": "CIPS_THP_9991",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_THP/FeatureServer/1",
+        "visibility": false,
+        "opacity": 1,
+        "title": "Nonindustrial Timber Management Plants (Cal Fire)",
+        "itemId": "d6d346c181c648cb99b809df6472f3b3",
+        "layerDefinition": {
+          "drawingInfo": {
+            "renderer": {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [
+                  0,
+                  76,
+                  115,
+                  18
+                ],
+                "outline": {
+                  "color": [
+                    0,
+                    76,
+                    115,
+                    255
+                  ],
+                  "width": 0.75,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                },
+                "type": "esriSFS",
+                "style": "esriSFSSolid"
+              }
+            }
+          },
+          "minScale": 1500000,
+          "maxScale": 0
+        },
+        "popupInfo": {
+          "title": "Nonindustrial Timber Management Plants (Cal Fire): {County}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Year",
+              "label": "Year",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "County",
+              "label": "County",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "HarvestDoc_Num",
+              "label": "HarvestDoc_Num",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Silviculture",
+              "label": "Silviculture",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Silviculture2",
+              "label": "Silviculture2",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Yarding",
+              "label": "Yarding",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Status_of_Plan",
+              "label": "Status_of_Plan",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Completion_Date",
+              "label": "Completion_Date",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Timber_Owner",
+              "label": "Timber_Owner",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Landowner",
+              "label": "Landowner",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Acres",
+              "label": "Acres",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "StartTHPYearDate",
+              "label": "StartTHPYearDate",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateDataPublished",
+              "label": "DateDataPublished",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_THP_2187",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_THP/FeatureServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "title": "Timber Harvest Plans (Cal Fire)",
+        "itemId": "d6d346c181c648cb99b809df6472f3b3",
+        "layerDefinition": {
+          "drawingInfo": {
+            "renderer": {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [
+                  230,
+                  76,
+                  0,
+                  26
+                ],
+                "outline": {
+                  "color": [
+                    230,
+                    76,
+                    0,
+                    255
+                  ],
+                  "width": 0.75,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                },
+                "type": "esriSFS",
+                "style": "esriSFSSolid"
+              }
+            }
+          },
+          "minScale": 1500000,
+          "maxScale": 0
+        },
+        "popupInfo": {
+          "title": "Timber Harvest Plans (Cal Fire): {County}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Year",
+              "label": "Year",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "County",
+              "label": "County",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "HarvestDoc_Num",
+              "label": "HarvestDoc_Num",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Silviculture",
+              "label": "Silviculture",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Silviculture2",
+              "label": "Silviculture2",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Yarding",
+              "label": "Yarding",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Status_of_Plan",
+              "label": "Status_of_Plan",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Completion_Date",
+              "label": "Completion_Date",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Timber_Owner",
+              "label": "Timber_Owner",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Landowner",
+              "label": "Landowner",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Acres",
+              "label": "Acres",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "StartYearDate",
+              "label": "StartYearDate",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "StartTHPYearDate",
+              "label": "StartTHPYearDate",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateDataPublished",
+              "label": "DateDataPublished",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
       },
       {
         "id": "CIPS_Operational_5300",
@@ -73,7 +1981,7 @@ appWebMap = {
               }
             }
           },
-          "minScale": 53700,
+          "minScale": 37000,
           "maxScale": 0
         },
         "popupInfo": {
@@ -85,17 +1993,17 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "GrowKey",
               "label": "GrowKey",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
@@ -103,17 +2011,17 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowID",
               "label": "GrowID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowYear",
@@ -124,7 +2032,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowType",
@@ -132,8 +2041,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSqFt",
@@ -145,7 +2054,8 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
@@ -153,8 +2063,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -165,27 +2075,40 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PreProcStatus",
               "label": "PreProcStatus",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PreProcDate",
               "label": "PreProcDate",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
+              "visible": false,
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "Acres",
+              "label": "Acres",
+              "isEditable": true,
+              "isEditableOnLayer": true,
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
             }
           ],
           "description": null,
@@ -427,7 +2350,8 @@ appWebMap = {
         "layerDefinition": {
           "minScale": 13889686,
           "maxScale": 432384
-        }
+        },
+        "disablePopup": true
       },
       {
         "id": "CIPS_Operational_320",
@@ -489,6 +2413,162 @@ appWebMap = {
           },
           "minScale": 13889686,
           "maxScale": 0
+        },
+        "popupInfo": {
+          "title": "Interpretation Areas: {InterpAreaName}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
+            },
+            {
+              "fieldName": "InterpAreaKey",
+              "label": "InterpAreaKey",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpAreaID",
+              "label": "InterpAreaID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpAreaName",
+              "label": "InterpAreaName",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpAreaSqKm",
+              "label": "InterpAreaSqKm",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpAreaAcres",
+              "label": "InterpAreaAcres",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "GrowYear",
+              "label": "GrowYear",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "StatusInterpArea",
+              "label": "StatusInterpArea",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "DateAerialInterpCompleted",
+              "label": "DateAerialInterpCompleted",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpMethod",
+              "label": "InterpMethod",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpImageryNamesDates",
+              "label": "InterpImageryNamesDates",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "TotalNumberGrowsIdentified",
+              "label": "TotalNumberGrowsIdentified",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "NumberIdentifiedGrowsPerSqKm",
+              "label": "NumberIdentifiedGrowsPerSqKm",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
         }
       },
       {
@@ -500,8 +2580,8 @@ appWebMap = {
         "title": "Grow Locations",
         "itemId": "a0c69d0449784ef686a18d3ca5ae7bd2",
         "layerDefinition": {
-          "minScale": 182918,
-          "maxScale": 43238,
+          "minScale": 72999,
+          "maxScale": 37000,
           "drawingInfo": {
             "renderer": {
               "type": "simple",
@@ -520,6 +2600,139 @@ appWebMap = {
               }
             }
           }
+        },
+        "popupInfo": {
+          "title": "Grow Locations: {GrowKey}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
+            },
+            {
+              "fieldName": "GrowKey",
+              "label": "GrowKey",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "GrowID",
+              "label": "GrowID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "GrowYear",
+              "label": "GrowYear",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "GrowType",
+              "label": "GrowType",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "GrowSqFt",
+              "label": "GrowSqFt",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpMethod",
+              "label": "InterpMethod",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "InterpDate",
+              "label": "InterpDate",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "PreProcStatus",
+              "label": "PreProcStatus",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "PreProcDate",
+              "label": "PreProcDate",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "fieldName": "ORIG_FID",
+              "label": "ORIG_FID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
         }
       }
     ],
@@ -538,6 +2751,20 @@ appWebMap = {
     "spatialReference": {
       "wkid": 102100,
       "latestWkid": 3857
+    },
+    "widgets": {
+      "timeSlider": {
+        "properties": {
+          "startTime": 662688000000,
+          "endTime": 1420070461000,
+          "thumbCount": 2,
+          "thumbMovingRate": 2000,
+          "timeStopInterval": {
+            "interval": 1,
+            "units": "esriTimeUnitsYears"
+          }
+        }
+      }
     },
     "authoringApp": "WebMapViewer",
     "authoringAppVersion": "3.9",
