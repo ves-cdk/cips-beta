@@ -6,7 +6,7 @@ appWebMap = {
     WEBMAP_JSON: 
     // **** Copy  webmap2Json output into this section - Start **** 
 
-{
+	{
   "item": {
     "title": "CIPS_Modeler",
     "snippet": "CIPS",

@@ -5,13 +5,12 @@ var clusterLayer, clusterLayerClickHandler; // used for clustered grow location 
 var basemapGallery, measurement, tb, epWidget, lineSymbol, timeSlider; // map widgets
 var showInfoWindow = "default"; // used to control map behavior based upon selected tool
 var cred = "esri_jsapi_id_manager_data"; // cookie/localStorage variable for ArcGIS for Server authentication
-var statsLoaded = [null,true,false,false,false,false,false,false,false,false,false]; // this is used to initialize stats carousels
-var sumDataRegion, sumDataInterp; // used for query results for summary statistics
-var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo; // editing variables
-var shapeEditLayer, shapeEditStatus, shapeEditBackup; // editing variables
+var shapeEditLayer, shapeEditStatus, shapeEditBackup, shapeCollection = [], newFeatureName; // editing variables
 var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
+var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
+var geometryService;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
 
@@ -125,7 +124,7 @@ function(
     ClusterFeatureLayer,
     BootstrapMap,
     dom, on, arrayUtil, lang, Connect, event, TOC) {
-        
+
     // -- Section 3: On-Load Settings -------------------------------------------------------------
         
     //var basemapGallery, scalebar, locator;
@@ -134,13 +133,16 @@ function(
     
     var app = dojo.getObject('app', true); // global object to allow function calls from the app.
     
+    geometryService = new GeometryService(appConfig.GEOMETRY_SERVICE);
+    
     // Proxy settings
-    esriConfig.defaults.geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+    //esriConfig.defaults.geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
     esriConfig.defaults.io.alwaysUseProxy = false;
     esriConfig.defaults.io.corsEnabledServers.push("tasks.arcgisonline.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver2.vestra.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");    
     esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");  
+    esriConfig.defaults.io.corsEnabledServers.push("services.arcgis.com");
     //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com"); 
     //esriConfig.defaults.io.corsEnabledServers.push("localhost");  
     //esriConfig.defaults.io.timeout = 12000;   
@@ -148,6 +150,10 @@ function(
     
     urlUtils.addProxyRule({
 	  urlPrefix: "tasks.arcgisonline.com",
+	  proxyUrl: appConfig.PROXY_PAGE
+	});
+	urlUtils.addProxyRule({
+	  urlPrefix: "sampleserver6.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
 	urlUtils.addProxyRule({
@@ -176,6 +182,7 @@ function(
 	});
     
     // -- Section 4: Build Map Elements -------------------------------------------------------------
+        
     app.buildMap = function(e) {
     	
     	loading = dojo.byId("mapLoading");
@@ -233,8 +240,14 @@ function(
             	if (i > 0) {
             		lyr.layer.advancedQueryCapabilities.supportsPagination = true;
             	}
+            	if (lyr.title === "Watershed Boundaries - HUC12") {
+            		wshdLyrIndex = i;
+            	}
             	if (lyr.title === "Interpretation Areas") {
             		interpLyrIndex = i;
+            	}
+            	if (lyr.title === "Interpretation Area Watersheds") {
+            		interpWshdLyrIndex = i;
             	}
             	if (lyr.title === "SWRCB Regions") {
             		regionLyrIndex = i;
@@ -256,17 +269,7 @@ function(
 	    		app.syncMaps(map);
 	    	});
 	    	
-	    	//hide the popup if its outside the map's extent (use this if not using Bootstrapmap library)
-	        /*map.on("mouse-drag", function(evt) {
-	          if (map.infoWindow.isShowing) {
-	            var loc = map.infoWindow.getSelectedFeature().geometry;
-	            if (!map.extent.contains(loc)) {
-	              map.infoWindow.hide();
-	            }
-	          }
-	        });*/
-
-            mapNav = new Navigation(map);
+	    	mapNav = new Navigation(map);
 
             if (map.loaded) {
                 app.buildMapElements(layers);
@@ -283,13 +286,33 @@ function(
         });
     };
     
+    app.buildMapItems = function (response) {
+
+    	app.buildPopup();
+    	app.buildTOC(response);
+    	app.buildBasemap();
+    	app.buildSearch();
+    	app.buildSearchWatershed();
+    	//app.buildPrint();
+    	app.buildMeasure();
+    	app.buildMapClickEvents();
+    	$.unblockUI();
+    	//$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 288895, null, function(callback) {
+			//$.when(app.buildEditor(function(buildCallback) {
+			//}));
+		//}));
+		editFillSymbol = new SimpleFillSymbol();
+    };
+
+    
     app.buildPopup = function () {
 	    // Customize popup behavior when editing features
         var popup = map.infoWindow;
         
         on(popup, "SetFeatures", function() {
+        	esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7"];
+        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -300,123 +323,12 @@ function(
         		case "optionsRadios1": 
         		case "optionsRadios2":
         		case "optionsRadios3":
-        		case "optionsRadios4":
         			// Do nothing - adding new features, don't want to display popup;
-        		break;
-        		case "optionsRadios5": 
-        		// Edit feature's attributes
-            		$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		if (editFtr._layer._editable) {
-            			bootbox.confirm("Edit the selected feature?", function(result) {
-            				if (result) {
-            					app.editFeature(editFtr, "attributes");
-            					console.log(editFtr);
-            				} else {
-            					popup.clearFeatures();
-            				}
-            			});
-            		} else {
-            			bootbox.alert("You cannot edit features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turing off any other layers that might be selected instead.");
-            			popup.clearFeatures();
-            		}
-        		break;
-        		case "optionsRadios6": 
-        		// Edit feature's shape
-        			$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		if (editFtr._layer._editable) {
-            			bootbox.confirm("Edit the selected feature?", function(result) {
-            				if (result) {
-            					app.editFeature(editFtr, "shape");
-            				} else {
-            					popup.clearFeatures();
-            				}
-            			});
-            		} else {
-            			bootbox.alert("You cannot edit features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turing off any other layers that might be selected instead.");
-            			popup.clearFeatures();
-            		}
-        		break;
-        		case "optionsRadios7": 
-        		// Delete a feature
-        			esri.show(loading);
-            		$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		if (editFtr._layer._editable) {
-            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
-            				if (result) {
-            					app.deleteFeature(editFtr);
-
-            					// If deleting grow polygon, need to also delete the point feature associated with it:
-            					if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
-            						var GrowKey = editFtr.attributes.GrowKey;
-            						// Query the point feature to get the objectId for deleting
-            						$.when(app.runQuery(appConfig.URL_EDIT_GROW_POINTS, "GrowKey='" + GrowKey + "'", function(callback) {
-            							// Now delete with an ajax call to the rest service
-										var url = appConfig.URL_EDIT_GROW_POINTS + "/deleteFeatures";
-										var params = "OBJECTID = " + callback.features[0].attributes.OBJECTID;
-										var dataString = {
-											f: "json",
-											where: params,
-											token: token
-										};
-									    $.ajax({
-									        url: url,
-									        type: "POST",
-									        dataType: "json",
-									        data: dataString,
-									        success: function (data) {
-									        	console.log("delete grow point successful");
-									        	
-									        },
-									        error: function (response) {
-									        	console.log("An error occurred trying to delete Grow Point feature");
-									        }
-									    });
-									    $.each(layers, function(layer) {
-											//console.log(layers[layer].layer.url);
-											if (layers[layer].layer.url === appConfig.URL_EDIT_GROW_POINTS) {
-												layers[layer].layer.refresh();
-											}
-										});
-            						}));
-            					}
-            					
-            				} else {
-            					popup.clearFeatures();
-            					esri.hide(loading);
-            				}
-            			});
-            		} else {
-            			popup.clearFeatures();
-            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
-            			esri.hide(loading);
-            		}
-        		break;
-        		default:
-        		// Default popup behavior
-        			$(".esriPopupWrapper").css("display","block");
         		break;
         	}
         });
     };
     
-    app.buildMapItems = function (response) {
-
-    	app.buildPopup();
-    	app.buildTOC(response);
-    	app.buildBasemap();
-    	app.buildSearch();
-    	app.buildSearchWatershed();
-    	//app.buildPrint();
-    	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 80000, null, function(callback) {
-			$.when(app.buildEditor(function(buildCallback) {
-			}));
-		}));
-    };
-
     app.buildMapElements = function (layers) {
         on(map, "mouse-move", app.showCoordinates);
         on(map, "mouse-drag", app.showCoordinates);
@@ -649,6 +561,148 @@ function(
 	     sL.startup();
 	};
 	
+	app.buildMapClickEvents = function() {
+		on(map, "click", function(evt) {
+			//console.log("mapclick");
+			//esri.show(loading);
+			if ($("#optionsRadios1:checked").prop("checked")) {
+				//$(".esriPopupWrapper").css("display","none");
+				esri.show(loading);
+				// User is creating a new Interpretation Area. Changing the map's onClick behavior to only select from the HUC 12 watershed layer.
+				//map.infoWindow.clearFeatures();
+				var query = new Query();
+				query.geometry = evt.mapPoint;
+				layers[wshdLyrIndex].layer.queryFeatures(query, function(featureset) {
+					//console.log("query results", featureset);
+					var evt = featureset.features[0];
+					var addOrRemove;
+					//console.log(evt);
+					var symbol = editFillSymbol;
+					var evtID = evt.attributes.OBJECTID;
+					var graphicLen = map.graphics.graphics.length;
+					var runCount = 0;
+					if (graphicLen > 1) {
+
+						$.each(map.graphics.graphics, function(i) {
+							runCount += 1;
+							if (map.graphics.graphics[i].attributes) {
+
+								var graphID = map.graphics.graphics[i].attributes.OBJECTID;
+								//console.log(graphID, evtID);
+								if (graphID === evtID) {
+									map.graphics.remove(map.graphics.graphics[i]);
+									esri.hide(loading);
+									addOrRemove = "remove";
+									return false;
+								}
+								if (runCount === graphicLen) {
+									if (!(addOrRemove === "remove")) {
+										map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+										esri.hide(loading);
+									}
+								}
+							}
+						});
+
+					} else {
+						map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+						esri.hide(loading);
+					}
+
+				});
+			}
+			
+			if ($("#optionsRadios2:checked").prop("checked")) {
+				//$(".esriPopupWrapper").css("display","none");
+				// User is creating a new Prioritization Area from Interp Area. Change the map's onClick behavior to only select from the HUC 12 watershed layer.
+				//map.infoWindow.clearFeatures();
+				esri.show(loading);
+				var query = new Query();
+				query.geometry = evt.mapPoint;
+				
+				// first query the interp area
+				layers[interpLyrIndex].layer.queryFeatures(query, function(featureset) {
+					//console.log(featureset);
+					if (featureset.features.length === 0) {
+						bootbox.alert("Prioritization Areas <b>must</b> fall within existing Interpretation Area boundaries. Please try again.");
+						esri.hide(loading);
+					} else {
+						var evt = featureset.features[0];
+						var symbol = editFillSymbol;
+						var interpName = evt.attributes.InterpAreaName;
+						//console.log(evt);
+						map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+						bootbox.confirm(interpName + " was selected. Use this Interpretation Area boundary for your new Prioritization Area?", function(result) {
+							if (!(result)) {
+								map.graphics.clear();
+							} else {
+								//bootbox.alert("saving new Prioritization Area."
+								// ADD CODE TO SAVE BOUNDARY TO PRIORITIZATON AREA
+								app.saveEdits();
+							}
+						});
+						esri.hide(loading);
+					}
+				});
+			};
+		
+		
+		if ($("#optionsRadios3:checked").prop("checked")) {
+			esri.show(loading);
+			// User is creating a new Prioritization Area. Changing the map's onClick behavior to only select from the HUC 12 watershed layer.
+			var query = new Query();
+			query.geometry = evt.mapPoint;
+
+			// first query the interp area
+			layers[interpLyrIndex].layer.queryFeatures(query, function(featuresetI) {
+				//console.log(featureset);
+				if (featuresetI.features.length === 0) {
+					bootbox.alert("Prioritization Areas <b>must</b> fall within existing Interpretation Area boundaries. Please try again.");
+					esri.hide(loading);
+				} else {
+
+					layers[wshdLyrIndex].layer.queryFeatures(query, function(featureset) {
+						//console.log("query results", featureset);
+						var evt = featureset.features[0];
+						var addOrRemove;
+						//console.log(evt);
+						var symbol = editFillSymbol;
+						var evtID = evt.attributes.OBJECTID;
+						var graphicLen = map.graphics.graphics.length;
+						var runCount = 0;
+						if (graphicLen > 1) {
+							$.each(map.graphics.graphics, function(i) {
+								runCount += 1;
+								if (map.graphics.graphics[i].attributes) {
+
+									var graphID = map.graphics.graphics[i].attributes.OBJECTID;
+									//console.log(graphID, evtID);
+									if (graphID === evtID) {
+										map.graphics.remove(map.graphics.graphics[i]);
+										esri.hide(loading);
+										addOrRemove = "remove";
+										return false;
+									}
+									if (runCount === graphicLen) {
+										if (!(addOrRemove === "remove")) {
+											map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+											esri.hide(loading);
+										}
+									}
+								}
+							});
+						} else {
+							map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
+							esri.hide(loading);
+						}
+					});
+				}
+			});
+		}
+		
+		}); 
+	};
+	
 	app.buildPrint = function () {
 		var printer = new Print({
 			map: map,
@@ -701,7 +755,6 @@ function(
 			epWidget.startup();
 		}
 	}; 
-	
 	
 	app.buildEditor = function(callback) {
 		
@@ -776,7 +829,7 @@ function(
 		callback("app.buildEditor complete.");
 	}; 
 
-	app.buildGraphicTools = function() {
+	app.buildGraphicTools_OLD = function() {
 		// Graphics are used for editing - when adding new features, graphics are used while drawing, then the graphics are saved to the shape after user saves.
 		map.enableSnapping();
 		editPointSymbol = new SimpleMarkerSymbol();
@@ -805,10 +858,41 @@ function(
 			map.graphics.add(new Graphic(evt.geometry, symbol));
 		});
 	};
-        
+	
+	app.buildGraphicTools = function() {
+		// Graphics are used for editing - when adding new features, graphics are used while drawing, then the graphics are saved to the shape after user saves.
+		//map.enableSnapping();
+		//editPointSymbol = new SimpleMarkerSymbol();
+		//editLineSymbol = new CartographicLineSymbol();
+		editFillSymbol = new SimpleFillSymbol();
+		//graphicTb = new Draw(map);
+		
+		//graphicTb.on("draw-end", function(evt) {
+			// add actions to keep or discard the graphic
+			//$("#saveGraphic").show();
+			//$("#stopEdit").show();
+			//$("#editInstructions").html("Click Continue to save the feature and go to the next step.<br/>Or click Cancel to start over.");
+	    	//addGraphicEvt = evt;
+			//graphicTb.deactivate();
+			//switch(evt.geometry.type) {
+				//case "polygon":
+					var symbol = editFillSymbol;
+				//break;
+				//case "point":
+				//	var symbol = editPointSymbol;
+				//break;
+				//case "polyline":
+				//	var symbol = editLineSymbol;
+				//break;
+			//}
+			map.graphics.add(new Graphic(evt.geometry, symbol));
+		//});
+	};
+	
     // -- Section 5: Map Functionality -------------------------------------------------------------
         
-    app.syncMaps = function(mapObj) {
+    
+	app.syncMaps = function(mapObj) {
 		// When map changes, record the map extent in order to keep all maps synconized
 		var mapExtent = mapObj.extent;
 		var mapCenter = mapObj.extent.getCenter;
@@ -889,7 +973,7 @@ function(
 		// Create clustered layer for grow locations
 		clusterLayer = new ClusterFeatureLayer({
 			"url" : sourceUrl,
-			"distance" : 20,
+			"distance" : 40,
 			"id" : newLyrName,
 			"labelColor" : "#fff",
 			"labelOffset" : -5,
@@ -902,9 +986,9 @@ function(
 		});
 		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
 		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
-		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.7]));
-		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.7]));
-		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.7]));
+		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.5]));
+		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.5]));
+		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.5]));
 
 		renderer.addBreak(2, 5, group1);
 		renderer.addBreak(5, 20, group2);
@@ -1011,9 +1095,9 @@ function(
 	
 	app.menuChange = function(option) {
 		// Called when map menu items are selected
-		if (showInfoWindow === "sumWshd") {
+		/*if (showInfoWindow === "sumWshd") {
 			$("#sumWshd-toggle").bootstrapToggle("off");
-		};
+		};*/
 		if (option.id === "menuMapTools") {
 			dojo.disconnect(clickHandler);
 			clickHandler = null;
@@ -1029,9 +1113,9 @@ function(
 				clickHandler = dojo.connect(map, "onClick", clickListener);
 			}
 		}
-		if (option.id === "menuEdit") {
+		/*if (option.id === "menuEdit") {
 	  		app.buildGraphicTools();
-		}
+		}*/
 	};
 
 	app.runQuery = function(layerUrl, queryWhere, callback) {
@@ -1049,48 +1133,331 @@ function(
 		});
 	};
         
-    // Section 6: Map Editing Functions -------------------------------------------------------------
+    // Section 6: Model Functionality ------------------------------------------
         
-	app.startDraw = function(colorOption, source) {
+	app.initModelMenu = function(option) {
+		var selOption = option.id;
+
+		switch(selOption) {
+			case "optionsRadios1":
+			// Creating a new Interpretation Area
+			dojo.disconnect(clickHandler);
+			clickHandler = null;
+				bootbox.prompt("Enter a name for the new Interpretation Area.", function(result) {
+					if (!(result)) {
+						//do nothing
+						app.stopEdit();
+					} else {
+						//console.log(result);
+						newFeatureName = result;
+						$("#editRadios2").hide();
+						$("#editRadios3").hide();
+						$("#editRadios4").hide();
+						$("#editRadios5").hide();
+						$("#editButtons").show();
+						$("#stopEdit").show();
+						$("#saveEdits").show();
+						// Make sure watershed boundary layer is visible
+						if (!(layers[wshdLyrIndex].layer.visible)) {
+							layers[wshdLyrIndex].layer.setVisibility(true);
+						}
+						$("#editInstructions").html("All Interpretation Areas are based on one or more Watersheds.<br/> "
+							+ "If you don't see the blue Watershed Boundaries, zoom in until you do.<br/><br/>"
+							+ "Click on one or more Watersheds to be included in your Interpretation Area.<br/><br/>"
+							+ "When done, click the Save button.");
+					}
+				});
+			break;
+			case "optionsRadios2":
+				dojo.disconnect(clickHandler);
+				clickHandler = null;
+				bootbox.prompt("Enter a name for the new Prioritization Area.", function(result) {
+					if (!(result)) {
+						//do nothing
+						app.stopEdit();
+					} else {
+						//console.log(result);
+						newFeatureName = result;
+						//map.graphics.clear();
+						$("#editRadios1").hide();
+						$("#editRadios3").hide();
+						$("#editRadios4").hide();
+						$("#editRadios5").hide();
+						$("#editButtons").show();
+						$("#stopEdit").show();
+						$("#saveEdits").show();
+						// Make sure watershed boundary layer is visible
+						if (!(layers[interpLyrIndex].layer.visible)) {
+							layers[interpLyrIndex].layer.setVisibility(true);
+						}
+						if (layers[wshdLyrIndex].layer.visible) {
+							layers[wshdLyrIndex].layer.setVisibility(false);
+						}
+						$("#editInstructions").html("Click on an Interpretation Area boundary.<br/>Once a boundary is selected, you'll be prompted for the next step");
+					}
+				});
+			break;
+			case "optionsRadios3":
+				dojo.disconnect(clickHandler);
+				clickHandler = null;
+				bootbox.prompt("Enter a name for the new Prioritization Area.", function(result) {
+					if (!(result)) {
+						app.stopEdit();
+					} else {
+						newFeatureName = result;
+						$("#editRadios1").hide();
+						$("#editRadios2").hide();
+						$("#editRadios4").hide();
+						$("#editRadios5").hide();
+						$("#editButtons").show();
+						$("#stopEdit").show();
+						$("#saveEdits").show();
+						// Make sure watershed boundary layer is visible
+						if (!(layers[interpLyrIndex].layer.visible)) {
+							layers[interpLyrIndex].layer.setVisibility(true);
+						}
+						if (!(layers[wshdLyrIndex].layer.visible)) {
+							layers[wshdLyrIndex].layer.setVisibility(true);
+						}
+						$("#editInstructions").html("Click on one or more Watersheds.<br/>"
+							+ "All Watersheds need to be within an Interpretation Area boundary.<br/><br/>"
+							+ "If you don't see the blue Watershed Boundaries, zoom in until you do.<br/><br/>"
+							+ "When done, click the Save button.");
+					}
+				});
+			break;
+			case "optionsRadios4":
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios5").hide();
+				$("#editButtons").show();
+				$("#editInstructions").html("new model.");
+			break;
+			case "optionsRadios5":
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editButtons").show();
+				$("#editInstructions").html("edit model.");
+			break;
+		}
+		//dojo.disconnect(clickHandler);
+		//clickHandler = null;
+	};
+	
+	app.unionPolygons = function(outputLayer) {
+		esri.show(loading);
+		var inputPolys = [];
+		$.each(map.graphics.graphics, function(i) {
+			inputPolys.push(map.graphics.graphics[i].geometry);
+		});
+		geometryService.union(inputPolys, function(result) {
+			map.graphics.clear();
+			map.graphics.add(new Graphic(result, editFillSymbol));
+			esri.hide(loading);
+			//bootbox.alert("union completed");
+			switch(outputLayer) {
+				case "interpretation":
+					// new interpretation area being created
+					console.log("save interpretation ", newFeatureName, result);
+					//testObj = result;
+					var center = result.getCentroid();
+					
+					//get the Region that the new interp area falls within
+					var query = new Query();
+					query.geometry = center;
+					layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+						//console.log("region query results", featureset);
+						var regionId = featureset.features[0].attributes.RB;
+						console.log("regionid", regionId);
+						$.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", function(callback) {
+							//console.log("interp num callback", callback);
+							//testObj = callback.features[0];
+							
+							//var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+							//console.log(lastNum);
+							var regAttr = "Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+							$.each(callback.features[0].attributes, function(i) { 
+								if (i === regAttr) {
+									var lastRegNum = callback.features[0].attributes[i];
+									var objId = callback.features[0].attributes.OBJECTID;
+									lastRegNum += 1;
+									//console.log(regAttr, lastRegNum);
+									$.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_INTERP_AREA, function(callback) {
+										$.when(app.updateAttributes(appConfig.URL_INTERP_AREA_NUM, objId, i, lastRegNum, function(callback) {
+											esri.hide(loading);
+											bootbox.alert(newFeatureName + " Interpretation Area successfully created.");
+											app.stopEdit();
+										}));
+									}));
+								}
+							});
+						}));
+					});
+				break;
+				case "prioritization":
+					console.log("save prioritization ", newFeatureName, result);
+					var center = result.getCentroid();
+					
+					//get the Region that the new interp area falls within
+					var query = new Query();
+					query.geometry = center;
+					layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+						console.log("region query results", featureset);
+						var regionId = featureset.features[0].attributes.RB;
+						console.log("regionid", regionId);
+						$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", function(callback) {
+							//console.log("interp num callback", callback);
+							//testObj = callback.features[0];
+							
+							//var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+							//console.log(lastNum);
+							var regAttr = "R" + regionId.toString() + "LastPrioritizAreaIDAssigned"; // LastPrioritizAreaIDAssigned 
+							$.each(callback.features[0].attributes, function(i) { 
+								if (i === regAttr) {
+									var lastRegNum = callback.features[0].attributes[i];
+									var objId = callback.features[0].attributes.OBJECTID;
+									lastRegNum += 1;
+									//console.log(regAttr, lastRegNum);
+									$.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_PRIOR_AREA, function(callback) {
+										$.when(app.updateAttributes(appConfig.URL_PRIOR_AREA_NUM, objId, i, lastRegNum, function(callback) {
+											esri.hide(loading);
+											bootbox.alert(newFeatureName + " Prioritization Area successfully created.");
+											app.stopEdit();
+										}));
+									}));
+								}
+							});
+						}));
+					});
+				break;
+			}
+		}, function(error) {
+			bootbox.alert("An error occurred, please try again.");
+		});
+	}; 
+	
+	app.createNewPolyFeature = function(source, param1, param2, graphic, lyrSource, callback) {
+		// Create object for writing new feature to the layer
+
+		switch(source) {
+			case "interpretation":
+				var polygon = new Polygon(graphic.rings);
+				var addFeature = {
+					"attributes": {
+						InterpAreaName: newFeatureName,
+						StatusInterpArea: "In Initial Review",
+						InterpAreaKey: param2 + "_" + param1,
+						SWRCBRegID: param2,
+						InterpAreaID: param1
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
+			break;
+			case "prioritization":
+				var polygon = new Polygon(graphic.rings);
+				var addFeature = {
+					"attributes": {
+						PrioritizAreaName: newFeatureName,
+						StatusPrioritizArea: "Approved for Modeling",
+						PrioritizAreaKey: param2 + "_" + param1,
+						SWRCBRegID: param2,
+						PrioritizAreaID: param1
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
+			break;
+		}
+		
+		$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
+			
+			map.graphics.clear();
+			// loop through map layers to find matching edited layer, then refresh it.
+			$.each(layers, function(layer) {
+				//console.log(layers[layer].layer.url);
+				if (layers[layer].layer.url === lyrSource) {
+					layers[layer].layer.refresh();
+					var query = new Query();
+					query.where = "objectId = " + saveCallback.addResults[0].objectId;
+					layers[layer].layer.selectFeatures(query);
+				}
+			});
+			callback("createNewPolyFeature complete");
+			//$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
+		}));	
+	};
+	
+	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {		
+		
+		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
+		//console.log(updateAttributes);			
+
+		var url = ftrUrl + "/updateFeatures";
+		var updString = {
+	        f: 'json',
+	        //where: "objectId=" + objId,
+	        features: updFeature,
+	        token: token
+	    };
+		//console.log(updFeature, url, updString);
+			
+	    // Query feature
+	    $.ajax({
+	        url: url,
+	        type: "POST",
+	        dataType: "json",
+	        data: updString,
+	        success: function (data) {
+	        	callback("success");
+	        },
+	        error: function (response) {
+	        	bootbox.alert("An error occurred during saving. Please notify CIPS IT/GIS staff.");
+	        	//console.log("error updating features");
+	            //callback(response);
+	        }
+	    });
+	};
+	
+	app.startDraw = function(type, colorOption) {
 		// editing - user is adding features
-		// the colorOption variable defines what color the added temporary graphic is shown with. Current options are red or blue.
+		// the colorOption variable defines what color the added graphic is shown with. Current options are red or blue.
 		dojo.disconnect(clickHandler);
 		clickHandler = null;
-		var type;
-		
-		$("#editRadios1").hide();
-		$("#editRadios2").hide();
-		$("#editRadios3").hide();
-		$("#editRadios4").hide();
-		$("#editRadios5").hide();
-		$("#editRadios6").hide();
-		$("#editRadios7").hide();
-		$("#editLabelEdit").hide();
-		$("#editLabelDelete").hide();
-		$("#stopEdit").show();
-		$("#editButtons").show();
 		
 		// hide options that are not selected
-		switch(source) {
-			case "grow":
-				type = "polygon";
-				$("#editRadios1").show();
-				$("#editInstructions").html("Use single clicks to trace around the production area of a Grow. When done, double click.");
+		switch(type) {
+			case "point":
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				$("#editRadios6").hide();
+				$("#stopEdit").show();
+				$("#editInstructions").html("Click on the map to add the point.");
 			break;
-			case "disturbed":
-				type = "polygon";
-				$("#editRadios2").show();
-				$("#editInstructions").html("Use single clicks to trace around the disturbed/graded area. When done, double click.");
+			case "polyline":
+				$("#editRadios1").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				$("#editRadios6").hide();
+				$("#stopEdit").show();
+				$("#editInstructions").html("Use single clicks on the map to draw the line. When done, double click.");
 			break;
-			case "tank":
-				type = "point";
-				$("#editRadios3").show();
-				$("#editInstructions").html("Single click on the Water Tank location.");
-			break;
-			case "reservoir":
-				type = "polygon";
-				$("#editRadios4").show();
-				$("#editInstructions").html("Use single clicks to trace the Reservoir. When done, double click.");
+			case "polygon":
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				$("#editRadios6").hide();
+				$("#stopEdit").show();
+				$("#editInstructions").html("Use single clicks on the map to draw the polygon. When done, double click.");
 			break;
 		}
 		switch (colorOption) {
@@ -1120,11 +1487,8 @@ function(
 		$("#editRadios1").hide();
 		$("#editRadios2").hide();
 		$("#editRadios3").hide();
-		$("#editRadios4").hide();
 		$("#editRadios5").hide();
 		$("#editRadios6").hide();
-		$("#editLabelEdit").hide();
-		$("#editLabelAdd").hide();
 		$("#stopEdit").show();
 		$("#editInstructions").html("Click on the feature you want to delete.");
 		$("#editButtons").show();
@@ -1175,11 +1539,8 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios6").hide();
-				$("#editRadios7").hide();
 				$("#stopEdit").show();
-				$("#editLabelAdd").hide();
-				$("#editLabelDelete").hide();
-				$("#editInstructions").html("Click on the feature you want to edit.<br/>For polygons, click on outline of the shape (not inside) to select the feature.");
+				$("#editInstructions").html("Click on the feature you want to edit.");
 				$("#editButtons").show();
 			break;
 			case "shape":
@@ -1191,14 +1552,10 @@ function(
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
-				$("#editRadios7").hide();
-				$("#editLabelAdd").hide();
-				$("#editLabelDelete").hide();
 				$("#saveEdits").show();
 				$("#stopEdit").show();
 				$("#editInstructions").html("<b>For Polygon and Line features:</b><br/>"
 					+ "Double click on the feature you want to modify.<br/>"
-					+ "For polygons, click on the outline of the shape (not inside) to select the feature.<br/>"
 					+ "The points (vertices) that make up the polygon or line will appear.<br/> Click and drag the points to adjust the boundary<br/>"
 					+ "When done, click Save to record the edits.<br/><br/>"
 					+ "<b>For Point features:</b><br/>"
@@ -1232,297 +1589,54 @@ function(
 		esri.show(loading);
 		$("#attributesDiv").show();
 		
-		// Get the region that this new feature falls within
-		if ($("#optionsRadios3:checked").prop("checked")) {
-			// optionRadios3 is a point feature, don't need centroid
-			var center = addGraphicEvt.geometry;
-		} else {
-			// polygon features - get centroid for intersect with Interp Area and calculate the acreage of the poly
-			var center = addGraphicEvt.geometry.getCentroid();
-			var polyAcre = app.calcAcreage(addGraphicEvt.geometry);
-		}
-		var query = new Query();
-		query.geometry = center;
-		layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
-			var regionId = featureset.features[0].attributes.RB;
-			console.log("regionId", regionId);
-			
-			if ($("#optionsRadios1:checked").prop("checked")) {
-				// Save grow
-				layers[interpLyrIndex].layer.queryFeatures(query, function(featureset) {
-					var interpCount = featureset.features.length;
-					if (interpCount === 0) {
-						// New grows must fall within interp areas. This maintains the internal id's
-						bootbox.alert("The new Grow Footprint falls outside of an Interpretation Area and cannot be added.");
-					} else {
-						// OK to proceed with creating new grow. Get the next ID based on the Interpretation Area that it falls within
-						var interpId = featureset.features[0].attributes.InterpAreaID;
-						
-						$.when(app.runQuery(appConfig.URL_GROW_NUM, "0=0", function(callback) {
-							var regAttr = "Reg" + regionId.toString() + "LastInterpAreaIDAssigned"; // LastPrioritizAreaIDAssigned 
-								$.each(callback.features[0].attributes, function(i) { 
-									if (i === regAttr) {
-										var lastRegNum = callback.features[0].attributes[i];
-										var objId = callback.features[0].attributes.OBJECTID;
-										lastRegNum += 1;
-										$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, function(callback) {
-											$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, function(callback) {
-												esri.hide(loading);
-											}));
-										}));
-									}
-								});	
-							}));
-						
-						}
-				});
-			}
-			if ($("#optionsRadios2:checked").prop("checked")) {
-				// save disturbed area
-				$.when(app.createNewFeature("disturbed_area", regionId, polyAcre, addGraphicEvt, appConfig.URL_EDIT_DISTURBED_AREA, function(callback) {
-					//console.log(callback);
-					esri.hide(loading);
-				}));
-			}
-			if ($("#optionsRadios3:checked").prop("checked")) {
-				// save water tank
-				$.when(app.createNewFeature("water_tank", regionId, null, addGraphicEvt, appConfig.URL_EDIT_WATER_TANK, function(callback) {
-					//console.log(callback);
-					esri.hide(loading);
-				}));
-			}
-			if ($("#optionsRadios4:checked").prop("checked")) {
-				// save reservoir
-				$.when(app.createNewFeature("reservoir", regionId, polyAcre, addGraphicEvt, appConfig.URL_EDIT_RESERVOIR, function(callback) {
-					//console.log(callback);
-					esri.hide(loading);
-				}));
-			}
-			$("#saveGraphic").hide();
-			$("#saveEdits").show();
-		});
-	};
-	
-	app.calcAcreage = function(polygon) {
-		// Calculate the acreage of a polygon shape
-		var calculatedAcres;
-		calculatedAcres = Math.round(100 * esri.geometry.geodesicAreas([esri.geometry.webMercatorToGeographic(polygon)], Units.ACRES)) / 100;
-	    
-	    if (!(calculatedAcres)) {
-	    	console.info("error in acreage calc"); 
-			origPoly = polygon;
-			origPoly.rings[0].reverse();
-			calculatedAcres = Math.round(100 * esri.geometry.geodesicAreas([esri.geometry.webMercatorToGeographic(origPoly)], Units.ACRES)) / 100;
-			if (calculatedAcres < 0) {
-				calculatedAcres = calculatedAcres * -1;
-				return(calculatedAcres);
-			} else {
-				return(calculatedAcres);
-			}
-		} else {
-			return(calculatedAcres);
-		}
-	}; 
-	
-	app.createNewGrowFeature = function(lastRegNum, regionId, polyAcre, graphic, callback) {
-		// Create object for writing new Grow features
-
-		var polygon = new Polygon(graphic.rings);
-		var center = new Point(graphic.getCentroid());
-		console.log(center);
-		var addFeature = {
-			"attributes": {
-				//InterpAreaName: newFeatureName,
-				PreProcStatus: "Not PreProcessed",
-				InterpMethod: "Aerial Imagery",
-				StatusInterpArea: "In Initial Review",
-				GrowYear: new Date("1/1/2014"),
-				GrowKey: regionId + "_" + lastRegNum,
-				SWRCBRegID: regionId,
-				GrowID: lastRegNum,
-				GrowAcres: polyAcre,
-				GrowSqFt: polyAcre * 43560,
-				InterpDate: new Date()
-			},
-			"geometry": {
-				rings: polygon.rings
-			}
-		};
-		
-		var addPointFeature = {
-			"attributes": {
-				//InterpAreaName: newFeatureName,
-				PreProcStatus: "Not PreProcessed",
-				InterpMethod: "Aerial Imagery",
-				StatusInterpArea: "In Initial Review",
-				GrowYear: new Date("1/1/2014"),
-				GrowKey: regionId + "_" + lastRegNum,
-				SWRCBRegID: regionId,
-				GrowID: lastRegNum,
-				GrowAcres: polyAcre,
-				GrowSqFt: polyAcre * 43560,
-				InterpDate: new Date()
-			},
-			"geometry": {
-				x: center.x,
-				y: center.y
-			}
-		};
-		
-		// Write first to the grow polygons layer
-		$.when(app.saveNewFeature(addFeature, appConfig.URL_EDIT_GROW_FOOTPRINTS, function(saveCallback) {
-			
-			// then, write to grow points layer
-			// Note that currently, any changes made to the poly's attributes will not be updated to the point feature.
-			$.when(app.saveNewFeature(addPointFeature, appConfig.URL_EDIT_GROW_POINTS, function(saveCallback2) {
-				map.graphics.clear();
-				// loop through map layers to find matching edited layer, then refresh it.
-				$.each(layers, function(layer) {
-					if (layers[layer].layer.url === appConfig.URL_EDIT_GROW_POINTS) {
-						layers[layer].layer.refresh();
-					}
-					if (layers[layer].layer.url === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
-						layers[layer].layer.refresh();
-						var query = new Query();
-						query.where = "objectId = " + saveCallback.addResults[0].objectId;
-						layers[layer].layer.selectFeatures(query);
-					}
-				});
-				callback("createNewPolyFeature complete");
+		if ($("#optionsRadios1:checked").prop("checked")) {
+			// save point
+			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POINT, function(callback) {
+				esri.hide(loading);
 			}));
-			
-		}));	
-	};
-	
-	app.createNewFeature = function(source, attrRegion, attrAcreage, graphic, lyrSource, callback) {
-		// Create object for writing new feature to the layer
-		switch(source) {
-			case "disturbed_area":
-				var polygon = new Polygon(graphic.geometry.rings);
-				$("#stopEdit").hide();
-				var addFeature = {
-					"attributes": {
-						SWRCBRegID: attrRegion,
-						DisturbedAreasAcres: attrAcreage,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
-					},
-					"geometry": {
-						rings: polygon.rings
-					}
-				};
-				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
-					map.graphics.clear();
-					esri.hide(loading);
-					// Loop through map layers to find matching edited layer, then refresh it.
-					$.each(layers, function(layer) {
-						if (layers[layer].layer.url === lyrSource) {
-							layers[layer].layer.refresh();
-							var query = new Query();
-							query.where = "objectId = " + saveCallback.addResults[0].objectId;
-							layers[layer].layer.selectFeatures(query);
-						}
-					});
-					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
-				}));
-			break;
-			case "reservoir":
-				var polygon = new Polygon(graphic.geometry.rings);
-				$("#stopEdit").hide();
-				var addFeature = {
-					"attributes": {
-						SWRCBRegID: attrRegion,
-						ReserviorAcres: attrAcreage,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
-					},
-					"geometry": {
-						rings: polygon.rings
-					}
-				};
-				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
-					map.graphics.clear();
-					esri.hide(loading);
-					// Loop through map layers to find matching edited layer, then refresh it.
-					$.each(layers, function(layer) {
-						if (layers[layer].layer.url === lyrSource) {
-							layers[layer].layer.refresh();
-							var query = new Query();
-							query.where = "objectId = " + saveCallback.addResults[0].objectId;
-							layers[layer].layer.selectFeatures(query);
-						}
-					});
-					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
-				}));
-			break;
-			case "water_tank":
-				$("#stopEdit").hide();
-				var addFeature = {
-					"attributes": {
-						SWRCBRegID: attrRegion,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
-					},
-					"geometry": {
-						x: graphic.geometry.x,
-						y: graphic.geometry.y
-					}
-				};
-				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
-					map.graphics.clear();
-					esri.hide(loading);
-					// Loop through map layers to find matching edited layer, then refresh it.
-					$.each(layers, function(layer) {
-						if (layers[layer].layer.url === lyrSource) {
-							layers[layer].layer.refresh();
-							var query = new Query();
-							query.where = "objectId = " + saveCallback.addResults[0].objectId;
-							layers[layer].layer.selectFeatures(query);
-						}
-					});
-					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
-				}));
-			break;
 		}
-	};
-	
-	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {		
-		
-		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
-		//console.log(updateAttributes);			
-
-		var url = ftrUrl + "/updateFeatures";
-		var updString = {
-	        f: 'json',
-	        //where: "objectId=" + objId,
-	        features: updFeature,
-	        token: token
-	    };
-		//console.log(updFeature, url, updString);
-			
-	    // Query feature
-	    $.ajax({
-	        url: url,
-	        type: "POST",
-	        dataType: "json",
-	        data: updString,
-	        success: function (data) {
-	        	callback("success");
-	        },
-	        error: function (response) {
-	        	bootbox.alert("An error occurred during saving. Please notify CIPS IT/GIS staff.");
-	        	//console.log("error updating features");
-	            //callback(response);
-	        }
-	    });
+		if ($("#optionsRadios2:checked").prop("checked")) {
+			// save point
+			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYLINE, function(callback) {
+				//console.log(callback);
+				esri.hide(loading);
+			}));
+		}
+		if ($("#optionsRadios3:checked").prop("checked")) {
+			// save point
+			$.when(app.createNewFeature(addGraphicEvt, appConfig.URL_EDIT_POLYGON, function(callback) {
+				//console.log(callback);
+				esri.hide(loading);
+			}));
+		}
+		$("#saveGraphic").hide();
+		$("#saveEdits").show();
 	};
 	
 	app.stopEdit = function () {
 		
 		// Used for cancelling an edit, and for resetting the edit menu back to default state
+		newFeatureName = null;
+		$("#editRadios1").show();
+		$("#editRadios2").show();
+		$("#editRadios3").show();
+		$("#editRadios4").show();
+		$("#editRadios5").show();
+		$("#optionsRadios1:checked").prop("checked",false);
+		$("#optionsRadios2:checked").prop("checked",false);
+		$("#optionsRadios3:checked").prop("checked",false);
+		$("#optionsRadios4:checked").prop("checked",false);
+		$("#optionsRadios5:checked").prop("checked",false);
+		$("#editInstructions").html("Select a modeling option.");
+    	if (!(clickHandler)) {
+			clickHandler = dojo.connect(map, "onClick", clickListener);
+		};
+		$("#attributesDiv").hide();
+		$("#editButtons").hide();
+		map.graphics.clear();
 		
 		// If editing shape, discard the edits because the user clicked the cancel button
-		if ($("#optionsRadios6:checked").prop("checked")) {
+		/*if ($("#optionsRadios6:checked").prop("checked")) {
 			if (shapeEditStatus) {
 				//console.log("shape edits discarded");
 				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
@@ -1536,56 +1650,125 @@ function(
 					console.log("error");
 				});
 			}
-		}
-		
-		$.each(layers, function(layer) {
-			layers[layer].layer.clearSelection();
-		});
+		}*/
 
 		// resetting edit menu to defaults
-		map.graphics.clear();
-		graphicTb.deactivate();
-		$("#editRadios1").show();
-		$("#editRadios2").show();
-		$("#editRadios3").show();
-		$("#editRadios4").show();
-		$("#editRadios5").show();
-		$("#editRadios6").show();
-		$("#editRadios7").show();
-		$("#editLabelAdd").show();
-		$("#editLabelEdit").show();
-		$("#editLabelDelete").show();
-		$("#saveGraphic").hide();
-		$("#saveEdits").hide();
-		$("#stopEdit").hide();
-		$("#saveShapeEdit").hide();
-		$("#optionsRadios1:checked").prop("checked",false);
-		$("#optionsRadios2:checked").prop("checked",false);
-		$("#optionsRadios3:checked").prop("checked",false);
-		$("#optionsRadios4:checked").prop("checked",false);
-		$("#optionsRadios5:checked").prop("checked",false);
-		$("#optionsRadios6:checked").prop("checked",false);
-		$("#optionsRadios7:checked").prop("checked",false);
-    	$("#editInstructions").html("Select an editing option.");
-    	if (!(clickHandler)) {
-			clickHandler = dojo.connect(map, "onClick", clickListener);
-		};
-		$("#attributesDiv").hide();
-		$("#editButtons").hide();
+		/*map.graphics.clear();
+		graphicTb.deactivate();*/
+		
+		//$("#editRadios5").show();
+		//$("#editRadios6").show();
+		//$("#saveGraphic").hide();
+		//$("#saveEdits").hide();
+		//$("#stopEdit").hide();
+		//$("#saveShapeEdit").hide();
+		
+		//$("#optionsRadios5:checked").prop("checked",false);
+		//$("#optionsRadios6:checked").prop("checked",false);
+    	
 		
 	};
 	
 	app.saveEdits = function () {
 		// For attribute and shape editing
 		
-		// Shape edit - on-deactivate, the editorToolbar will save the change to the shape
-		if ($("#optionsRadios6:checked").prop("checked")) {
-			editToolbar.deactivate();
-
-		// All other edits are already recorded, just reset the menu
-		} else {
-			app.stopEdit();
-		}		
+		if ($("#optionsRadios1:checked").prop("checked")) {
+			app.unionPolygons("interpretation");
+		}
+		if ($("#optionsRadios2:checked").prop("checked")) {
+			app.unionPolygons("prioritization");
+		}
+		if ($("#optionsRadios3:checked").prop("checked")) {
+			app.unionPolygons("prioritization");
+		}
+		
+			
+	};
+	
+	
+	
+	app.createNewFeature = function(graphic, lyrSource, callback) {
+		// Create object for writing new feature to the layer
+		var type = graphic.geometry.type;
+		switch(type) {
+			case "point":
+				$("#stopEdit").hide();
+				var addFeature = {
+					"attributes": {
+						// currently, no attributes are written, but these will be added based on the CIPS dataset being edited
+					},
+					"geometry": {
+						x: graphic.geometry.x,
+						y: graphic.geometry.y
+					}
+				};
+				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
+					map.graphics.clear();
+					// Loop through map layers to find matching edited layer, then refresh it.
+					$.each(layers, function(layer) {
+						if (layers[layer].layer.url === lyrSource) {
+							layers[layer].layer.refresh();
+							var query = new Query();
+							query.where = "objectId = " + saveCallback.addResults[0].objectId;
+							layers[layer].layer.selectFeatures(query);
+						}
+					});
+					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
+				}));
+			break;
+			case "polyline":
+				$("#stopEdit").hide();
+				var polyline = new Polyline(graphic.geometry.paths);
+				var addFeature = {
+					"attributes": {
+						
+					},
+					"geometry": {
+						paths: polyline.paths
+					}
+				};
+				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
+					map.graphics.clear();
+					// loop through map layers to find matching edited layer, then refresh it.
+					$.each(layers, function(layer) {
+						if (layers[layer].layer.url === lyrSource) {
+							layers[layer].layer.refresh();
+							var query = new Query();
+							query.where = "objectId = " + saveCallback.addResults[0].objectId;
+							layers[layer].layer.selectFeatures(query);
+						}
+					});
+					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
+				}));
+			break;
+			case "polygon":
+				$("#stopEdit").hide();
+				var polygon = new Polygon(graphic.geometry.rings);
+				var addFeature = {
+					"attributes": {
+						
+					},
+					"geometry": {
+						rings: polygon.rings
+					}
+				};
+				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
+					map.graphics.clear();
+					// loop through map layers to find matching edited layer, then refresh it.
+					$.each(layers, function(layer) {
+						//console.log(layers[layer].layer.url);
+						if (layers[layer].layer.url === lyrSource) {
+							layers[layer].layer.refresh();
+							var query = new Query();
+							query.where = "objectId = " + saveCallback.addResults[0].objectId;
+							layers[layer].layer.selectFeatures(query);
+						}
+					});
+					$("#editInstructions").html("Type in the attributes for the new feature, then click Save.");
+				}));
+			break;
+			
+		}
 	};
 	
 	app.saveNewFeature = function(feature, url, callback) {
@@ -1613,7 +1796,7 @@ function(
 	    });
 	};
 	
-    // -- Section 7: Authentication ----------------------------------------------------
+// -- Section 7: Authentication ----------------------------------------------------
 
 	// Authentication - when services come from ArcGIS Online
 	if (appConfig.AUTH === "arcgisonline") {
@@ -1755,6 +1938,7 @@ function(
 
     $(document).ready(function() {
 		// Page has loaded, set on- events	
+		console.log("page ready");
 	
 		$.unblockUI();
 

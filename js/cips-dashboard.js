@@ -1,19 +1,17 @@
+// -- Section 1: Global Variables ----------------------------------------------------
 var map, mapDeferred, mapResponse, mapNav, toc, loading; // core map objects
 var layers, clickHandler, clickListener, lyrInfoTemplate = []; // used for popups
-var cred = "esri_jsapi_id_manager_data"; // cookie/localStorage variable for ArcGIS for Server authentication
-var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer;
-var layerFromQuery;
 var clusterLayer, clusterLayerClickHandler; // used for clustered grow location display
-var measurement; // Measurement widget
-var showInfoWindow = "default";
+var basemapGallery, measurement, tb, epWidget, lineSymbol, timeSlider; // map widgets
+var showInfoWindow = "default"; // used to control map behavior based upon selected tool
+var cred = "esri_jsapi_id_manager_data"; // cookie/localStorage variable for ArcGIS for Server authentication
 var statsLoaded = [null,true,false,false,false,false,false,false,false,false,false]; // this is used to initialize stats carousels
 var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
 var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
-var tb, epWidget, lineSymbol; // for elevation profile
-var timeSlider; // Time slider widget
-
+var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var testvar; //generic variable for testing
-	
+
+// -- Section 2: Requires -------------------------------------------------------------
 require([
     "esri/arcgis/utils", 
     "esri/config",
@@ -57,9 +55,9 @@ require([
     "esri/IdentityManager",
     "esri/TimeExtent",
     "esri/dijit/TimeSlider",
-    "./js/ClusterLayer.js", 
+    //"./js/ClusterLayer.js",
     //"./js/clusterfeaturelayer.js",
-    "./js/ClusterFeatureLayer2.js",
+    "./js/lib/ClusterFeatureLayer.js",
     "./js/lib/bootstrapmap.js",
     "dojo/dom", "dojo/on", "dojo/_base/array", "dojo/_base/lang", "./js/agsjs/dijit/TOC.js", "dojo/domReady!"], 
 
@@ -107,25 +105,27 @@ function(
     esriId, 
     TimeExtent,
     TimeSlider,
-    ClusterLayer,
+    //ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
     dom, on, arrayUtil, lang, TOC) {
 
-    var basemapGallery, scalebar, locator;
+    // -- Section 3: On-Load Settings -------------------------------------------------------------
+        
+    //var basemapGallery;
     
     document.title = appConfig.APP_NAME_HTML_TITLE;
     
-    var app = dojo.getObject('app', true); // global object to allow function calls from the app.
+    var app = dojo.getObject('app', true); // Global object to allow function calls from the app. Most functions are constructed with this (ex: app.buildMap = function() {};
     
     // Proxy settings
     esriConfig.defaults.geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
     esriConfig.defaults.io.alwaysUseProxy = false;
     esriConfig.defaults.io.corsEnabledServers.push("tasks.arcgisonline.com");
-    //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver2.vestra.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");    
-    esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");     
+    esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");
+    //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com");
     //esriConfig.defaults.io.corsEnabledServers.push("localhost");  
     //esriConfig.defaults.io.timeout = 120000;   
     //esriConfig.defaults.io.proxyUrl = "http://localhost/apps/cipsproxy/DotNet/proxy.ashx";
@@ -165,7 +165,7 @@ function(
 		}
 	});
 
-    // for the map tool container
+    // for the map toolbar menu items
     var showing = false;
 	$(document).on("click", ".tabItems", function(e) {
 		var elementToShow = $(this).attr("href");		
@@ -185,13 +185,251 @@ function(
 		$("#ribbon-bar-toggle").show();
 	});
     
-    // Functions to initialize map elements ------------------------------------------
+    // -- Section 4: Summary Charts/Stats -------------------------------------------------------------
+        
+    app.numberWithCommas = function (x) {
+        // converts number to a string with comma separators (used for summary section)
+        x = x.toFixed(0);
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+        
+    app.initStats = function () {
+        // create results for first carousel content (Statewide summary)
+        // charting uses the open source Chart.js library: http://www.chartjs.org/
+        
+        // Get chart input data from the Region and Interpretation Summary tables
+        var queryParams = "0=0";
+        
+        var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
+        //var regInterpAreas = "", regInterpWatersheds = "", regInterpAcreage = "";
+        var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
+        var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
+        
+        $.when(app.runQuery(appConfig.URL_SUMMARY_REGION, queryParams, function(qryResultsRegion) {
+            sumDataRegion = qryResultsRegion;
+            // put the attribute: value pairs for each region into an object
+            $.each(qryResultsRegion.features, function(i) {
+                var regionId = qryResultsRegion.features[i].attributes.SWRCBRegID;
+                sumRegion[regionId] = qryResultsRegion.features[i].attributes;
+            });
+            $.when(app.runQuery(appConfig.URL_SUMMARY_INTERP_AREA, queryParams, function(qryResultsInterp) {
+                sumDataInterp = qryResultsInterp;
+                // put the attribute: value pairs for each interpretation area into an object
+                $.each(qryResultsInterp.features, function(i) {
+                    var interpId = qryResultsInterp.features[i].attributes.InterpAreaKey;
+                    sumInterp[interpId] = qryResultsInterp.features[i].attributes;
+                });
+                // loop through the value pairs for each region and get totals
+                $.each(sumRegion, function(i) {
+                    totalInterpAreas += sumRegion[i].NumInterpAreas;
+                    totalInterpWatersheds += sumRegion[i].NumHuc12InInterpAreas;
+                    totalInterpAcreage += sumRegion[i].TotalAcreageInterpAreas;
+                    totalNumGrows += sumRegion[i].NumGrows;
+                    totalGrowAcreage += sumRegion[i].TotalAcreageGrows;
+                    totalGrowOutdoor += sumRegion[i].NumOutdoorGrows;
+                    totalGrowGreenhouse += sumRegion[i].NumGreenHouseGrows;
+                    totalWaterUse += sumRegion[i].TotalWaterUse;
+                    totalLevel1 += sumRegion[i].NumCultAreaScore1Grows;
+                    totalLevel2 += sumRegion[i].NumCultAreaScore2Grows;
+                    totalLevel3 += sumRegion[i].NumCultAreaScore3Grows;
+                });
+                // set the values on the page
+                dojo.byId('quickStatInterpArea').innerHTML = totalInterpAreas;
+                dojo.byId('quickStatWatersheds').innerHTML = app.numberWithCommas(totalInterpWatersheds);
+                dojo.byId('quickStatTotalAcreage').innerHTML = app.numberWithCommas(totalInterpAcreage);
+                dojo.byId('quickStatGrows').innerHTML = app.numberWithCommas(totalNumGrows);
+                dojo.byId('quickStatGrowAcreage').innerHTML = app.numberWithCommas(totalGrowAcreage);
+                
+                // build pie chart1
+                var chart1Data = [
+                    {
+                        value: totalGrowGreenhouse,
+                        color:"#58eb7b",
+                        highlight: "#aafbbd",
+                        label: "Greenhouse"
+                    },
+                    {
+                        value: totalGrowOutdoor,
+                        color: "#e1b474",
+                        highlight: "#f8c884",
+                        label: "Outdoor"
+                    }
+                ];
+                dojo.byId('titleChart1S').innerHTML = "Outdoor vs Greenhouse";
+                var chart1 = document.getElementById("chart1S").getContext("2d");
+                window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
+                   responsive : false,
+                   animation: false
+                });
+                
+                // build pie chart2
+                var chart2Data = [
+                    {
+                        value: totalLevel1,
+                        color:"#fee6ce",
+                        highlight: "#fdd0a2",
+                        label: "Level 1"
+                    },
+                    {
+                        value: totalLevel2,
+                        color: "#fdae6b",
+                        highlight: "#fd8d3c",
+                        label: "Level 2"
+                    },
+                    {
+                        value: totalLevel3,
+                        color: "#f16913",
+                        highlight: "#d94801",
+                        label: "Level 3"
+                    }
+                ];
+                dojo.byId('titleChart2S').innerHTML = "Cultivated Area";
+                var chart2 = document.getElementById("chart2S").getContext("2d");
+                window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
+                    responsive : false,
+                    animation: false
+                });
+                }));
+            }));
+        };
+        
+        app.initStatsReg = function(regNum) {
+            // create results for Region-specific charts
+            var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
+            var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
+            var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
+            
+            totalInterpAreas = sumRegion[regNum].NumInterpAreas;
+            totalInterpWatersheds = sumRegion[regNum].NumHuc12InInterpAreas;
+            totalInterpAcreage = sumRegion[regNum].TotalAcreageInterpAreas;
+            totalNumGrows = sumRegion[regNum].NumGrows;
+            totalGrowAcreage = sumRegion[regNum].TotalAcreageGrows;
+            totalGrowOutdoor = sumRegion[regNum].NumOutdoorGrows;
+            totalGrowGreenhouse = sumRegion[regNum].NumGreenHouseGrows;
+            totalWaterUse = sumRegion[regNum].TotalWaterUse;
+            totalLevel1 = sumRegion[regNum].NumCultAreaScore1Grows;
+            totalLevel2 = sumRegion[regNum].NumCultAreaScore2Grows;
+            totalLevel3 = sumRegion[regNum].NumCultAreaScore3Grows;
+            
+            // set the values on the page
+            dojo.byId("sumTitleR" + regNum).innerHTML = "Region <b>" + regNum + "</b> Summary";
+            dojo.byId("quickStatInterpAreaR" + regNum).innerHTML = totalInterpAreas;
+            dojo.byId("quickStatWatershedsR" + regNum).innerHTML = app.numberWithCommas(totalInterpWatersheds);
+            dojo.byId("quickStatTotalAcreageR" + regNum).innerHTML = app.numberWithCommas(totalInterpAcreage);
+            dojo.byId("quickStatGrowsR" + regNum).innerHTML = app.numberWithCommas(totalNumGrows);
+            dojo.byId("quickStatGrowAcreageR" + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
+        
+            // build pie chart1
+            var chart1Data = [{
+                value : totalGrowGreenhouse,
+                color : "#58eb7b",
+                highlight : "#aafbbd",
+                label : "Greenhouse"
+            }, {
+                value : totalGrowOutdoor,
+                color : "#e1b474",
+                highlight : "#f8c884",
+                label : "Outdoor"
+            }];
+            dojo.byId("titleChart1R" + regNum).innerHTML = "Outdoor vs Greenhouse";
+            var chart1 = document.getElementById("chart1R" + regNum).getContext("2d");
+            window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
+                responsive : false
+            });
+        
+            // build pie chart2
+            var chart2Data = [{
+                value : totalLevel1,
+                color : "#fee6ce",
+                highlight : "#fdd0a2",
+                label : "Level 1"
+            }, {
+                value : totalLevel2,
+                color : "#fdae6b",
+                highlight : "#fd8d3c",
+                label : "Level 2"
+            }, {
+                value : totalLevel3,
+                color : "#f16913",
+                highlight : "#d94801",
+                label : "Level 3"
+            }];
+            dojo.byId("titleChart2R" + regNum).innerHTML = "Cultivated Area";
+            var chart2 = document.getElementById("chart2R" + regNum).getContext("2d");
+            window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
+                responsive : false
+            });
+        };
+        
+        app.initStatsWater = function() {
+        // Generate water usage estimates
+        
+            var totalWaterUse = 0, totalWaterUseScore1Grows = 0, totalWaterUseScore2Grows = 0, totalWaterUseScore3Grows = 0;
+            var numWaterUseScore1Grows = 0, numWaterUseScore2Grows = 0, numWaterUseScore3Grows = 0;
+        
+            $.each(sumRegion, function(i) {
+               totalWaterUse += sumRegion[i].TotalWaterUse;
+               totalWaterUseScore1Grows += sumRegion[i].TotalWaterUseScore1Grows;
+               totalWaterUseScore2Grows += sumRegion[i].TotalWaterUseScore2Grows;
+               totalWaterUseScore3Grows += sumRegion[i].TotalWaterUseScore3Grows;
+               numWaterUseScore1Grows += sumRegion[i].NumWaterUseScore1Grows;
+               numWaterUseScore2Grows += sumRegion[i].NumWaterUseScore2Grows;
+               numWaterUseScore3Grows += sumRegion[i].NumWaterUseScore3Grows;
+            });
+        
+            var totalWaterUseGal = totalWaterUse * 325851;
+        
+            // set the values on the page
+            dojo.byId('quickStatWaterAcFt').innerHTML = app.numberWithCommas(totalWaterUse);
+            dojo.byId('quickStatWaterGal').innerHTML = app.numberWithCommas(totalWaterUseGal);
+            dojo.byId('quickStatWaterNumScore1').innerHTML = app.numberWithCommas(numWaterUseScore1Grows);
+            dojo.byId('quickStatWaterTotScore1').innerHTML = app.numberWithCommas(totalWaterUseScore1Grows);
+            dojo.byId('quickStatWaterNumScore2').innerHTML = app.numberWithCommas(numWaterUseScore2Grows);
+            dojo.byId('quickStatWaterTotScore2').innerHTML = app.numberWithCommas(totalWaterUseScore2Grows);
+            dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
+            dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
+            
+            
+            // Bar Chart for Water Use by Risk Level
+            var barChartData = {
+            labels : ["Risk Level 1","Risk Level 2", "Risk Level 3"],
+            datasets : [
+                {
+                    label: "Region 1",
+                    fillColor : "#58eb7b",
+                    strokeColor : "#FFF",
+                    highlightFill: "#aafbbd",
+                    highlightStroke: "#FFF",
+                    data : [sumRegion[1].TotalWaterUseScore1Grows, sumRegion[1].TotalWaterUseScore2Grows, sumRegion[1].TotalWaterUseScore3Grows]
+                },
+                {
+                    label: "Region 5",
+                    fillColor : "#e1b474",
+                    strokeColor : "#FFF",
+                    highlightFill: "#f8c884",
+                    highlightStroke: "#FFF",
+                    data : [sumRegion[5].TotalWaterUseScore1Grows, sumRegion[5].TotalWaterUseScore2Grows, sumRegion[5].TotalWaterUseScore3Grows]
+                },
+            ]
+        };
+        
+        var bar1 = document.getElementById("bar1").getContext("2d");
+        window.myBar = new Chart(bar1).Bar(barChartData, {
+            responsive : true,
+            animation: false,
+            multiTooltipTemplate: "<%= datasetLabel %> - <%= value %>"
+        });
+    };
+
+    // -- Section 5: Build Map Elements -------------------------------------------------------------
+        
+    // Initialize the map
     app.buildMap = function(e) {
     	
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
 		
-		// getting extent from previous page (if exists). Only has to be done for first map, the rest are based on extent of this map after load
+		// Get the map extent from previous session or page. Only has to be done for first map, the rest are based on extent of this map after load
 		if (localStorage.extent) {
 			var ext = $.parseJSON(localStorage.extent);
 			var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
@@ -239,7 +477,6 @@ function(
             // defining the layers allows for access to attributes per layer
             layers = esri.arcgis.utils.getLegendLayers(response);
            	$.each(layers, function(i, lyr) {
-            	//console.log(i, lyr);
             	lyrInfoTemplate.push({infoTemplate: lyr.layer.infoTemplate,lyrTitle: lyr.title});
             	//if (i > 0) {
             	//	lyr.layer.advancedQueryCapabilities.supportsPagination = true;
@@ -248,12 +485,6 @@ function(
  
             clickHandler = response.clickEventHandle;
             clickListener = response.clickEventListener;
-           	
-           	/*on(map, "click", function(evt) {
-           		console.log(evt);
-           		testvar = evt;
-           		// This is used for editing dialogs - turning on/off map click functionality
-           	});*/
             
             on(map, "update-start", function() {
 	        	esri.show(loading);
@@ -289,7 +520,6 @@ function(
 
         }, function(error) {
             alert("An error occurred loading the map. Refresh the page and try again.");
-            //console.log("Error loading webmap: " + dojo.toJson(error));
         });
     };
     
@@ -299,15 +529,10 @@ function(
     	app.buildBasemap();
     	app.buildSearch();
     	app.buildSearchWatershed();
-    	//app.buildSearchLayers();
-    	//app.buildEditDropdowns();
-    	//app.buildGraphicEditTools();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 73000, null, function(callback) {
+    	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.GROW_POINTS_URL, appConfig.GROW_POINTS_SCALE, null, function(callback) {
 		}));
-    	//console.log(esriId.credentials);
-    	//map.addLayer(graphicLayer);
     };
 
     app.buildMapElements = function (layers) {
@@ -316,10 +541,8 @@ function(
     };
 
     app.buildTOC = function (response) {
-        //this is for TOC
-        var webmapLayerInfos = [];
-        //this is for Legend
-        var layerInfo = [];
+        var webmapLayerInfos = []; // this is for TOC
+        var layerInfo = []; //this is for Legend
 
         dojo.forEach(response.itemInfo.itemData.operationalLayers, function(olayer) {
             webmapLayerInfos.push({
@@ -334,14 +557,13 @@ function(
             });
         });
 
-        //add TOC
+        // add TOC
         webmapLayerInfos.reverse();
         toc = new agsjs.dijit.TOC({
             map : map,
             layerInfos : webmapLayerInfos
         }, "mapTocDiv");
         toc.startup();
-        //});
     };
     
     app.buildBasemap = function () {
@@ -499,6 +721,7 @@ function(
 	};
     
     app.buildSearch = function () {
+        // Generic search by address or place name
     	var s = new Search({
             map: map
          }, "searchBasic");
@@ -506,13 +729,13 @@ function(
     };
     
     app.buildSearchWatershed = function () {
-		// Uses the 3.13 Search function to search via both geocode and specified features
+		// Uses the Search function to search specified layers
 		var sL = new Search({	
-			enableButtonMode: false, //this enables the search widget to display as a single button
+			enableButtonMode: false, // this enables the search widget to display as a single button
 	        enableLabel: false,
 	        enableInfoWindow: true,
 	        showInfoWindowOnSelect: false,
-	        sources: [],
+	        sources: [], // using a empty object removes default use of address locator
 	        map: map
 	     }, "searchWatershed");
 	
@@ -559,16 +782,13 @@ function(
 	
 	app.buildMeasure = function () {
 		measurement = new Measurement({
-		    map: map//,
-		    //defaultAreaUnit: Units.SQUARE_MILES,
-		    //defaultLengthUnit: Units.KILOMETERS
+		    map: map
 		}, dom.byId('measurement'));
 		measurement.startup();
 	};
 	
 	
 	app.buildElevProfile = function() {
-		//app.summarizeWshd(false);
 		// Create the profile widget the first time loaded
 		if (!(epWidget)) {
 			$("#elev-toggle").change(function() {
@@ -616,7 +836,7 @@ function(
           timeExtent.endTime = new Date("12/31/2015 UTC");
           timeSlider.setThumbCount(2);
           timeSlider.createTimeStopsByTimeInterval(timeExtent, 1, "esriTimeUnitsYears");
-          timeSlider.setThumbIndexes([17,17]);
+          timeSlider.setThumbIndexes([15,15]);
           timeSlider.setThumbMovingRate(4000);
           timeSlider.startup();
           
@@ -637,37 +857,47 @@ function(
             dom.byId("daterange").innerHTML = "<i>" + startValString + " and " + endValString  + "<\/i>";
           });
     };
+        
+    // -- Section 6: Map Functionality -------------------------------------------------------------
 	
-	app.syncMaps = function(mapObj) {
+    app.runQuery = function(layerUrl, queryWhere, callback) {
+		
+		var query = new Query();
+		var queryTask = new QueryTask(layerUrl);
+		query.where = queryWhere;
+		query.outSpatialReference = {
+			wkid : 102100
+		};
+		query.returnGeometry = true;
+		query.outFields = ["*"];
+		queryTask.execute(query, function(res) {
+			//qryResults = res;			
+			callback(res);
+
+			//console.log(res);
+		});
+
+	};
+        
+    app.syncMaps = function(mapObj) {
+        // when map extent changes, write it to localStorage.extent variable
 		var mapExtent = mapObj.extent;
 		var mapCetner = mapObj.extent.getCenter;
 		localStorage.extent = JSON.stringify(mapObj.extent);
 	};
-
-	app.disableElevTool = function() {
-		//console.log("disableElevTool");
-		tb.deactivate();
-		epWidget.clearProfile();
-		map.graphics.clear();
-		if ($("#sumWshd-toggle").prop('checked') === false) {
-			clickHandler = dojo.connect(map, "onClick", clickListener);
-		};
-	};
 	
 	app.initElevToolbar = function(toolName) {
-		epWidget.clearProfile();
 		//Clear profile
+        epWidget.clearProfile();
 		dojo.disconnect(clickHandler);
 		clickHandler = null;
 		map.graphics.clear();
-		//tb = new Draw(map);
 		tb.on("draw-end", app.addElevGraphic);
-		tb.activate(toolName);
-		//map.disableMapNavigation();
+		tb.activate(toolName);;
 	};
 
 	app.addElevGraphic = function(evt) {
-		//deactivate the toolbar and clear existing graphics
+		// deactivate the elevation toolbar and clear existing graphics when tool is not active
 		tb.deactivate();
 		map.enableMapNavigation();
 		var symbol = lineSymbol;
@@ -679,313 +909,195 @@ function(
 			var val = sel.options[sel.selectedIndex].value;
 			epWidget.set("measureUnits", val);
 		}
-	}; 
-
+	};
+        
+    app.disableElevTool = function() {
+        // turning off elevation profile functionality when the tool is not active
+        tb.deactivate();
+        epWidget.clearProfile();
+        map.graphics.clear();
+        if ($("#sumWshd-toggle").prop('checked') === false) {
+            clickHandler = dojo.connect(map, "onClick", clickListener);
+        };
+    };
 
     app.showCoordinates = function (evt) {
-        //the map is in web mercator but display coordinates in geographic (lat, long)
+        // the map is in web mercator but display coordinates in geographic (lat, long)
         var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
-        //display mouse coordinates
+        // display mouse coordinates
         $('#coordsText').html(mp.x.toFixed(3) + ", " + mp.y.toFixed(3));
     };
+        
+    app.isolatePopup = function(item) {
+     	// sets the popup results to a single layer, identified with the layer Title passed to the function.
+		$.each(layers, function(i, lyr) {
+		  if (!(lyr.title === item)) {
+		    lyr.layer.infoTemplate = null;
+		  }
+		});
+	};
+	
+	app.resetPopup = function() {
+        // resets popup results to default for all layers.
+        $.each(layers, function(i, lyr) {
+		    lyr.layer.infoTemplate = lyrInfoTemplate[i].infoTemplate;
+		});
+	};
 
-    //on(window, "resize", function(evt) {
-    //    $('#btnLeftToggle').css('left', $('#leftbox').outerWidth());
-    //    $('#btnBottomToggle').css('bottom', $('#bottombox').outerHeight());
-    //});
-
-    app.repositionInfoWindow = function (point) {
-        // Determine the upper right, and center, coordinates of the map
-        var maxPoint = new esri.geometry.Point(map.extent.xmax, map.extent.ymax, map.spatialReference);
-        var centerPoint = new esri.geometry.Point(map.extent.getCenter());
-        // Convert to screen coordinates
-        var maxPointScreen = map.toScreen(maxPoint);
-        var centerPointScreen = map.toScreen(centerPoint);
-        var graphicPointScreen = map.toScreen(point);
-        // Points only
-        // Buffer
-        var marginLR = 10;
-        var marginTop = 3;
-        var infoWin = map.infoWindow.domNode.childNodes[0];
-        var infoWidth = infoWin.clientWidth;
-        var infoHeight = infoWin.clientHeight + map.infoWindow.marginTop;
-        // X
-        var lOff = graphicPointScreen.x - infoWidth / 2;
-        var rOff = graphicPointScreen.x + infoWidth / 2;
-        var l = lOff - marginLR < 0;
-        var r = rOff > maxPointScreen.x - marginLR;
-        if (l) {
-            centerPointScreen.x -= (Math.abs(lOff) + marginLR) < marginLR ? marginLR : Math.abs(lOff) + marginLR;
-        } else if (r) {
-            centerPointScreen.x += (rOff - maxPointScreen.x) + marginLR;
-        }
-        // Y
-        var yOff = map.infoWindow.offsetY;
-        var tOff = graphicPointScreen.y - infoHeight - yOff;
-        var t = tOff - marginTop < 0;
-        if (t) {
-            centerPointScreen.y += tOff - marginTop;
-        }
-        //Pan the map to the new centerpoint
-        if (r || l || t) {
-            centerPoint = map.toMap(centerPointScreen);
-            map.centerAt(centerPoint);
-        }
-    };
-    
-    
-    app.numberWithCommas = function (x) {
-			// converts number to a string with comma separators
-			x = x.toFixed(0);
-		    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-		};
+	app.findRegion = function() {
+		// Search and zoom to a specified region. Used for Search by Region drop down.
+		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
+			var extent = callback.features[0].geometry.getExtent();
+			map.setExtent(extent);
+		}));
 		
-		app.initStats = function () {
-			// create results for first carousel content (Statewide summary)
-			// charting uses the open source Chart.js library: http://www.chartjs.org/
-			
-			// Get chart input data from the Region and Interpretation Summary tables
-			var queryParams = "0=0";
-			
-			var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
-			//var regInterpAreas = "", regInterpWatersheds = "", regInterpAcreage = "";
-			var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
-			var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
-			
-			$.when(app.runQuery(appConfig.URL_SUMMARY_REGION, queryParams, function(qryResultsRegion) {
-				sumDataRegion = qryResultsRegion;
+	};
+	
+	app.findInterpArea = function() {
+		// Search and zoom to a specified Interpretation Area. Used for Search by Interpretation Area drop down.
+		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
+			var extent = callback.features[0].geometry.getExtent();
+			map.setExtent(extent);
+		}));
+	};
+        
+    app.buildClusterLayer = function(newLyrName, sourceUrl, maxScale, minScale, callback) {
+		// Create clustered layer for grow locations
+		clusterLayer = new ClusterFeatureLayer({
+			"url" : sourceUrl,
+			"distance" : 20,
+			"id" : newLyrName,
+			"labelColor" : "#fff",
+			"labelOffset" : -5,
+			"resolution" : map.extent.getWidth() / map.width,
+			"useDefaultSymbol" : false,
+			"singleColor" : "#888"//,
+			//"showSingles" : true,
+			//"webmap" : true//,
+			//"singleTemplate" : infoTemplate
+		});
+		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
+		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
+		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.7]));
+		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.7]));
+		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.7]));
 
-				// put the attribute: value pairs for each region into an object
-				$.each(qryResultsRegion.features, function(i) { 
-					var regionId = qryResultsRegion.features[i].attributes.SWRCBRegID;
-					sumRegion[regionId] = qryResultsRegion.features[i].attributes;
-					
+		renderer.addBreak(2, 5, group1);
+		renderer.addBreak(5, 20, group2);
+		renderer.addBreak(20, 50000, group3);
+		clusterLayer.setRenderer(renderer);
+		if (maxScale) {
+			clusterLayer.setMaxScale(maxScale);
+		}
+		if (minScale) {
+			clusterLayer.setMinScale(minScale);
+		}
+		map.addLayers([clusterLayer]);
+		toc.layerInfos.push({
+			"layer" : clusterLayer,
+			"title" : newLyrName
+		});
+		toc.refresh();
+			
+	};
+		
+	app.summarizeWshd = function(option) {
+		// Generate a summary of a watershed after map-click
+		switch(option) {
+			case true:
+				if (epWidget) {
+					app.disableElevTool();
+					$("#elev-toggle").bootstrapToggle("off");
+				}				
+				$("#sumWshdText").show();
+				dojo.disconnect(clickHandler);
+				if (clusterLayer) {
+					clusterLayer._onClickHandler = null;
+				}
+				showInfoWindow = "sumWshd";
+				var currentClick = null;
+				var queryTask = new QueryTask(appConfig.SEARCH_WATERSHED);
+				var queryTaskGrow = new QueryTask(appConfig.GROW_POLYS_URL);
+				var query = new Query();
+				var results1, results2, results3;
+				query.returnGeometry = true;
+				query.outFields = ["*"];
+				
+				map.on("click", function(evt) {
+					map.graphics.clear();
+					results1 = evt;
+					if (showInfoWindow === "sumWshd") {
+						$("#sumWshdText").html("Generating Summary - please wait.");
+						currentClick = query.geometry = evt.mapPoint;
+						query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+						queryTask.execute(query);
+					}
 				});
-				
-				$.when(app.runQuery(appConfig.URL_SUMMARY_INTERP_AREA, queryParams, function(qryResultsInterp) {
-					sumDataInterp = qryResultsInterp;
-					
-					// put the attribute: value pairs for each interpretation area into an object
-					$.each(qryResultsInterp.features, function(i) { 
-						var interpId = qryResultsInterp.features[i].attributes.InterpAreaKey;
-						sumInterp[interpId] = qryResultsInterp.features[i].attributes;
-					});
-				
-					// loop through the value pairs for each region and get totals
-					$.each(sumRegion, function(i) { 
-						totalInterpAreas += sumRegion[i].NumInterpAreas;
-						totalInterpWatersheds += sumRegion[i].NumHuc12InInterpAreas;
-						totalInterpAcreage += sumRegion[i].TotalAcreageInterpAreas;
-						totalNumGrows += sumRegion[i].NumGrows;
-						totalGrowAcreage += sumRegion[i].TotalAcreageGrows;
-						totalGrowOutdoor += sumRegion[i].NumOutdoorGrows;
-						totalGrowGreenhouse += sumRegion[i].NumGreenHouseGrows;
-						totalWaterUse += sumRegion[i].TotalWaterUse;
-						totalLevel1 += sumRegion[i].NumCultAreaScore1Grows;
-						totalLevel2 += sumRegion[i].NumCultAreaScore2Grows;
-						totalLevel3 += sumRegion[i].NumCultAreaScore3Grows;
-					});
-				
-					// set the values on the page
-					dojo.byId('quickStatInterpArea').innerHTML = totalInterpAreas;
-					dojo.byId('quickStatWatersheds').innerHTML = app.numberWithCommas(totalInterpWatersheds);
-					dojo.byId('quickStatTotalAcreage').innerHTML = app.numberWithCommas(totalInterpAcreage);
-					dojo.byId('quickStatGrows').innerHTML = app.numberWithCommas(totalNumGrows);
-					dojo.byId('quickStatGrowAcreage').innerHTML = app.numberWithCommas(totalGrowAcreage);
-					
-					// build pie chart1
-					var chart1Data = [
-						{
-							value: totalGrowGreenhouse,
-							color:"#58eb7b",
-							highlight: "#aafbbd",
-							label: "Greenhouse"
-						},
-						{
-							value: totalGrowOutdoor,
-							color: "#e1b474",
-							highlight: "#f8c884",
-							label: "Outdoor"
+				queryTask.on("complete", function(evt) {
+					testObj = evt;
+					results2 = evt;					
+					var symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([38, 110, 235]), 4);
+					var resultShape = evt.featureSet.features[0];
+					resultShape.setSymbol(symbol);
+					map.graphics.add(resultShape);
+					query.geometry = evt.featureSet.features[0].geometry;
+					queryTaskGrow.execute(query);
+				});
+				queryTaskGrow.on("complete", function(evt) {
+					results3 = evt;
+					var totalGrows = evt.featureSet.features.length;
+					var totalOutdoor = 0, totalGreenhouse = 0, totalArea = 0;
+					$.each(evt.featureSet.features, function(i) {
+						var ftrAttr = evt.featureSet.features[i].attributes;
+						totalArea += ftrAttr.GrowSqFt;
+						if (ftrAttr.GrowType === "Outdoor") {
+							totalOutdoor += 1;
 						}
-					];
-					dojo.byId('titleChart1S').innerHTML = "Outdoor vs Greenhouse";
-					var chart1 = document.getElementById("chart1S").getContext("2d");
-					window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
-						responsive : false,
-						animation: false
+						if (ftrAttr.GrowType === "Greenhouse") {
+							totalGreenhouse += 1;
+						}
 					});
+					totalArea = (totalArea * 0.000022956841138659).toFixed(2);
+					var sumResult = "<b>Summary Results for: <u>" + results2.featureSet.features[0].attributes.Name + "</u></b><br/>";
+					sumResult += " Outdoor Grows: " + totalOutdoor + "<br/>";
+					sumResult += " Greenhouse Grows: " + totalGreenhouse + "<br/>";
+					sumResult += " Total Grow Acreage: " + totalArea + "<br/>";
+					
+					$("#sumWshdText").html(sumResult);
+					var lyrExtent = results2.featureSet.features[0].geometry.getExtent();
+					var resultExtent = lyrExtent.expand(1.4);
+					map.setExtent(resultExtent);
+				});
+			break;
+			case false:
+				$("#sumWshdText").hide();
+				map.graphics.clear();
+				clickHandler = dojo.connect(map, "onClick", clickListener);
+				if (clusterLayer) {
+					clusterLayer._onClickHandler = clusterLayerClickHandler;
+				}
+				showInfoWindow = "default";
+				$("#sumWshdText").html("Click on a watershed boundary to display summary.");
+			break;
+		}
+	};
 
-					// build pie chart2
-					var chart2Data = [
-						{
-							value: totalLevel1,
-							color:"#fee6ce",
-							highlight: "#fdd0a2",
-							label: "Level 1"
-						},
-						{
-							value: totalLevel2,
-							color: "#fdae6b",
-							highlight: "#fd8d3c",
-							label: "Level 2"
-						},
-						{
-							value: totalLevel3,
-							color: "#f16913",
-							highlight: "#d94801",
-							label: "Level 3"
-						}
-					];
-					dojo.byId('titleChart2S').innerHTML = "Cultivated Area";
-					var chart2 = document.getElementById("chart2S").getContext("2d");
-					window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
-						responsive : false,
-						animation: false
-					});
-					
-				}));
-			}));
-		};
-		
-		app.initStatsReg = function(regNum) {
-	
-			var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
-			var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
-			var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
-	
-			totalInterpAreas = sumRegion[regNum].NumInterpAreas;
-			totalInterpWatersheds = sumRegion[regNum].NumHuc12InInterpAreas;
-			totalInterpAcreage = sumRegion[regNum].TotalAcreageInterpAreas;
-			totalNumGrows = sumRegion[regNum].NumGrows;
-			totalGrowAcreage = sumRegion[regNum].TotalAcreageGrows;
-			totalGrowOutdoor = sumRegion[regNum].NumOutdoorGrows;
-			totalGrowGreenhouse = sumRegion[regNum].NumGreenHouseGrows;
-			totalWaterUse = sumRegion[regNum].TotalWaterUse;
-			totalLevel1 = sumRegion[regNum].NumCultAreaScore1Grows;
-			totalLevel2 = sumRegion[regNum].NumCultAreaScore2Grows;
-			totalLevel3 = sumRegion[regNum].NumCultAreaScore3Grows;
-	
-			// set the values on the page
-			dojo.byId("sumTitleR" + regNum).innerHTML = "Region <b>" + regNum + "</b> Summary";
-			dojo.byId("quickStatInterpAreaR" + regNum).innerHTML = totalInterpAreas;
-			dojo.byId("quickStatWatershedsR" + regNum).innerHTML = app.numberWithCommas(totalInterpWatersheds);
-			dojo.byId("quickStatTotalAcreageR" + regNum).innerHTML = app.numberWithCommas(totalInterpAcreage);
-			dojo.byId("quickStatGrowsR" + regNum).innerHTML = app.numberWithCommas(totalNumGrows);
-			dojo.byId("quickStatGrowAcreageR" + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
-	
-			// build pie chart1
-			var chart1Data = [{
-				value : totalGrowGreenhouse,
-				color : "#58eb7b",
-				highlight : "#aafbbd",
-				label : "Greenhouse"
-			}, {
-				value : totalGrowOutdoor,
-				color : "#e1b474",
-				highlight : "#f8c884",
-				label : "Outdoor"
-			}];
-			dojo.byId("titleChart1R" + regNum).innerHTML = "Outdoor vs Greenhouse";
-			var chart1 = document.getElementById("chart1R" + regNum).getContext("2d");
-			window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
-				responsive : false
-			});
-	
-			// build pie chart2
-			var chart2Data = [{
-				value : totalLevel1,
-				color : "#fee6ce",
-				highlight : "#fdd0a2",
-				label : "Level 1"
-			}, {
-				value : totalLevel2,
-				color : "#fdae6b",
-				highlight : "#fd8d3c",
-				label : "Level 2"
-			}, {
-				value : totalLevel3,
-				color : "#f16913",
-				highlight : "#d94801",
-				label : "Level 3"
-			}];
-			dojo.byId("titleChart2R" + regNum).innerHTML = "Cultivated Area";
-			var chart2 = document.getElementById("chart2R" + regNum).getContext("2d");
-			window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
-				responsive : false
-			});
-		}; 
-		
-		app.initStatsWater = function() {
-			
-			var totalWaterUse = 0, totalWaterUseScore1Grows = 0, totalWaterUseScore2Grows = 0, totalWaterUseScore3Grows = 0;
-			var numWaterUseScore1Grows = 0, numWaterUseScore2Grows = 0, numWaterUseScore3Grows = 0;
-			
-			$.each(sumRegion, function(i) { 
-				totalWaterUse += sumRegion[i].TotalWaterUse;
-				totalWaterUseScore1Grows += sumRegion[i].TotalWaterUseScore1Grows;
-				totalWaterUseScore2Grows += sumRegion[i].TotalWaterUseScore2Grows;
-				totalWaterUseScore3Grows += sumRegion[i].TotalWaterUseScore3Grows;
-				numWaterUseScore1Grows += sumRegion[i].NumWaterUseScore1Grows;
-				numWaterUseScore2Grows += sumRegion[i].NumWaterUseScore2Grows;
-				numWaterUseScore3Grows += sumRegion[i].NumWaterUseScore3Grows;
-			});
-			
-			var totalWaterUseGal = totalWaterUse * 325851;
-		
-			// set the values on the page
-			dojo.byId('quickStatWaterAcFt').innerHTML = app.numberWithCommas(totalWaterUse);
-			dojo.byId('quickStatWaterGal').innerHTML = app.numberWithCommas(totalWaterUseGal);
-			dojo.byId('quickStatWaterNumScore1').innerHTML = app.numberWithCommas(numWaterUseScore1Grows);
-			dojo.byId('quickStatWaterTotScore1').innerHTML = app.numberWithCommas(totalWaterUseScore1Grows);
-			dojo.byId('quickStatWaterNumScore2').innerHTML = app.numberWithCommas(numWaterUseScore2Grows);
-			dojo.byId('quickStatWaterTotScore2').innerHTML = app.numberWithCommas(totalWaterUseScore2Grows);
-			dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
-			dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
-					
-			
-			// Bar Chart for Water Use by Risk Level
-			var barChartData = {
-				labels : ["Risk Level 1","Risk Level 2", "Risk Level 3"],
-				datasets : [
-					{
-						label: "Region 1",
-						fillColor : "#58eb7b",
-						strokeColor : "#FFF",
-						highlightFill: "#aafbbd",
-						highlightStroke: "#FFF",
-						data : [sumRegion[1].TotalWaterUseScore1Grows, sumRegion[1].TotalWaterUseScore2Grows, sumRegion[1].TotalWaterUseScore3Grows]
-					},
-					{
-						label: "Region 5",
-						fillColor : "#e1b474",
-						strokeColor : "#FFF",
-						highlightFill: "#f8c884",
-						highlightStroke: "#FFF",
-						data : [sumRegion[5].TotalWaterUseScore1Grows, sumRegion[5].TotalWaterUseScore2Grows, sumRegion[5].TotalWaterUseScore3Grows]
-					},
-				]
-			};
-			
-			var bar1 = document.getElementById("bar1").getContext("2d");
-			window.myBar = new Chart(bar1).Bar(barChartData, {
-				responsive : true,
-				animation: false,
-				multiTooltipTemplate: "<%= datasetLabel %> - <%= value %>"
-			});
-		};
+	app.zoomToLayerExtent  = function(layerName) {
+		var extentLayer = map.getLayer(layerName);
+		var lyrExtent = esri.graphicsExtent(extentLayer.graphics);
+		var newExtent = lyrExtent.expand(1.25);
+		map.setExtent(newExtent);
+	};
     
-    
-    // Menu items
+    // -- Section 7: Map Menu Items -------------------------------------------------------------
+        
     app.hideRibbonMenu = function() {
  		var tabs = $('.tabItems');
 		var containers = $('#menu1, #menu2, #menu3, #menu4, #menu5');
-
-		//if ((!containers.is(e.target) && containers.has(e.target).length === 0) && (!tabs.is(e.target) && tabs.has(e.target).length === 0)) {
-				containers.removeClass("slide-out");
-				containers.removeClass("showing");
-				containers.removeClass("active");
-				showing = false;
-		//}
+        containers.removeClass("slide-out");
+        containers.removeClass("showing");
+        containers.removeClass("active");
+        showing = false;
 		$("#ribbon-bar-toggle").hide();
  	};
  	
@@ -996,7 +1108,6 @@ function(
  	
  	app.toggleBox = function(item, element) {
  		$("#timeInfo").show();
- 		//console.log(element);
  		if ($("#" + item).css('display') !== 'none') {
             $("#" + item).hide();
             $('#' + element.id).html('<i class="fa fa-chevron-down"></i>');
@@ -1058,7 +1169,7 @@ function(
 	};
 	
 	app.menuReset = function() {
-		
+		// Set menu items back to default state
 		
 		$('.btn-level1').each(function(){
 			$(this).css("background", "");
@@ -1077,71 +1188,35 @@ function(
 			$(this).css("background", "");
 			$(this).show();
 		});
-		
-		/*
-		$('.menuLevel3').each(function(){
-		    //var itemId = $(this).attr('id');   
-		    $(this).hide();
-		});*/
-		
-		//$("#menu1A").show();
-		
-		//Create new Prioritization Area menu item reset
-		/*$("#optStep1Existing").show();
-		$("#optStep1New").show();
-		$("#newStep1Existing").prop('checked', false);
-		$("#newStep1New").prop('checked', false);
-		$("#newStep2Existing").hide();
-		$("#newStep2New").hide();*/
-		//$("#optStep1New").show();
-		//$("#newStep1New").show();	
-		
 		$("#btnLeftPanelToggle").css('left', $('#leftPanel').outerWidth()).addClass('btn-left-toggle-open');
 		
 	};
-	
-	
+        
+    app.menuChange = function(option) {
+		// called when top menu items are selected
+		if (showInfoWindow === "sumWshd") {
+			$("#sumWshd-toggle").bootstrapToggle("off");
+		};
+		if (option.id === "menuMapTools") {
+			dojo.disconnect(clickHandler);
+			clickHandler = null;
+		} else {
+			
+			measurement.setTool("area", false);
+			measurement.setTool("distance", false);
+			measurement.setTool("location", false);
+			measurement.clearResult();
+		};
+		if ((option.id === "menuSearch") || (option.id === "menuBasemap") || (option.id === "menuLayers")) {
+			if (!(clickHandler)) {
+				clickHandler = dojo.connect(map, "onClick", clickListener);
+			}
+		}
+	};
     
-
-	// global functions ---------------------------------------------
-	
-	// sets the popup results to a single layer, identified with the layer Title passed to the function.
-	app.isolatePopup = function(item) {
-		//console.log("isolatePopup:", item);
-		$.each(layers, function(i, lyr) {
-		  //console.log(lyr.title);
-		  if (!(lyr.title === item)) {
-		    lyr.layer.infoTemplate = null;
-		  }
-		});
-	};
-	
-	// resets popup results to default for all layers.
-	app.resetPopup = function() {
-		$.each(layers, function(i, lyr) {
-		  //console.log(lyr.title);
-		    lyr.layer.infoTemplate = lyrInfoTemplate[i].infoTemplate;
-		});
-	};
-
-	app.findRegion = function() {
-		//console.log($('#frmSearchRegion').val());
-		//Need the url to a region service for this
-		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
-			var extent = callback.features[0].geometry.getExtent();
-			map.setExtent(extent);
-		}));
-		
-	};
-	
-	app.findInterpArea = function() {
-		//console.log($('#frmSearchRegion').val());
-		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
-			var extent = callback.features[0].geometry.getExtent();
-			map.setExtent(extent);
-		}));
-	};
-	
+        
+    // -- Section 8: Map Prioritization Model Rendering ----------------------------------------------------
+        
 	app.loadPrioritization = function(action) {
 		switch(action) {
 			case "loadRegion":
@@ -1303,8 +1378,6 @@ function(
 						}));
 					});
 				};
-//var test = graphicsUtils.graphicsExtent(mapResponse.itemInfo.itemData.operationalLayers[6].layerObject.graphics);
-//					map.setExtent(test);
 				function generateDefaultPopupInfo(featureCollection) {
 					var fields = featureCollection.layerDefinition.fields;
 					var decimal = {
@@ -1581,172 +1654,8 @@ function(
 			json.content += "<\/table>";
 			return json;
 		}
-	}; 
-
-	app.buildClusterLayer = function(newLyrName, sourceUrl, maxScale, minScale, callback) {
-		// Create clustered layer for grow locations
-		clusterLayer = new ClusterFeatureLayer({
-			"url" : sourceUrl,
-			"distance" : 20,
-			"id" : newLyrName,
-			"labelColor" : "#fff",
-			"labelOffset" : -5,
-			"resolution" : map.extent.getWidth() / map.width,
-			"useDefaultSymbol" : false,
-			"singleColor" : "#888"//,
-			//"showSingles" : true,
-			//"webmap" : true//,
-			//"singleTemplate" : infoTemplate
-		});
-		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
-		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
-		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.7]));
-		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.7]));
-		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.7]));
-
-		renderer.addBreak(2, 5, group1);
-		renderer.addBreak(5, 20, group2);
-		renderer.addBreak(20, 50000, group3);
-		clusterLayer.setRenderer(renderer);
-		if (maxScale) {
-			clusterLayer.setMaxScale(maxScale);
-		}
-		if (minScale) {
-			clusterLayer.setMinScale(minScale);
-		}
-		map.addLayers([clusterLayer]);
-		toc.layerInfos.push({
-			"layer" : clusterLayer,
-			"title" : newLyrName
-		});
-		toc.refresh();
-			
 	};
-		
-		
-	
-	app.summarizeWshd = function(option) {
-		//console.log("summarizeWshd", option);
-		switch(option) {
-			case true:
-				if (epWidget) {
-					app.disableElevTool();
-					$("#elev-toggle").bootstrapToggle("off");
-				}				
-				$("#sumWshdText").show();
-				dojo.disconnect(clickHandler);
-				if (clusterLayer) {
-					clusterLayer._onClickHandler = null;
-				}
-				showInfoWindow = "sumWshd";
-				var currentClick = null;
-				var queryTask = new QueryTask(appConfig.SEARCH_WATERSHED);
-				var queryTaskGrow = new QueryTask(appConfig.GROW_POLYS_URL);
-				var query = new Query();
-				var results1, results2, results3;
-				query.returnGeometry = true;
-				query.outFields = ["*"];
-				
-				map.on("click", function(evt) {
-					map.graphics.clear();
-					results1 = evt;
-					if (showInfoWindow === "sumWshd") {
-						$("#sumWshdText").html("Generating Summary - please wait.");
-						//console.log(evt);
-						//map.infoWindow.hide();
-						//map.graphics
-						currentClick = query.geometry = evt.mapPoint;
-						query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-						queryTask.execute(query);
-					}
-				});
-				queryTask.on("complete", function(evt) {
-					testObj = evt;
-					results2 = evt;					
-					var symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([38, 110, 235]), 4);
-					var resultShape = evt.featureSet.features[0];
-					resultShape.setSymbol(symbol);
-					map.graphics.add(resultShape);
-					//console.log("queryTask results:", evt);
-					query.geometry = evt.featureSet.features[0].geometry;
-					queryTaskGrow.execute(query);
-				});
-				queryTaskGrow.on("complete", function(evt) {
-					//console.log("queryTaskGrow results:", evt);
-					results3 = evt;
-					//query.geometry = evt.featureSet.features[0].geometry;
-					//queryTaskGrow.execute(query);
-					//var sum1 = evt.featureSet.features.length;
-					var totalGrows = evt.featureSet.features.length;
-					var totalOutdoor = 0, totalGreenhouse = 0, totalArea = 0;
-					$.each(evt.featureSet.features, function(i) {
-						var ftrAttr = evt.featureSet.features[i].attributes;
-						totalArea += ftrAttr.GrowSqFt;
-						if (ftrAttr.GrowType === "Outdoor") {
-							totalOutdoor += 1;
-						}
-						if (ftrAttr.GrowType === "Greenhouse") {
-							totalGreenhouse += 1;
-						}
-					});
-					totalArea = (totalArea * 0.000022956841138659).toFixed(2);
-					var sumResult = "<b>Summary Results for: <u>" + results2.featureSet.features[0].attributes.Name + "</u></b><br/>";
-					sumResult += " Outdoor Grows: " + totalOutdoor + "<br/>";
-					sumResult += " Greenhouse Grows: " + totalGreenhouse + "<br/>";
-					sumResult += " Total Grow Acreage: " + totalArea + "<br/>";
-					
-					$("#sumWshdText").html(sumResult);
-					var lyrExtent = results2.featureSet.features[0].geometry.getExtent();
-					var resultExtent = lyrExtent.expand(1.4);
-					map.setExtent(resultExtent);
-					//console.log("outdoor: " + totalOutdoor, ", greenhouse: " + totalGreenhouse, ", area: " + totalArea);
-					
-				});
-			break;
-			case false:
-				$("#sumWshdText").hide();
-				map.graphics.clear();
-				clickHandler = dojo.connect(map, "onClick", clickListener);
-				if (clusterLayer) {
-					clusterLayer._onClickHandler = clusterLayerClickHandler;
-				}
-				showInfoWindow = "default";
-				$("#sumWshdText").html("Click on a watershed boundary to display summary.");
-			break;
-			
-		}
-	};
-	
-	app.menuChange = function(option) {
-		// called when top menu items are selected
-		if (showInfoWindow === "sumWshd") {
-			$("#sumWshd-toggle").bootstrapToggle("off");
-		};
-		if (option.id === "menuMapTools") {
-			dojo.disconnect(clickHandler);
-			clickHandler = null;
-		} else {
-			
-			measurement.setTool("area", false);
-			measurement.setTool("distance", false);
-			measurement.setTool("location", false);
-			measurement.clearResult();
-		};
-		if ((option.id === "menuSearch") || (option.id === "menuBasemap") || (option.id === "menuLayers")) {
-			if (!(clickHandler)) {
-				clickHandler = dojo.connect(map, "onClick", clickListener);
-			}
-		}
-	};
-
-	app.zoomToLayerExtent  = function(layerName) {
-		var extentLayer = map.getLayer(layerName);
-		var lyrExtent = esri.graphicsExtent(extentLayer.graphics);
-		var newExtent = lyrExtent.expand(1.25);
-		map.setExtent(newExtent);
-	};
-	
-
+        
 	app.loadGrow = function(option) {
 
 		var queryParams;
@@ -1922,25 +1831,6 @@ function(
 		}));
 	};
 	
-	app.runQuery = function(layerUrl, queryWhere, callback) {
-		
-		var query = new Query();
-		var queryTask = new QueryTask(layerUrl);
-		query.where = queryWhere;
-		query.outSpatialReference = {
-			wkid : 102100
-		};
-		query.returnGeometry = true;
-		query.outFields = ["*"];
-		queryTask.execute(query, function(res) {
-			//qryResults = res;			
-			callback(res);
-
-			//console.log(res);
-		});
-
-	};
-	
 	// Creating template feature classes for on-the-fly rendering
 	app.createPointFC = function(fcTitle, qryResults, callback) {
 		
@@ -2048,11 +1938,9 @@ function(
 		//addFeature.setRenderer(renderer);
 		map.addLayer(addFeature);
 		callback(addFeature);
-		//testObj = addFeature;
 	};
 
-	//--Layer renderer functions - Start ----------------------------------------------------------------------	
-	
+	//--Layer renderer functions
 	app.loadRenderer = function() {
 		var renderField = $("#frmLoadRenderer").val();
 		app.classBreakRenderer(renderField, addLayers[0]);
@@ -2111,20 +1999,10 @@ function(
            //createLegend(map, layer, field);
         });
 	};
-	
-	    
-    // Initialize the map during page load 
-    //app.initStats();
-    //app.buildMap();
-    //
+        
 
-	//--Layer renderer functions - End -------------------------------------------------------------------------
-	
-	// END custom layer functions
-	
-	// end global functions --------------------------------------------
-
-// User credentials (when services come from ArcGIS Online) --------------------------
+    // -- Section 9: Authentication ----------------------------------------------------
+        
 	// Authentication - when services come from ArcGIS Online
 		if (appConfig.AUTH === "arcgisonline") {
 			var info = new OAuthInfo({
@@ -2135,27 +2013,18 @@ function(
 	
 			esriId.checkSignInStatus(info.portalUrl + "/sharing").then(
 				function (){
-					//console.log("signed in");
-					
+					// User is signed in, show content
 					$("#appContent").show();
 					$("#appInit").hide();
 					$("#sign-out").show();
 					$("#about-cips").show();
 					$("#open-editor").show();
-					//app.buildMap();
-					//app.initStats();
 					app.initStats();
 			    	app.buildMap();
-					//app.signIn();
-					//app.initStats1();
-					//app.buildMap();
-				 //$('#personalizedPanel').css("display", "block");
-				 //$('#anonymousPanel').css("display", "none");
 				 }
 			).otherwise(
 				function (){
-					//$("#sign-in").show();
-					//console.log("not signed in");
+					// user is not signed in, show login content
 					$("#appContent").html("");
 					$("#appContent").hide();
 					$("#appInit").show();
@@ -2163,22 +2032,15 @@ function(
 					$("#about-cips").hide();
 					$("#open-editor").hide();
 					$("#sign-in").show();
-					//app.signOut();
-				 //$('#personalizedPanel').css("display", "none");
-				 //$('#anonymousPanel').css("display", "block");
 				 }
 			);
 	
 			on(dom.byId("sign-in"), "click", function() {
-				//console.log("click", arguments);
 				// user will be shown the OAuth Sign In page
 				esriId.getCredential(info.portalUrl, {
 					oAuthPopupConfirmation : false
 				}).then(function() {
-					//console.log("signed in");
-					//displayItems();
-					//$('#personalizedPanel').css("display", "block");
-					//$('#anonymousPanel').css("display", "none");
+                    // After user signs in from the OAuth page, they will be redirected back to this one, with credentials
 				});
 			});
 	
@@ -2194,7 +2056,6 @@ function(
 			var idJson, idObject;
 	
 			esriId.on("credential-create", function() {
-				//console.log("credential-create");
 				storeCredentials();
 			});
 			if (supports_local_storage()) {
@@ -2208,16 +2069,35 @@ function(
 			if (idJson && idJson != "null" && idJson.length > 4) {
 				idObject = JSON.parse(idJson);
 				esriId.initialize(idObject);
-				//$('#personalizedPanel').css("display", "block");
+                // User is signed in, show content
+                $("#appContent").show();
+                $("#appInit").hide();
+                $("#sign-out").show();
+                $("#about-cips").show();
+                $("#open-editor").show();
+                app.initStats();
+                app.buildMap();
 	
 			} else {
-				//$('#anonymousPanel').css("display", "block");
+                // user is not signed in, show login content
+                $("#appContent").html("");
+                $("#appContent").hide();
+                $("#appInit").show();
+                $("#sign-out").hide();
+                $("#about-cips").hide();
+                $("#open-editor").hide();
+                $("#sign-in").show();
 			}
 	
 			on(dom.byId("sign-in"), "click", function() {
-				//$('#personalizedPanel').css("display", "block");
-				//$('#anonymousPanel').css("display", "none");
-			});
+               $("#appContent").show();
+               $("#appInit").hide();
+               $("#sign-out").show();
+               $("#about-cips").show();
+               $("#open-editor").show();
+               app.initStats();
+               app.buildMap();
+            });
 	
 			on(dom.byId("sign-out"), "click", function() {
 				esriId.destroyCredentials();
@@ -2246,7 +2126,6 @@ function(
 				cookie(cred, idString, {
 					expires : 1
 				});
-				// console.log("wrote a cookie :-/");
 			}
 	
 			$('#personalizedPanel').css("display", "block");
@@ -2262,18 +2141,11 @@ function(
 			}
 		}
 
+    // -- Section 10: Page Ready ----------------------------------------------------
+        
     $(document).ready(function() {
 
 		$.unblockUI();
-		
-				
-        // Close menu
-        /*$('#topTabs a').on('click', function() {
-            if ($(".navbar-toggle").css('display') !== 'none') {
-                $(".navbar-toggle").click();
-            }
-            $(this).blur();
-        });*/
 
         $('#mapNavPrev').on('click', function() {
             mapNav.zoomToPrevExtent();
@@ -2282,24 +2154,11 @@ function(
             mapNav.zoomToNextExtent();
         });
         $('#mapNavFull').on('click', function() {
-            //mapNav.zoomToFullExtent();
             map.setExtent(new Extent(appConfig.INIT_EXTENT), true);
         });
         $('#about-cips').on('click', function() {
             bootbox.alert(appConfig.ABOUT_TEXT);
         });
-        
-        //$('#signOut').on('click', function() {
-            //mapNav.zoomToFullExtent();
-        //    bootbox.alert('sign out');
-            //map.setExtent(new Extent(appConfig.INIT_EXTENT), true);
-        //});
-        
-        //$('#toggleDataLegend').on('click', function() {
-        //    $('#reportDataLegend').fadeToggle(400);
-        //    $(this).blur();
-        //});
-        
         $("#sumWshd-toggle").change(function() {
 	    	app.summarizeWshd($("#sumWshd-toggle").prop('checked'));
 	    });

@@ -12,12 +12,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -126.0639,
-        38.6577
+        -125.9503,
+        38.4324
       ],
       [
-        -119.1699,
-        42.0147
+        -119.0564,
+        41.8003
       ]
     ]
   },
@@ -1550,7 +1550,7 @@ appWebMap = {
         "id": "CIPS_Heat_Maps_2432",
         "layerType": "ArcGISMapServiceLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Heat_Maps/MapServer",
-        "visibility": false,
+        "visibility": true,
         "visibleLayers": [
           0,
           3,
@@ -1570,7 +1570,7 @@ appWebMap = {
         "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_THP/FeatureServer/1",
         "visibility": false,
         "opacity": 1,
-        "title": "Nonindustrial Timber Management Plants (Cal Fire)",
+        "title": "Nonindustrial Timber Management Plant (Cal Fire)",
         "itemId": "d6d346c181c648cb99b809df6472f3b3",
         "layerDefinition": {
           "drawingInfo": {
@@ -1605,7 +1605,7 @@ appWebMap = {
           "maxScale": 0
         },
         "popupInfo": {
-          "title": "Nonindustrial Timber Management Plants (Cal Fire): {County}",
+          "title": "Nonindustrial Timber Management Plant (Cal Fire): {County}",
           "fieldInfos": [
             {
               "fieldName": "OBJECTID",
@@ -2580,7 +2580,7 @@ appWebMap = {
         "title": "Grow Locations",
         "itemId": "a0c69d0449784ef686a18d3ca5ae7bd2",
         "layerDefinition": {
-          "minScale": 72999,
+          "minScale": 70000,
           "maxScale": 37000,
           "drawingInfo": {
             "renderer": {
