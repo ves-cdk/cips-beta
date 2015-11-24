@@ -175,54 +175,6 @@
 								<div id="basemapGallery"></div>
 							</div>
 
-							<div id="menu4" class="tab-pane ribbon-bar-tab">
-								<div class="panel-group" id="accordion4" role="tablist" aria-multiselectable="true">
-									<div class="panel panel-default">
-										<div class="panel-heading" role="tab" id="menu4panel1">
-											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion4" href="#menu4collapse1" aria-expanded="false" aria-controls="collapseOne"> Watershed Stats</a></h4>
-										</div>
-										<div id="menu4collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu4panel1">
-											<div class="panel-body">
-												<label class="checkbox-inline">
-													<input id="sumWshd-toggle" type="checkbox" data-toggle="toggle">
-													Grow Summary </label>
-												<div class="menuLevel3" id="sumWshdText" style="display: none;">
-													Click on a watershed boundary to display summary.
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="panel panel-default">
-										<div class="panel-heading" role="tab" id="menu4panel2">
-											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion4" href="#menu4collapse2" aria-expanded="false" aria-controls="collapseTwo" onclick="app.buildElevProfile();"> Elevation Profile</a></h4>
-										</div>
-										<div id="menu4collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu4panel2">
-											<div class="panel-body">
-												<div id="elevInfo">
-													<label class="checkbox-inline">
-														<input id="elev-toggle" type="checkbox" data-toggle="toggle">
-														Enable Profile Tool </label>
-													<div class="menuLevel3" id="elevText" style="display: block;">
-														After enabling the Profile Tool, use single clicks on the map to draw a line. Double click to end.
-													</div>
-													<label>Select unit measure:</label>
-													<select id="unitsSelect">
-														<option value="esriMiles">Miles</option>
-														<option value="esriKilometers">Kilometers</option>
-														<option value="esriMeters">Meters</option>
-														<option value="esriNauticalMiles">Nautical Miles</option>
-														<option value="esriYards">Yards</option>
-														<option value="esriFeet">Feet</option>
-													</select>
-												</div>
-												<div id="profileChartNode"></div>
-											</div>
-										</div>
-									</div>
-								</div>
-
-							</div>
-
 							<!-- Map tools -->
 							<div id="menu5" class="tab-pane ribbon-bar-tab">
 								<div class="panel-group" id="accordion5" role="tablist" aria-multiselectable="true">
@@ -287,35 +239,14 @@
 												</div>
 												<div class="radio" id="editRadios7">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios7" value="option7" onclick="app.initModelMenu(this)"> Model</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios7" value="option7" onclick="app.initModelMenu(this)"> Interpretation Area</label>
 												</div>
-												<!--<div class="radio" id="editRadios1">
+												<div class="radio" id="editRadios8">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" onclick="app.startDraw('point', 'red');"> Add a Point</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios8" value="option8" onclick="app.initModelMenu(this)"> Model</label>
 												</div>
-												<div class="radio" id="editRadios2">
-													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios2" value="option2" onclick="app.startDraw('polyline', 'red');"> Add a Line</label>
-												</div>
-												<div class="radio" id="editRadios3">
-													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" onclick="app.startDraw('polygon', 'red');"> Add a Polygon</label>
-												</div>
-												<div class="radio" id="editRadios4">
-													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios4" value="option4" onclick="app.startDelete();"> Delete a Feature</label>
-												</div>
-												<div class="radio" id="editRadios5">
-													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit('attribute');"> Edit a Feature's Attributes</label>
-												</div>
-												<div class="radio" id="editRadios6">
-													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios6" value="option6" onclick="app.startEdit('shape')"> Edit a Feature's shape</label>
-												</div>-->
-												
-												<div id="editorDiv"></div>
-												<div id="attributesDiv"></div>
+												<!--<div id="editorDiv"></div>
+												<div id="attributesDiv"></div>-->
 												
 											</div>
 										</div>
@@ -378,6 +309,190 @@
 				</div>
 			</div>
 		</div>
+		
+		<!-- Modal (popups) for creating new Prioritization Model -->
+		
+		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelSelect">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+			        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			        	<h4 class="modal-title">Select Prioritization Model</h4>
+			      	</div>
+			      	<div class="modal-body">
+			      		Select the model you are editing, then click Load Model.<br/><br/>
+			      		<select class="form-control" id="selectPriorModel">
+			      			<option></option>
+						</select><br/><br/>
+						<button type="button" onClick="app.existingModel()">Load Model</button>
+			      	</div>
+			    </div>
+			 </div>
+		</div>
+		
+        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+			        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			        	<h4 class="modal-title">Prioritization Model</h4>
+			      	</div>
+			      	<div class="modal-body">
+			      		
+			      		<form id="modelInfo"></form>
+			      		<form id="modelInstructions"></form>
+						
+						<form class="form-inline" id="modelModelName">
+							<div class="form-group">
+								<div class="input-group">
+									<div class="input-group-addon">Model Name</div>
+									<input type="text" class="form-control" id="inputModelName" placeholder="Model Name">
+								</div>
+							</div>
+						</form><br/><br/>
+						<div id="modelParameters">
+							<b>Model Parameters:</b></br>
+							Water Quality
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleElev" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Slope (%)&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtSlope" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleCult" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Cultivation Area&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtCult" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleProx" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Prox. to Water&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtProx" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleDrink" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Drinking Water Supply&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtDrink" name="">
+								    </div>
+								</div>
+							</form>
+							
+							<br/>Water Rights
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleRes" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Reservoirs/Tanks&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtRes" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleWtrright" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Filed Water Right&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtWtrright" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleWtrcons" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Water Consumption&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtWtrcons" name="">
+								    </div>
+								</div>
+							</form>
+							
+							<br/>Fish and Wildlife
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleCrit" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Critical Fish&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtCrit" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleSens" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Sensitive Wildlife&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtSens" name="">
+								    </div>
+								</div>
+							</form>
+							<form class="form-inline">
+								<div class="form-group">
+									<input id="toggleLSA" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">LSA Permit&nbsp;</label>
+								</div>
+								<div class="form-group">
+								    <div class="input-group">
+								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
+								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtLSA" name="">
+								    </div>
+								</div>
+							</form>
+							
+							<div id="modelCheck" class="text-right"></div>
+						
+						</div>
+						
+						<div id="modelProgress" style="display:none;">
+							<div id="modelProgressText">Status: Modeling in Process</div>
+							<div class="progress">
+								<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+							    <span class="sr-only" id="modelProgressIndicator">20% Complete</span>
+							 </div>
+							</div>
+							Note: You can close this dialog, along with the CIPS web application at any time. The Modeling processes will continue to run until completed.
+						</div>
+						
+					</div>
+					<div class="modal-footer">
+			       		<button type="button" class="btn btn-default" data-dismiss="modal" id="modelBtnCancel">Cancel</button>
+			        	<button type="button" class="btn btn-primary" onclick="app.saveModel();" id="modelBtnSave">Save and Continue</button>
+			        	<button type="button" class="btn btn-default" data-dismiss="modal" style="display: none;" id="modelBtnClose">Close</button>
+			      	</div>
+				</div>
+			</div>
+		</div>
+		
+		
 
 		<!-- JS libraries, placed at the end of the document so the pages load faster -->
 		<script src="js/lib/jquery-1.11.3.min.js"></script>

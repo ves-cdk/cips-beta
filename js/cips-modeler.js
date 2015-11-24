@@ -10,6 +10,8 @@ var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, e
 var shapeEditLayer, shapeEditStatus, shapeEditBackup, shapeCollection = [], newFeatureName; // editing variables
 var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
 var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
+var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
+var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
 var geometryService;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
@@ -422,6 +424,25 @@ function(
         });
     };
     
+    // sets the popup results to a single layer, identified with the layer Title passed to the function.
+	app.isolatePopup = function(item) {
+		//console.log("isolatePopup:", item);
+		$.each(layers, function(i, lyr) {
+		  //console.log(lyr.title);
+		  if (!(lyr.title === item)) {
+		    lyr.layer.infoTemplate = null;
+		  }
+		});
+	};
+	
+	// resets popup results to default for all layers.
+	app.resetPopup = function() {
+		$.each(layers, function(i, lyr) {
+		  //console.log(lyr.title);
+		    lyr.layer.infoTemplate = lyrInfoTemplate[i].infoTemplate;
+		});
+	};
+    
     app.buildPopup = function () {
 	    // Customize popup behavior when editing features
         var popup = map.infoWindow;
@@ -429,7 +450,7 @@ function(
         on(popup, "SetFeatures", function() {
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios6", "optionsRadios7"];
+        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -442,10 +463,31 @@ function(
         		case "optionsRadios3":
         			// Do nothing - adding new features, don't want to display popup;
         		break;
+        		case "optionsRadios4":
+        			$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		var editFtrName = editFtr.attributes.PrioritizAreaName;
+            		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
+            			bootbox.confirm("<b>" + editFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
+            				if (result) {
+ 								app.newModel(editFtr);
+            				} else {
+            					popup.clearFeatures();
+            					esri.hide(loading);
+            				}
+            			});
+            			
+            		} else {
+            			popup.clearFeatures();
+            			bootbox.alert("A Prioritization Area feature was not selected.<br/><br/>Try turning off any other layers that might be selected instead.");
+            			esri.hide(loading);
+            			//popup.selectNext();
+            		}
+        		break;
         		case "optionsRadios6":
         			$(".esriPopupWrapper").css("display","none");
             		var editFtr = popup.getSelectedFeature();
-            		if (editFtr._layer._url.path === appConfig.URL_PRIOR_AREA) {
+            		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
             			bootbox.confirm("<b>Warning</b> you will permanently delete the selected Prioritization Area, along with any associated Prioritization Models. <br/><br/>Click OK to proceed, or click Cancel and keep the Prioritization Area.", function(result) {
             				if (result) {
             					app.deleteFeature(editFtr);
@@ -457,6 +499,30 @@ function(
             					esri.hide(loading);
             				}
             			});
+            		} else {
+            			popup.clearFeatures();
+            			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
+            			esri.hide(loading);
+            		}
+        		break;
+        		case "optionsRadios7":
+        			$(".esriPopupWrapper").css("display","none");
+            		var editFtr = popup.getSelectedFeature();
+            		console.log(editFtr);
+            		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_INTERP_AREA).toLowerCase) {
+            			if (editFtr.attributes.StatusInterpArea === "In Initial Review") {
+	            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected Interpretation Area. Click OK to proceed, cancel to keep the Area", function(result) {
+	            				if (result) {
+	            					app.deleteFeature(editFtr);
+	            				} else {
+	            					popup.clearFeatures();
+	            					esri.hide(loading);
+	            				}
+	            			});
+            			} else {
+            				bootbox.alert("You cannot delete an Interpretation Area that is In Progress or Completed.");
+            				popup.clearFeatures();
+            			}
             		} else {
             			popup.clearFeatures();
             			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
@@ -837,6 +903,7 @@ function(
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
+						$("#editRadios8").hide();
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -854,6 +921,7 @@ function(
 				});
 			break;
 			case "optionsRadios2":
+				// creating new prioritization area with an interp area boundary
 				dojo.disconnect(clickHandler);
 				clickHandler = null;
 				map.graphics.clear();
@@ -871,6 +939,7 @@ function(
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
+						$("#editRadios8").hide();
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -888,6 +957,7 @@ function(
 				});
 			break;
 			case "optionsRadios3":
+				// creating new prioritization area with watershed boundaries
 				dojo.disconnect(clickHandler);
 				clickHandler = null;
 				map.graphics.clear();
@@ -902,6 +972,7 @@ function(
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
+						$("#editRadios8").hide();
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -914,6 +985,7 @@ function(
 						if (!(layers[wshdLyrIndex].layer.visible)) {
 							layers[wshdLyrIndex].layer.setVisibility(true);
 						}
+						//app.isolatePopup("Watershed Boundaries - HUC12");
 						$("#editInstructions").html("Click on one or more Watersheds.<br/>"
 							+ "All Watersheds need to be within an Interpretation Area boundary.<br/><br/>"
 							+ "If you don't see the blue Watershed Boundaries, zoom in until you do.<br/><br/>"
@@ -922,36 +994,63 @@ function(
 				});
 			break;
 			case "optionsRadios4":
+				// create new prioritization area model
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
+				$("#editRadios8").hide();
 				$("#editLabelAddArea").hide();
 				$("#editLabelDelete").hide();
 				$("#editButtons").show();
-				$("#editInstructions").html("new model.");
+				$("#editInstructions").html("Click on the Prioritization Area that this model will be run on.");
+				app.isolatePopup("Prioritization Areas");
 			break;
 			case "optionsRadios5":
+				// edit prioritization area model
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
+				$("#editRadios8").hide();
 				$("#editLabelAddArea").hide();
 				$("#editLabelDelete").hide();
 				$("#editButtons").show();
-				$("#editInstructions").html("edit model.");
+				$("#editInstructions").html("Follow the popup dialogs for editing an existing model.");
+				
+				
+				// 00000000000000000000000000000000000000000000000000000000000000000000000000000000
+				var modelList = "";
+				var query = new Query();
+				//var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
+				var queryTask = new QueryTask(appConfig.URL_REGION);
+				query.where = "0=0";
+				query.returnGeometry = false;
+				query.outFields = ["*"];
+				queryTask.execute(query, function(res) {	
+					console.log(res);
+					$.each(res.features, function(i) {
+						console.log(res.features[i].attributes.RBNAME);
+						modelList += "<option>" + res.features[i].attributes.RBNAME + "</option>";
+					});
+					$("#selectPriorModel").html(modelList);
+				});
+				
+				$("#modelSelect").modal("show");
 			break;
 			case "optionsRadios6":
+				// delete prioritization area
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios7").hide();
+				$("#editRadios8").hide();
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
@@ -959,12 +1058,28 @@ function(
 				app.startDelete("prioritization");
 			break;
 			case "optionsRadios7":
+				// delete interpretation area
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
+				$("#editRadios8").hide();
+				$("#editLabelAddArea").hide();
+				$("#editLabelAddModel").hide();
+				$("#editButtons").show();
+				$("#editInstructions").html("Click on the Interpretation Area you want to delete.<br/><br/>Note, you can only delete areas that are 'In Initial Review'.");
+			break;
+			case "optionsRadios8":
+				// delete model
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				$("#editRadios6").hide();
+				$("#editRadios7").hide();
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
@@ -974,6 +1089,97 @@ function(
 		//dojo.disconnect(clickHandler);
 		//clickHandler = null;
 	};
+	
+	app.resetModelPopup = function() {
+		// Reset the Model modal popup to default values
+		$("#inputModelName").val("");
+		$("#modelInfo").html("");
+		$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
+		$("#modelParameters").show();
+		$("#modelProgress").hide();
+		$("#modelBtnCancel").show();
+    	$("#modelBtnSave").show();
+    	$("#modelBtnClose").hide();
+    	$.each(modelParams, function(i) {
+    		$("#" + modelParams[i]).val(10);
+    	});
+    	$.each(modelToggles, function(i) {
+    		$("#" + modelToggles[i]).bootstrapToggle("on");
+    	});
+	};
+	
+	app.newModel = function(editFtr) {
+		app.resetModelPopup();
+		var paAttr = editFtr.attributes;
+		console.log(editFtr);
+		$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
+		$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
+    	$("#modelPopup").modal("show");
+	};
+	
+	app.existingModel = function() {
+		// Load existing model parameters into modal popup
+		
+		
+		// need to load model parameters into modal popup
+		
+		
+		console.log("load existing model");
+		$("#modelSelect").modal("hide");
+		$("#modelPopup").modal("show");
+	};
+	
+	app.saveModel = function() {
+		// Prioritization Model
+		
+		// Check to make sure a Model Name is entered
+		if ($("#inputModelName").val() === "") {
+			$("#modelCheck").html("<br/>Please enter a Model Name");
+		} else {
+			// Check to verify the total weight of all included parameters equals 100
+			var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
+	    	var totalWeight = 0;
+	    	$.each(modelParams, function(i) {
+	    		var paramVal = parseInt($("#" + modelParams[i]).val());
+	    		totalWeight += paramVal;
+	    	});
+	    	console.log(totalWeight);
+	    	if (totalWeight < 100) {
+	    		$("#modelCheck").html("<br/>Current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100");
+	    	} else {
+	    		if (totalWeight > 100) {
+	    			$("#modelCheck").html("<br/>Current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100");
+	    		} else {
+	    			// OK to proceed
+	    			$("#modelCheck").html("");
+	    			// Build the feature to be passed via ajax call
+	    			var addFeature = {
+						"attributes": {
+							SWRCBRegID: 1,
+							PrioritizAreaID: "1_1",
+							ModelRunName: $("#inputModelName").val()
+						}
+					};
+					$.each(modelParams, function(i) {
+			    		if (!($("#" + modelParams[i]).prop("disabled"))) {
+			    			var fieldName = $("#" + modelParams[i]).prop("name");
+			    			var fieldVal = $("#" + modelParams[i]).val();
+			    			addFeature.attributes[fieldName] = fieldVal;
+			    		}
+			    	});
+			    	
+			    	console.log(addFeature);
+			    	$("#modelParameters").hide();
+			    	$("#modelProgress").show();
+			    	$("#modelBtnCancel").hide();
+			    	$("#modelBtnSave").hide();
+			    	$("#modelBtnClose").show();
+			    	
+	    		}
+	    	}
+	    }
+	};
+	
 	
 	app.unionPolygons = function(outputLayer, urlSource) {
 		esri.show(loading);
@@ -1162,62 +1368,6 @@ function(
 	    });
 	};
 	
-	app.startDraw = function(type, colorOption) {
-		//NOT USED
-		// editing - user is adding features
-		// the colorOption variable defines what color the added graphic is shown with. Current options are red or blue.
-		dojo.disconnect(clickHandler);
-		clickHandler = null;
-		
-		// hide options that are not selected
-		switch(type) {
-			case "point":
-				$("#editRadios2").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Click on the map to add the point.");
-			break;
-			case "polyline":
-				$("#editRadios1").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Use single clicks on the map to draw the line. When done, double click.");
-			break;
-			case "polygon":
-				$("#editRadios1").hide();
-				$("#editRadios2").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Use single clicks on the map to draw the polygon. When done, double click.");
-			break;
-		}
-		switch (colorOption) {
-			case "red":
-				editPointSymbol.setColor(new esri.Color("#de2d26"));
-				editPointSymbol.size = 12;
-				editLineSymbol.setColor(new esri.Color("#de2d26"));
-				//editFillSymbol.setOutline(lineSymbol);
-				editFillSymbol.setColor(new esri.Color([222,45,38,0.4]));
-			break;
-			case "blue":
-				editPointSymbol.setColor(new esri.Color("#488fc3"));
-				editLineSymbol.setColor(new esri.Color("#488fc3"));
-				//editFillSymbol.setOutline(lineSymbol);
-				editFillSymbol.setColor(new esri.Color([4,117,229,0.4]));
-			break;
-		}
-		graphicTb.activate(type);
-		$("#editButtons").show();
-	};
-	
 	app.startDelete = function(source) {
 		// editing - initial steps for user to delete a feature
 		switch(source) {
@@ -1258,47 +1408,6 @@ function(
 	        }
 	    });
 		
-	};
-	
-	app.startEdit = function(option) {
-		// editing - initial steps to edit a feature's attributes or geometry
-		switch(option) {
-			case "attribute":
-				if (!(clickHandler)) {
-					clickHandler = dojo.connect(map, "onClick", clickListener);
-				};
-				$("#editRadios1").hide();
-				$("#editRadios2").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios6").hide();
-				$("#stopEdit").show();
-				$("#editInstructions").html("Click on the feature you want to edit.");
-				$("#editButtons").show();
-			break;
-			case "shape":
-				dojo.disconnect(clickHandler);
-				clickHandler = null;
-				$("#attributesDiv").hide();
-				$("#editRadios1").hide();
-				$("#editRadios2").hide();
-				$("#editRadios3").hide();
-				$("#editRadios4").hide();
-				$("#editRadios5").hide();
-				$("#saveEdits").show();
-				$("#stopEdit").show();
-				$("#editInstructions").html("<b>For Polygon and Line features:</b><br/>"
-					+ "Double click on the feature you want to modify.<br/>"
-					+ "The points (vertices) that make up the polygon or line will appear.<br/> Click and drag the points to adjust the boundary<br/>"
-					+ "When done, click Save to record the edits.<br/><br/>"
-					+ "<b>For Point features:</b><br/>"
-					+ "Double click on the feature you want to modify.<br/>"
-					+ "Your cursor should change to a hand when hovering over the point.<br/>"
-					+ "Click and drag to move the point to a new location.<br/>"
-					+ "When done, click Save to record the edits.s.");
-				$("#editButtons").show();
-			break;
-		}
 	};
 	
 	app.editFeature = function(ftr, type) {
@@ -1349,6 +1458,7 @@ function(
 	app.stopEdit = function () {
 		
 		// Used for cancelling an edit, and for resetting the edit menu back to default state
+		app.resetPopup();
 		newFeatureName = null;
 		$("#editRadios1").show();
 		$("#editRadios2").show();
@@ -1357,6 +1467,7 @@ function(
 		$("#editRadios5").show();
 		$("#editRadios6").show();
 		$("#editRadios7").show();
+		$("#editRadios8").show();
 		$("#editLabelAddArea").show();
 		$("#editLabelAddModel").show();
 		$("#editLabelDelete").show();
@@ -1367,6 +1478,7 @@ function(
 		$("#optionsRadios5:checked").prop("checked",false);
 		$("#optionsRadios6:checked").prop("checked",false);
 		$("#optionsRadios7:checked").prop("checked",false);
+		$("#optionsRadios8:checked").prop("checked",false);
 		$("#editInstructions").html("Select a modeling option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
@@ -1374,39 +1486,7 @@ function(
 		$("#attributesDiv").hide();
 		$("#editButtons").hide();
 		map.graphics.clear();
-		
-		// If editing shape, discard the edits because the user clicked the cancel button
-		/*if ($("#optionsRadios6:checked").prop("checked")) {
-			if (shapeEditStatus) {
-				//console.log("shape edits discarded");
-				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
-					console.log("update feature successful");
-					shapeEditStatus = null;
-					shapeEditBackup = null;
-					//app.stopEdit();
-					shapeEditLayer.refresh();
-					editToolbar.deactivate();	
-				}, function error() {
-					console.log("error");
-				});
-			}
-		}*/
 
-		// resetting edit menu to defaults
-		/*map.graphics.clear();
-		graphicTb.deactivate();*/
-		
-		//$("#editRadios5").show();
-		//$("#editRadios6").show();
-		//$("#saveGraphic").hide();
-		//$("#saveEdits").hide();
-		//$("#stopEdit").hide();
-		//$("#saveShapeEdit").hide();
-		
-		//$("#optionsRadios5:checked").prop("checked",false);
-		//$("#optionsRadios6:checked").prop("checked",false);
-    	
-		
 	};
 	
 	app.saveEdits = function () {
@@ -1540,40 +1620,6 @@ function(
 		localStorage.extent = JSON.stringify(mapObj.extent);
 	};
 
-	app.initElevToolbar = function(toolName) {
-		// Elevation Profile Widget - initialize
-		epWidget.clearProfile();
-		//Clear profile
-		map.graphics.clear();
-		tb = new Draw(map);
-		tb.on("draw-end", app.addElevGraphic);
-		tb.activate(toolName);
-		map.disableMapNavigation();
-	};
-	
-	app.disableElevTool = function() {
-		// Elevation Profile Widget - reset popup when the tool is deactivated
-		tb.deactivate();
-		epWidget.clearProfile();
-		map.graphics.clear();
-		clickHandler = dojo.connect(map, "onClick", clickListener);
-	};
-	
-	app.addElevGraphic = function(evt) {
-		// Elevation Profile Widget - Deactivate the toolbar and clear existing graphics
-		tb.deactivate();
-		map.enableMapNavigation();
-		var symbol = lineSymbol;
-		map.graphics.add(new Graphic(evt.geometry, symbol));
-		epWidget.set("profileGeometry", evt.geometry);
-
-		var sel = dom.byId("unitsSelect");
-		if (sel) {
-			var val = sel.options[sel.selectedIndex].value;
-			epWidget.set("measureUnits", val);
-		}
-	}; 
-
     app.showCoordinates = function (evt) {
         // Show map coordinates in the lower right-hand corner of the app.
         // The map is in web mercator but display coordinates in geographic (lat, long)
@@ -1650,90 +1696,6 @@ function(
 		callback("clusterLayer complete");
 	}; 
 
-	app.summarizeWshd = function(option) {
-		// Query HUC 12 watershed boundary and summarize grows that fall within
-		
-		// Switch option is used to enable or disable the tool. This avoids conflicts with Elevation Profile Widget.
-		switch(option) {
-			case true:
-				if (epWidget) {
-					app.disableElevTool();
-					$("#elev-toggle").bootstrapToggle("off");
-				}				
-				$("#sumWshdText").show();
-				dojo.disconnect(clickHandler);
-				if (clusterLayer) {
-					clusterLayer._onClickHandler = null;
-				}
-				showInfoWindow = "sumWshd";
-				var currentClick = null;
-				var queryTask = new QueryTask(appConfig.SEARCH_WATERSHED);
-				var queryTaskGrow = new QueryTask(appConfig.GROW_POLYS_URL);
-				var query = new Query();
-				var results1, results2, results3;
-				query.returnGeometry = true;
-				query.outFields = ["*"];
-				
-				map.on("click", function(evt) {
-					map.graphics.clear();
-					results1 = evt;
-					if (showInfoWindow === "sumWshd") {
-						$("#sumWshdText").html("Generating Summary - please wait.");
-						currentClick = query.geometry = evt.mapPoint;
-						query.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-						queryTask.execute(query);
-					}
-				});
-				queryTask.on("complete", function(evt) {
-					testObj = evt;
-					results2 = evt;					
-					var symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([38, 110, 235]), 4);
-					var resultShape = evt.featureSet.features[0];
-					resultShape.setSymbol(symbol);
-					map.graphics.add(resultShape);
-					query.geometry = evt.featureSet.features[0].geometry;
-					queryTaskGrow.execute(query);
-				});
-				queryTaskGrow.on("complete", function(evt) {
-					results3 = evt;
-					var totalGrows = evt.featureSet.features.length;
-					var totalOutdoor = 0, totalGreenhouse = 0, totalArea = 0;
-					$.each(evt.featureSet.features, function(i) {
-						var ftrAttr = evt.featureSet.features[i].attributes;
-						totalArea += ftrAttr.GrowSqFt;
-						if (ftrAttr.GrowType === "Outdoor") {
-							totalOutdoor += 1;
-						}
-						if (ftrAttr.GrowType === "Greenhouse") {
-							totalGreenhouse += 1;
-						}
-					});
-					totalArea = (totalArea * 0.000022956841138659).toFixed(2);
-					var sumResult = "<b>Summary Results for: <u>" + results2.featureSet.features[0].attributes.Name + "</u></b><br/>";
-					sumResult += " Outdoor Grows: " + totalOutdoor + "<br/>";
-					sumResult += " Greenhouse Grows: " + totalGreenhouse + "<br/>";
-					sumResult += " Total Grow Acreage: " + totalArea + "<br/>";
-					
-					$("#sumWshdText").html(sumResult);
-					var lyrExtent = results2.featureSet.features[0].geometry.getExtent();
-					var resultExtent = lyrExtent.expand(1.4);
-					map.setExtent(resultExtent);
-				});
-			break;
-			case false:
-				$("#sumWshdText").hide();
-				map.graphics.clear();
-				clickHandler = dojo.connect(map, "onClick", clickListener);
-				if (clusterLayer) {
-					clusterLayer._onClickHandler = clusterLayerClickHandler;
-				}
-				showInfoWindow = "default";
-				$("#sumWshdText").html("Click on a watershed boundary to display summary.");
-			break;
-			
-		}
-	};
-	
 	app.menuChange = function(option) {
 		// Called when map menu items are selected
 		/*if (showInfoWindow === "sumWshd") {
@@ -1914,6 +1876,21 @@ function(
         $("#sumWshd-toggle").change(function() {
 	    	app.summarizeWshd($(this).prop("checked"));
 	    });
+	    
+	    // Set on-change behavior for Model Parameter toggles
+	    $.each(modelToggles, function(i) {
+    		$("#" + modelToggles[i]).change(function() {
+    			if ($(this).prop("checked")) {
+		    		$("#" + modelParams[i]).prop('disabled', false);
+		    	} else {
+		    		$("#" + modelParams[i]).prop('disabled', true);
+		    		$("#" + modelParams[i]).val(0);
+		    	}
+    		});
+    	});
+    		
+	    
+
 
     });
 });
