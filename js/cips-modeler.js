@@ -12,7 +12,8 @@ var interpLyrIndex, regionLyrIndex; // used for getting onClick results from spe
 var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
 var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
 var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
-var geometryService;
+var modelFactors;
+var geometryService, gp;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
 
@@ -142,6 +143,7 @@ function(
     esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");  
     esriConfig.defaults.io.corsEnabledServers.push("services.arcgis.com");
     esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com"); 
+    esriConfig.defaults.io.corsEnabledServers.push("vags102a");
     esriConfig.defaults.io.corsEnabledServers.push("http://localhost");  
     esriConfig.defaults.io.timeout = 12000;   
     //esriConfig.defaults.io.proxyUrl = "http://localhost/apps/cipsproxy/DotNet/proxy.ashx";
@@ -424,8 +426,8 @@ function(
         });
     };
     
-    // sets the popup results to a single layer, identified with the layer Title passed to the function.
 	app.isolatePopup = function(item) {
+		// sets the popup results to a single layer, identified with the layer Title passed to the function.
 		//console.log("isolatePopup:", item);
 		$.each(layers, function(i, lyr) {
 		  //console.log(lyr.title);
@@ -435,8 +437,8 @@ function(
 		});
 	};
 	
-	// resets popup results to default for all layers.
 	app.resetPopup = function() {
+		// resets popup results to default for all layers.
 		$.each(layers, function(i, lyr) {
 		  //console.log(lyr.title);
 		    lyr.layer.infoTemplate = lyrInfoTemplate[i].infoTemplate;
@@ -807,7 +809,6 @@ function(
 		measurement.startup();
 	};
 	
-	
 	app.buildEditor = function(callback) {
 		
 		// enable editing shapes on with double-click event
@@ -880,6 +881,134 @@ function(
 
 		callback("app.buildEditor complete.");
 	}; 
+	
+	// -- Section 5: Map Functionality -------------------------------------------------------------
+
+	app.syncMaps = function(mapObj) {
+		// When map changes, record the map extent in order to keep all maps synconized
+		var mapExtent = mapObj.extent;
+		var mapCenter = mapObj.extent.getCenter;
+		localStorage.extent = JSON.stringify(mapObj.extent);
+	};
+
+    app.showCoordinates = function (evt) {
+        // Show map coordinates in the lower right-hand corner of the app.
+        // The map is in web mercator but display coordinates in geographic (lat, long)
+        var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
+        //display mouse coordinates
+        $('#coordsText').html(mp.x.toFixed(3) + ", " + mp.y.toFixed(3));
+    };
+    
+    app.hideRibbonMenu = function() {
+    	// Map menu items - showing and hiding elements
+ 		var tabs = $('.tabItems');
+		var containers = $('#menu1, #menu2, #menu3, #menu4, #menu5, #menu6');
+		containers.removeClass("slide-out");
+		containers.removeClass("showing");
+		containers.removeClass("active");
+		showing = false;
+		$("#ribbon-bar-toggle").hide();
+ 	};
+
+	app.findRegion = function() {
+		// Search by Region tool - Query and zoom to the selected Region boundary
+		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
+			var extent = callback.features[0].geometry.getExtent();
+			map.setExtent(extent);
+		}));
+		
+	};
+	
+	app.findInterpArea = function() {
+		// Search by Interpretation Area tool - Query and zoom to the selected Interp Area boundary
+		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
+			var extent = callback.features[0].geometry.getExtent();
+			map.setExtent(extent);
+		}));
+	};
+	
+	app.buildClusterLayer = function(newLyrName, sourceUrl, maxScale, minScale, callback) {
+		// Create clustered layer for grow locations
+		clusterLayer = new ClusterFeatureLayer({
+			"url" : sourceUrl,
+			"distance" : 40,
+			"id" : newLyrName,
+			"labelColor" : "#fff",
+			"labelOffset" : -5,
+			"resolution" : map.extent.getWidth() / map.width,
+			"useDefaultSymbol" : false,
+			"singleColor" : "#888"//,
+			//"showSingles" : true,
+			//"webmap" : true//,
+			//"singleTemplate" : infoTemplate
+		});
+		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
+		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
+		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.5]));
+		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.5]));
+		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.5]));
+
+		renderer.addBreak(2, 5, group1);
+		renderer.addBreak(5, 20, group2);
+		renderer.addBreak(20, 50000, group3);
+		clusterLayer.setRenderer(renderer);
+		if (maxScale) {
+			clusterLayer.setMaxScale(maxScale);
+		}
+		if (minScale) {
+			clusterLayer.setMinScale(minScale);
+		}
+		map.addLayers([clusterLayer]);
+		toc.layerInfos.push({
+			"layer" : clusterLayer,
+			"title" : newLyrName
+		});
+		toc.refresh();
+		callback("clusterLayer complete");
+	}; 
+
+	app.menuChange = function(option) {
+		// Called when map menu items are selected
+		/*if (showInfoWindow === "sumWshd") {
+			$("#sumWshd-toggle").bootstrapToggle("off");
+		};*/
+		if (option.id === "menuMapTools") {
+			dojo.disconnect(clickHandler);
+			clickHandler = null;
+		} else {
+			if (measurement) {
+				measurement.setTool("area", false);
+				measurement.setTool("distance", false);
+				measurement.setTool("location", false);
+				measurement.clearResult();
+			}
+		};
+		if ((option.id === "menuSearch") || (option.id === "menuBasemap") || (option.id === "menuLayers")) {
+			if (!(clickHandler)) {
+				clickHandler = dojo.connect(map, "onClick", clickListener);
+			}
+		}
+		/*if (option.id === "menuEdit") {
+	  		app.buildGraphicTools();
+		}*/
+	};
+
+	app.runQuery = function(layerUrl, queryWhere, callback) {
+		// Query task
+		var query = new Query();
+		var queryTask = new QueryTask(layerUrl);
+		query.where = queryWhere;
+		query.outSpatialReference = {
+			wkid : 102100
+		};
+		query.returnGeometry = true;
+		query.outFields = ["*"];
+		queryTask.execute(query, function(res) {	
+			callback(res);
+		});
+	};
+	
+	// Section 6: Model Functionality ------------------------------------------
 	
 	app.initModelMenu = function(option) {
 		var selOption = option.id;
@@ -1010,6 +1139,7 @@ function(
 			break;
 			case "optionsRadios5":
 				// edit prioritization area model
+				esri.show(loading);
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
@@ -1022,25 +1152,23 @@ function(
 				$("#editButtons").show();
 				$("#editInstructions").html("Follow the popup dialogs for editing an existing model.");
 				
-				
-				// 00000000000000000000000000000000000000000000000000000000000000000000000000000000
+				// Populate the drop down list based on query of existing Models
 				var modelList = "";
 				var query = new Query();
-				//var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
-				var queryTask = new QueryTask(appConfig.URL_REGION);
+				var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
 				query.where = "0=0";
 				query.returnGeometry = false;
 				query.outFields = ["*"];
 				queryTask.execute(query, function(res) {	
 					console.log(res);
 					$.each(res.features, function(i) {
-						console.log(res.features[i].attributes.RBNAME);
-						modelList += "<option>" + res.features[i].attributes.RBNAME + "</option>";
+						console.log(res.features[i].attributes.ModelRunName);
+						modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
 					});
 					$("#selectPriorModel").html(modelList);
+					$("#modelSelect").modal("show");
+					esri.hide(loading);
 				});
-				
-				$("#modelSelect").modal("show");
 			break;
 			case "optionsRadios6":
 				// delete prioritization area
@@ -1093,7 +1221,10 @@ function(
 	app.resetModelPopup = function() {
 		// Reset the Model modal popup to default values
 		$("#inputModelName").val("");
-		$("#modelInfo").html("");
+		//$("#modelInfo").html("");
+		$("#inputModelReg").val("");
+		$("#inputModelPaId").val("");
+		$("#inputModelPaName").val("");
 		$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
 		$("#modelParameters").show();
 		$("#modelProgress").hide();
@@ -1109,24 +1240,132 @@ function(
 	};
 	
 	app.newModel = function(editFtr) {
+		// Create new Prioritization Model
+		esri.show(loading);
 		app.resetModelPopup();
 		var paAttr = editFtr.attributes;
 		console.log(editFtr);
-		$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
-		$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
-    	$("#modelPopup").modal("show");
+		//$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
+		//$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
+    	//$("#modelPopup").modal("show");
+    	
+    	// Query the PreProcInputs table to get parameters available for Model
+    	var modelInput = '<div class="row"><b>'
+			+ 	'<div class="col-md-1">'
+			+ 		'Include?'
+			+ 	'</div>'
+			+ 	'<div class="col-md-2">'
+			+		'Factor'
+			+ 	'</div>'
+			+ 	'<div class="col-md-2">'
+			+ 		'Model Weight (%)'
+			+ 	'</div>'
+			+ 	'<div class="col-md-2">'
+			+ 		'Risk Level 3'
+			+ 	'</div>'
+			+ 	'<div class="col-md-2">'
+			+ 		'Risk Level 2'
+			+ 	'</div>'
+			+ 	'<div class="col-md-2">'
+			+ 		'Risk Level 1'
+			+ 	'</div></b>'
+			+ '</div>';
+    	
+    	modelFactors = [];
+    	var query = new Query();
+		var queryTask = new QueryTask(appConfig.URL_PRIOR_PREPROC_INPUTS);
+		query.where = "SWRCBRegID = '" + paAttr.SWRCBRegID + "'";
+		query.returnGeometry = false;
+		query.outFields = ["*"];
+		queryTask.execute(query, function(res) {
+			// Dynamically build the forms for parameter input
+			var qryRes = res.features;
+			$.each(qryRes, function(i) {
+				console.log(qryRes[i].attributes);
+				var paramName = qryRes[i].attributes.PreProcDataSourceName;
+				var paramNameTrim = paramName.replace(/\s+/g , "_");
+				modelFactors.push(paramNameTrim);
+				modelInput += ""
+					+ '<div class="row">'
+					+ 	'<div class="col-md-1">'
+					+ 		'<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="70">'
+					+ 	'</div>'
+					+ 	'<div class="col-md-2">'
+					+		'<label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
+					+ 	'</div>'
+					+ 	'<div class="col-md-2">'
+					+ 		'<div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight</div>'
+					+ 		'<input type="number" min="0" max="100" value="10" class="form-control form-value" id="input' + paramNameTrim + '" name=""></div>'
+					+ 	'</div>'
+					+ 	'<div class="col-md-2">'
+					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel3 + '</label>'
+					+ 	'</div>'
+					+ 	'<div class="col-md-3">'
+					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel2 + '</label>'
+					+ 	'</div>'
+					+ 	'<div class="col-md-2">'
+					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel1 + '</label>'
+					+ 	'</div>'
+					+ '</div>';
+				/*modelInput += ""
+					+ '<form class="form-inline"><div class="form-group">'
+					+ '<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
+					+ '</div><div class="form-group"><div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight (%)</div>'
+					+ '<input type="number" min="0" max="100" value="10" class="form-control form-value" id="input' + paramNameTrim + '" name="">'
+					+ '</div></div>'
+					+ '<div class="form-group">Level 1: ' + qryRes[i].attributes.PreProcLevel1 + '</div>'
+					+ '<div class="form-group">Level 2: ' + qryRes[i].attributes.PreProcLevel2 + '</div>'
+					+ '<div class="form-group">Level 3: ' + qryRes[i].attributes.PreProcLevel3 + '</div>'
+					+ '</form>';*/
+			});
+			$("#modelParameters").html(modelInput);
+			//$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
+			$("#inputModelReg").val(paAttr.SWRCBRegID);
+			$("#inputModelPaId").val(paAttr.PrioritizAreaKey);
+			$("#inputModelPaName").val(paAttr.PrioritizAreaName);
+			$("#inputModelRunId").val("1"); // *************************NEED TO GET THIS FROM QUERY OF THE NEXT ID NUMBER
+			$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
+			$("#modelPopup").modal("show");
+			
+			// initialize the bootstrapToggle checkbox function
+			$.each(modelFactors, function(i) {
+				$('#toggle' + modelFactors[i]).bootstrapToggle();
+				// Set on-change behavior for Model Parameter toggles
+    			$("#toggle" + modelFactors[i]).change(function() {
+	    			if ($(this).prop("checked")) {
+			    		$("#input" + modelFactors[i]).prop('disabled', false);
+			    	} else {
+			    		$("#input" + modelFactors[i]).prop('disabled', true);
+			    		$("#input" + modelFactors[i]).val(0);
+			    	}
+    			});
+			});
+			esri.hide(loading);
+		});
 	};
 	
 	app.existingModel = function() {
 		// Load existing model parameters into modal popup
-		
-		
-		// need to load model parameters into modal popup
-		
-		
 		console.log("load existing model");
 		$("#modelSelect").modal("hide");
 		$("#modelPopup").modal("show");
+		
+		// Query to get record values
+		var selModel = $("#selectPriorModel").val();
+		var query = new Query();
+		var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
+		query.where = "ModelRunKey = '" + selModel + "'";
+		query.returnGeometry = false;
+		query.outFields = ["*"];
+		queryTask.execute(query, function(res) {
+			var qryAttr = res.features[0].attributes;	
+			console.log(qryAttr);
+			$("#inputModelName").val(qryAttr.ModelRunName);
+			
+			$.each(res.features[0].attributes, function(i) {
+				console.log(res.features[0].attributes);
+			});
+		});
 	};
 	
 	app.saveModel = function() {
@@ -1179,7 +1418,6 @@ function(
 	    	}
 	    }
 	};
-	
 	
 	app.unionPolygons = function(outputLayer, urlSource) {
 		esri.show(loading);
@@ -1337,7 +1575,7 @@ function(
 		}));	
 	};
 	
-	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {		
+	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {
 		
 		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
 		//console.log(updateAttributes);			
@@ -1613,130 +1851,93 @@ function(
 	    });
 	};
 	
-	app.syncMaps = function(mapObj) {
-		// When map changes, record the map extent in order to keep all maps synconized
-		var mapExtent = mapObj.extent;
-		var mapCenter = mapObj.extent.getCenter;
-		localStorage.extent = JSON.stringify(mapObj.extent);
+	app.gpModelPrioritizGrowsSync = function() {
+		// syncronous GP call, CURRENTLY NOT USED
+		var gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
+		var gpParams = {
+			"PrioritizAreaKey" : "5_1",
+			"ModelRunID" : "2",
+			"Model_Run_Name" : "web app test 1",
+			"Huc12_feature_class_name" : "HUC_12_Watersheds",
+			"Input1_DataSource" : "Cultivated Area",
+			"Input1_Level_Combo" : "1",
+			"Input1_Level_Weight" : 0.4,
+			"Input2_DataSource" : "Water Consumption",
+			"Input2_Level_Combo" : "1",
+			"Input2_Weight" : 0.4,
+			"Input3_DataSource" : "Percent Slope",
+			"Input3_Level_Combo" : "1",
+			"Input3_Weight" : 0.2
+		};
+		//var rerunCount = 0; // this can be used to run the gp tool again on fail
+		gp.execute(gpParams);
+		gp.on("execute-complete", function(results) {
+            console.log("gpModelPrioritizGrows complete", results);
+        });
+        gp.on("error", function(error) {
+            /*if (rerunCount < 2) {
+                gp.execute(gpParams);
+                rerunCount = rerunCount + 1;
+            }*/
+            console.log("error gpModelPrioritizGrows", error);
+        });
 	};
-
-    app.showCoordinates = function (evt) {
-        // Show map coordinates in the lower right-hand corner of the app.
-        // The map is in web mercator but display coordinates in geographic (lat, long)
-        var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
-        //display mouse coordinates
-        $('#coordsText').html(mp.x.toFixed(3) + ", " + mp.y.toFixed(3));
-    };
-    
-    app.hideRibbonMenu = function() {
-    	// Map menu items - showing and hiding elements
- 		var tabs = $('.tabItems');
-		var containers = $('#menu1, #menu2, #menu3, #menu4, #menu5, #menu6');
-		containers.removeClass("slide-out");
-		containers.removeClass("showing");
-		containers.removeClass("active");
-		showing = false;
-		$("#ribbon-bar-toggle").hide();
- 	};
-
-	app.findRegion = function() {
-		// Search by Region tool - Query and zoom to the selected Region boundary
-		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
-			var extent = callback.features[0].geometry.getExtent();
-			map.setExtent(extent);
-		}));
+	
+	app.gpModelPrioritizGrows = function() {
+		// asyncronous GP call
 		
-	};
-	
-	app.findInterpArea = function() {
-		// Search by Interpretation Area tool - Query and zoom to the selected Interp Area boundary
-		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
-			var extent = callback.features[0].geometry.getExtent();
-			map.setExtent(extent);
-		}));
-	};
-	
-	app.buildClusterLayer = function(newLyrName, sourceUrl, maxScale, minScale, callback) {
-		// Create clustered layer for grow locations
-		clusterLayer = new ClusterFeatureLayer({
-			"url" : sourceUrl,
-			"distance" : 40,
-			"id" : newLyrName,
-			"labelColor" : "#fff",
-			"labelOffset" : -5,
-			"resolution" : map.extent.getWidth() / map.width,
-			"useDefaultSymbol" : false,
-			"singleColor" : "#888"//,
-			//"showSingles" : true,
-			//"webmap" : true//,
-			//"singleTemplate" : infoTemplate
-		});
-		var defaultSym = new SimpleMarkerSymbol('circle', 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([252, 174, 145, 0.5]), 6), new Color([165, 15, 21, 1]));
-		var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
-		var group1 = new SimpleMarkerSymbol('circle', 15, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([251, 106, 74, 0.25]), 10), new Color([251, 106, 74, 0.5]));
-		var group2 = new SimpleMarkerSymbol('circle', 20, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([222, 45, 38, 0.25]), 15), new Color([222, 45, 38, 0.5]));
-		var group3 = new SimpleMarkerSymbol('circle', 30, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([165, 15, 21, 0.25]), 15), new Color([165, 15, 21, 0.5]));
-
-		renderer.addBreak(2, 5, group1);
-		renderer.addBreak(5, 20, group2);
-		renderer.addBreak(20, 50000, group3);
-		clusterLayer.setRenderer(renderer);
-		if (maxScale) {
-			clusterLayer.setMaxScale(maxScale);
-		}
-		if (minScale) {
-			clusterLayer.setMinScale(minScale);
-		}
-		map.addLayers([clusterLayer]);
-		toc.layerInfos.push({
-			"layer" : clusterLayer,
-			"title" : newLyrName
-		});
-		toc.refresh();
-		callback("clusterLayer complete");
-	}; 
-
-	app.menuChange = function(option) {
-		// Called when map menu items are selected
-		/*if (showInfoWindow === "sumWshd") {
-			$("#sumWshd-toggle").bootstrapToggle("off");
+		/*gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
+		var gpParams = {
+			"PrioritizAreaKey" : "5_1",
+			"ModelRunID" : "2",
+			"Model_Run_Name" : "web app test 1",
+			"Huc12_feature_class_name" : "HUC_12_Watersheds",
+			"Input1_DataSource" : "Cultivated Area",
+			"Input1_Level_Combo" : "1",
+			"Input1_Level_Weight" : 0.4,
+			"Input2_DataSource" : "Water Consumption",
+			"Input2_Level_Combo" : "1",
+			"Input2_Weight" : 0.4,
+			"Input3_DataSource" : "Percent Slope",
+			"Input3_Level_Combo" : "1",
+			"Input3_Weight" : 0.2
 		};*/
-		if (option.id === "menuMapTools") {
-			dojo.disconnect(clickHandler);
-			clickHandler = null;
-		} else {
-			if (measurement) {
-				measurement.setTool("area", false);
-				measurement.setTool("distance", false);
-				measurement.setTool("location", false);
-				measurement.clearResult();
-			}
+		
+		$("#inputModelReg").val("");
+		$("#inputModelPaId").val("");
+		$("#inputModelPaName").val("");
+		
+		gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
+		var gpParams = {
+			"PrioritizAreaKey" : $("#inputModelPaId").val(),
+			"ModelRunID" : $("#inputModelRunId").val(),
+			"Model_Run_Name" : $("#inputModelName").val(),
+			"Huc12_feature_class_name" : "HUC_12_Watersheds",
 		};
-		if ((option.id === "menuSearch") || (option.id === "menuBasemap") || (option.id === "menuLayers")) {
-			if (!(clickHandler)) {
-				clickHandler = dojo.connect(map, "onClick", clickListener);
-			}
-		}
-		/*if (option.id === "menuEdit") {
-	  		app.buildGraphicTools();
-		}*/
-	};
-
-	app.runQuery = function(layerUrl, queryWhere, callback) {
-		// Query task
-		var query = new Query();
-		var queryTask = new QueryTask(layerUrl);
-		query.where = queryWhere;
-		query.outSpatialReference = {
-			wkid : 102100
-		};
-		query.returnGeometry = true;
-		query.outFields = ["*"];
-		queryTask.execute(query, function(res) {	
-			callback(res);
+		// Loop through model factors to build the parameters that will be used in the gp tool
+		$.each(modelFactors, function(i) {
+		//	gpParams.["Input" + i + "_DataSource"] = $("#input")
 		});
+		
+		
+		
+		gp.submitJob(gpParams, app.gpCompleteCallback, app.gpStatusCallback);
 	};
 
+	app.gpStatusCallback = function(jobInfo) {
+		console.log(jobInfo.jobStatus);
+	};
+
+	app.gpCompleteCallback = function(jobInfo) {
+		console.log("completed, jobInfo");
+	};
+
+	app.gpcDisplayResult = function(item) {
+		console.log(item.value);
+	};
+	
+	// -- Section 7: Authentication ----------------------------------------------------
+	
 	// Authentication - when services come from ArcGIS Online
 	if (appConfig.AUTH === "arcgisonline") {
 		var info = new OAuthInfo({
@@ -1854,6 +2055,8 @@ function(
 			return false;
 		}
 	}
+	
+	// -- Section 8: Page Ready ----------------------------------------------------
 
     $(document).ready(function() {
 		// Page has loaded, set on- events	
@@ -1877,6 +2080,7 @@ function(
 	    	app.summarizeWshd($(this).prop("checked"));
 	    });
 	    
+	    /*
 	    // Set on-change behavior for Model Parameter toggles
 	    $.each(modelToggles, function(i) {
     		$("#" + modelToggles[i]).change(function() {
@@ -1888,7 +2092,7 @@ function(
 		    	}
     		});
     	});
-    		
+    	*/
 	    
 
 

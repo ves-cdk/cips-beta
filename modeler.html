@@ -330,7 +330,7 @@
 			 </div>
 		</div>
 		
-        <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
+        <!--<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -490,9 +490,73 @@
 			      	</div>
 				</div>
 			</div>
+		</div>-->
+		
+		<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+			        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			        	<h4 class="modal-title">Prioritization Model</h4>
+			      	</div>
+			      	<div class="modal-body">
+			      		
+			      		<form id="modelInfo">
+			      			<div class="form-group">
+								<div class="input-group">
+									<div class="input-group-addon">Region</div>
+									<input type="text" class="form-control" id="inputModelReg" disabled>
+								</div>
+								<div class="input-group">
+									<div class="input-group-addon">Prior. Area Id</div>
+									<input type="text" class="form-control" id="inputModelPaId" disabled>
+								</div>
+								<div class="input-group">
+									<div class="input-group-addon">Prior. Area Name</div>
+									<input type="text" class="form-control" id="inputModelPaName" disabled>
+								</div>
+								<div class="input-group">
+									<div class="input-group-addon">Model Run Id</div>
+									<input type="text" class="form-control" id="inputModelRunId">
+								</div>
+							</div>
+			      		</form><br/>
+			      		<form id="modelInstructions"></form>
+						
+						<form class="form-inline" id="modelModelName">
+							<div class="form-group">
+								<div class="input-group">
+									<div class="input-group-addon">Model Name</div>
+									<input type="text" class="form-control" id="inputModelName" placeholder="Model Name">
+								</div>
+							</div>
+						</form><br/><br/>
+						
+						<div id="modelParameters">
+							<!-- content is dynamically created based on PreProcInputs table -->
+						</div>
+								
+						<div id="modelCheck" class="text-right"></div>
+
+						<div id="modelProgress" style="display:none;">
+							<div id="modelProgressText">Status: Modeling in Process</div>
+							<div class="progress">
+								<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
+							    <span class="sr-only" id="modelProgressIndicator">20% Complete</span>
+							 </div>
+							</div>
+							Note: You can close this dialog, along with the CIPS web application at any time. The Modeling processes will continue to run until completed.
+						</div>
+						
+					</div>
+					<div class="modal-footer">
+			       		<button type="button" class="btn btn-default" data-dismiss="modal" id="modelBtnCancel">Cancel</button>
+			        	<button type="button" class="btn btn-primary" onclick="app.saveModel();" id="modelBtnSave">Save and Continue</button>
+			        	<button type="button" class="btn btn-default" data-dismiss="modal" style="display: none;" id="modelBtnClose">Close</button>
+			      	</div>
+				</div>
+			</div>
 		</div>
-		
-		
 
 		<!-- JS libraries, placed at the end of the document so the pages load faster -->
 		<script src="js/lib/jquery-1.11.3.min.js"></script>

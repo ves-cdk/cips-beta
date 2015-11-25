@@ -27,10 +27,14 @@ appConfig = {
 	//PRIORIT_JOIN_KEY: "PrioritizGrowKey",
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/2",
 	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
+	
 	URL_PRIOR_AREA: urlRoot + "CIPS_20151015/FeatureServer/3",
 	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/9",
-	URL_PRIOR_MODELS: urlRoot + "CIPS_20151015/FeatureServer/18",
-	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/1",
+	URL_PRIOR_MODELS: urlRoot + "CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
+	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_20151123/FeatureServer/13",
+	
+	URL_GP_MODEL_PRIOR_GROWS: "http://vags102a/arcgis/rest/services/CIPS/ModelPrioritizGrows/GPServer/V102_ModelPrioritizGrows",
+	
 	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/1",
 	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/0", //urlRoot + "CIPS_20151015/FeatureServer/20",
     URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/4", //urlRoot + "CIPS_20151015/FeatureServer/11",

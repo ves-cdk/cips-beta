@@ -374,6 +374,13 @@ a:focus {
 }
 .checkbox-inline.model-label {
 	min-width: 175px;
+	padding-left: 2px !important;
+}
+.modal-xl {
+	width: 95%;
+}
+.input-group-addon {
+	padding: 6px 8px;
 }
 /* Editor-specific styles */
 .esriAttributeInspector .atiButtons {
