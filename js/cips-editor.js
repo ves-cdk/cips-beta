@@ -349,7 +349,8 @@ function(
             					app.deleteFeature(editFtr);
 
             					// If deleting grow polygon, need to also delete the point feature associated with it:
-            					if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
+            					//   NOTE - this is commented out - the relationship class should take care of this.
+            					/*if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
             						var GrowKey = editFtr.attributes.GrowKey;
             						// Query the point feature to get the objectId for deleting
             						$.when(app.runQuery(appConfig.URL_EDIT_GROW_POINTS, "GrowKey='" + GrowKey + "'", function(callback) {
@@ -381,7 +382,7 @@ function(
 											}
 										});
             						}));
-            					}
+            					}*/
             					
             				} else {
             					popup.clearFeatures();

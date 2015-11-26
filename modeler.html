@@ -312,7 +312,7 @@
 		
 		<!-- Modal (popups) for creating new Prioritization Model -->
 		
-		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelSelect">
+		<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelSelect" data-backdrop="static">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -330,169 +330,7 @@
 			 </div>
 		</div>
 		
-        <!--<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-			        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			        	<h4 class="modal-title">Prioritization Model</h4>
-			      	</div>
-			      	<div class="modal-body">
-			      		
-			      		<form id="modelInfo"></form>
-			      		<form id="modelInstructions"></form>
-						
-						<form class="form-inline" id="modelModelName">
-							<div class="form-group">
-								<div class="input-group">
-									<div class="input-group-addon">Model Name</div>
-									<input type="text" class="form-control" id="inputModelName" placeholder="Model Name">
-								</div>
-							</div>
-						</form><br/><br/>
-						<div id="modelParameters">
-							<b>Model Parameters:</b></br>
-							Water Quality
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleElev" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Slope (%)&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtSlope" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleCult" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Cultivation Area&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtCult" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleProx" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Prox. to Water&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtProx" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleDrink" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Drinking Water Supply&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtDrink" name="">
-								    </div>
-								</div>
-							</form>
-							
-							<br/>Water Rights
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleRes" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Reservoirs/Tanks&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtRes" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleWtrright" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Filed Water Right&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtWtrright" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleWtrcons" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Water Consumption&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtWtrcons" name="">
-								    </div>
-								</div>
-							</form>
-							
-							<br/>Fish and Wildlife
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleCrit" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Critical Fish&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtCrit" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleSens" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">Sensitive Wildlife&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtSens" name="">
-								    </div>
-								</div>
-							</form>
-							<form class="form-inline">
-								<div class="form-group">
-									<input id="toggleLSA" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">LSA Permit&nbsp;</label>
-								</div>
-								<div class="form-group">
-								    <div class="input-group">
-								      <div class="input-group-addon input-group-sm input-label">Weight (%)</div>
-								      <input type="number" min="0" max="100" value="10" class="form-control form-value" id="inputWtLSA" name="">
-								    </div>
-								</div>
-							</form>
-							
-							<div id="modelCheck" class="text-right"></div>
-						
-						</div>
-						
-						<div id="modelProgress" style="display:none;">
-							<div id="modelProgressText">Status: Modeling in Process</div>
-							<div class="progress">
-								<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-							    <span class="sr-only" id="modelProgressIndicator">20% Complete</span>
-							 </div>
-							</div>
-							Note: You can close this dialog, along with the CIPS web application at any time. The Modeling processes will continue to run until completed.
-						</div>
-						
-					</div>
-					<div class="modal-footer">
-			       		<button type="button" class="btn btn-default" data-dismiss="modal" id="modelBtnCancel">Cancel</button>
-			        	<button type="button" class="btn btn-primary" onclick="app.saveModel();" id="modelBtnSave">Save and Continue</button>
-			        	<button type="button" class="btn btn-default" data-dismiss="modal" style="display: none;" id="modelBtnClose">Close</button>
-			      	</div>
-				</div>
-			</div>
-		</div>-->
-		
-		<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup">
+      	<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modelPopup" data-backdrop="static">
 			<div class="modal-dialog modal-xl">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -505,17 +343,14 @@
 			      			<div class="form-group">
 								<div class="input-group">
 									<div class="input-group-addon">Region</div>
-									<input type="text" class="form-control" id="inputModelReg" disabled>
-								</div>
-								<div class="input-group">
+									<input type="text" class="form-control" id="inputModelReg">
+								
 									<div class="input-group-addon">Prior. Area Id</div>
-									<input type="text" class="form-control" id="inputModelPaId" disabled>
-								</div>
-								<div class="input-group">
+									<input type="text" class="form-control" id="inputModelPaId">
+								
 									<div class="input-group-addon">Prior. Area Name</div>
-									<input type="text" class="form-control" id="inputModelPaName" disabled>
-								</div>
-								<div class="input-group">
+									<input type="text" class="form-control" id="inputModelPaName">
+								
 									<div class="input-group-addon">Model Run Id</div>
 									<input type="text" class="form-control" id="inputModelRunId">
 								</div>
@@ -536,16 +371,14 @@
 							<!-- content is dynamically created based on PreProcInputs table -->
 						</div>
 								
-						<div id="modelCheck" class="text-right"></div>
+						<div id="modelCheck" class="text-center"></div>
 
-						<div id="modelProgress" style="display:none;">
+						<div id="modelProgress" style="display:none;" class="text-center">
 							<div id="modelProgressText">Status: Modeling in Process</div>
-							<div class="progress">
-								<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-							    <span class="sr-only" id="modelProgressIndicator">20% Complete</span>
-							 </div>
+							<div id="modelProgressImage">
+								<img src="img/loading.gif" style="width: 50px;"/>
 							</div>
-							Note: You can close this dialog, along with the CIPS web application at any time. The Modeling processes will continue to run until completed.
+							<div class="text-center">Note: You can close this dialog, along with the CIPS web application (your web browser) at any time.<br/>The Modeling processes will continue to run until completed.</div>
 						</div>
 						
 					</div>

@@ -10,9 +10,11 @@ var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, e
 var shapeEditLayer, shapeEditStatus, shapeEditBackup, shapeCollection = [], newFeatureName; // editing variables
 var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
 var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
-var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
-var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
-var modelFactors;
+//var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
+//var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
+var modelFactors, paramFactors;  // modelFactors are the factors with _ separators, paramFactors hav spaces
+var modelNewOrEdit; // used for messaging when a Prioritization model is created
+var lastModelNum, newModelNum, modelNumObjectId, regionNum;
 var geometryService, gp;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
@@ -912,7 +914,7 @@ function(
 
 	app.findRegion = function() {
 		// Search by Region tool - Query and zoom to the selected Region boundary
-		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), function(callback) {
+		$.when(app.runQuery(appConfig.URL_REGION, "RB=" + $('#frmSearchRegion').val(), true, function(callback) {
 			var extent = callback.features[0].geometry.getExtent();
 			map.setExtent(extent);
 		}));
@@ -921,7 +923,7 @@ function(
 	
 	app.findInterpArea = function() {
 		// Search by Interpretation Area tool - Query and zoom to the selected Interp Area boundary
-		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", function(callback) {
+		$.when(app.runQuery(appConfig.URL_INTERP_AREA, "InterpAreaName='" + $('#frmSearchInterp').val() + "'", true, function(callback) {
 			var extent = callback.features[0].geometry.getExtent();
 			map.setExtent(extent);
 		}));
@@ -993,7 +995,7 @@ function(
 		}*/
 	};
 
-	app.runQuery = function(layerUrl, queryWhere, callback) {
+	app.runQuery = function(layerUrl, queryWhere, geomTrueFalse, callback) {
 		// Query task
 		var query = new Query();
 		var queryTask = new QueryTask(layerUrl);
@@ -1001,7 +1003,7 @@ function(
 		query.outSpatialReference = {
 			wkid : 102100
 		};
-		query.returnGeometry = true;
+		query.returnGeometry = geomTrueFalse;
 		query.outFields = ["*"];
 		queryTask.execute(query, function(res) {	
 			callback(res);
@@ -1154,21 +1156,17 @@ function(
 				
 				// Populate the drop down list based on query of existing Models
 				var modelList = "";
-				var query = new Query();
-				var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
-				query.where = "0=0";
-				query.returnGeometry = false;
-				query.outFields = ["*"];
-				queryTask.execute(query, function(res) {	
-					console.log(res);
+				
+				$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "0=0", false, function(res) {
 					$.each(res.features, function(i) {
 						console.log(res.features[i].attributes.ModelRunName);
 						modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
 					});
 					$("#selectPriorModel").html(modelList);
+					app.resetModelPopup();
 					$("#modelSelect").modal("show");
 					esri.hide(loading);
-				});
+				}));
 			break;
 			case "optionsRadios6":
 				// delete prioritization area
@@ -1220,6 +1218,7 @@ function(
 	
 	app.resetModelPopup = function() {
 		// Reset the Model modal popup to default values
+		$("#inputModelName").prop("disabled", false);
 		$("#inputModelName").val("");
 		//$("#modelInfo").html("");
 		$("#inputModelReg").val("");
@@ -1231,191 +1230,314 @@ function(
 		$("#modelBtnCancel").show();
     	$("#modelBtnSave").show();
     	$("#modelBtnClose").hide();
-    	$.each(modelParams, function(i) {
-    		$("#" + modelParams[i]).val(10);
-    	});
-    	$.each(modelToggles, function(i) {
-    		$("#" + modelToggles[i]).bootstrapToggle("on");
-    	});
+    	lastModelNum = null;
+    	newModelNum = null;
+    	modelNumObjectId = null;
+    	modelNewOrEdit = null;
+    	regionNum = null;
 	};
 	
 	app.newModel = function(editFtr) {
 		// Create new Prioritization Model
 		esri.show(loading);
-		app.resetModelPopup();
+		modelNewOrEdit = "new";
+		app.resetModelPopup(); // removes any previously-created elements
 		var paAttr = editFtr.attributes;
-		console.log(editFtr);
-		//$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
-		//$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
-    	//$("#modelPopup").modal("show");
-    	
-    	// Query the PreProcInputs table to get parameters available for Model
-    	var modelInput = '<div class="row"><b>'
-			+ 	'<div class="col-md-1">'
-			+ 		'Include?'
-			+ 	'</div>'
-			+ 	'<div class="col-md-2">'
-			+		'Factor'
-			+ 	'</div>'
-			+ 	'<div class="col-md-2">'
-			+ 		'Model Weight (%)'
-			+ 	'</div>'
-			+ 	'<div class="col-md-2">'
-			+ 		'Risk Level 3'
-			+ 	'</div>'
-			+ 	'<div class="col-md-2">'
-			+ 		'Risk Level 2'
-			+ 	'</div>'
-			+ 	'<div class="col-md-2">'
-			+ 		'Risk Level 1'
-			+ 	'</div></b>'
-			+ '</div>';
-    	
-    	modelFactors = [];
-    	var query = new Query();
-		var queryTask = new QueryTask(appConfig.URL_PRIOR_PREPROC_INPUTS);
-		query.where = "SWRCBRegID = '" + paAttr.SWRCBRegID + "'";
-		query.returnGeometry = false;
-		query.outFields = ["*"];
-		queryTask.execute(query, function(res) {
-			// Dynamically build the forms for parameter input
-			var qryRes = res.features;
-			$.each(qryRes, function(i) {
-				console.log(qryRes[i].attributes);
-				var paramName = qryRes[i].attributes.PreProcDataSourceName;
-				var paramNameTrim = paramName.replace(/\s+/g , "_");
-				modelFactors.push(paramNameTrim);
-				modelInput += ""
-					+ '<div class="row">'
-					+ 	'<div class="col-md-1">'
-					+ 		'<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="70">'
-					+ 	'</div>'
-					+ 	'<div class="col-md-2">'
-					+		'<label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
-					+ 	'</div>'
-					+ 	'<div class="col-md-2">'
-					+ 		'<div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight</div>'
-					+ 		'<input type="number" min="0" max="100" value="10" class="form-control form-value" id="input' + paramNameTrim + '" name=""></div>'
-					+ 	'</div>'
-					+ 	'<div class="col-md-2">'
-					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel3 + '</label>'
-					+ 	'</div>'
-					+ 	'<div class="col-md-3">'
-					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel2 + '</label>'
-					+ 	'</div>'
-					+ 	'<div class="col-md-2">'
-					+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel1 + '</label>'
-					+ 	'</div>'
-					+ '</div>';
-				/*modelInput += ""
-					+ '<form class="form-inline"><div class="form-group">'
-					+ '<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="90"><label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
-					+ '</div><div class="form-group"><div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight (%)</div>'
-					+ '<input type="number" min="0" max="100" value="10" class="form-control form-value" id="input' + paramNameTrim + '" name="">'
-					+ '</div></div>'
-					+ '<div class="form-group">Level 1: ' + qryRes[i].attributes.PreProcLevel1 + '</div>'
-					+ '<div class="form-group">Level 2: ' + qryRes[i].attributes.PreProcLevel2 + '</div>'
-					+ '<div class="form-group">Level 3: ' + qryRes[i].attributes.PreProcLevel3 + '</div>'
-					+ '</form>';*/
-			});
-			$("#modelParameters").html(modelInput);
-			//$("#modelInfo").html("SWRCBRegID: " + paAttr.SWRCBRegID + ", PrioritizAreaKey: " + paAttr.PrioritizAreaKey + ", PrioritizAreaName: " + paAttr.PrioritizAreaName + "<br/><br/>");
-			$("#inputModelReg").val(paAttr.SWRCBRegID);
-			$("#inputModelPaId").val(paAttr.PrioritizAreaKey);
-			$("#inputModelPaName").val(paAttr.PrioritizAreaName);
-			$("#inputModelRunId").val("1"); // *************************NEED TO GET THIS FROM QUERY OF THE NEXT ID NUMBER
-			$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
-			$("#modelPopup").modal("show");
+		regionNum = paAttr.SWRCBRegID;
+		
+		// Get the last used model number
+		$.when(app.runQuery(appConfig.URL_PRIOR_MODEL_NUMBER, "0=0", false, function(callback1) {
+			lastModelNum = callback1.features[0].attributes["Reg" + regionNum + "LastModelNumAssigned"];
+			newModelNum = lastModelNum + 1;
+			modelNumObjectId = callback1.features[0].attributes.OBJECTID;
 			
-			// initialize the bootstrapToggle checkbox function
-			$.each(modelFactors, function(i) {
-				$('#toggle' + modelFactors[i]).bootstrapToggle();
-				// Set on-change behavior for Model Parameter toggles
-    			$("#toggle" + modelFactors[i]).change(function() {
-	    			if ($(this).prop("checked")) {
-			    		$("#input" + modelFactors[i]).prop('disabled', false);
-			    	} else {
-			    		$("#input" + modelFactors[i]).prop('disabled', true);
-			    		$("#input" + modelFactors[i]).val(0);
-			    	}
-    			});
-			});
-			esri.hide(loading);
-		});
+			// Update the last used model number with + 1
+			//$.when(app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, modelNumObjectId, "Reg" + regionNum + "LastModelNumAssigned", newModelNum, function(callback2) {
+				
+				// Dynamically build the elemments on the Model popup based upon what is available from the PreProcInputs table
+				
+				// Column headers
+		    	var modelInput = '<div class="row"><b>'
+					+ 	'<div class="col-md-1">Include?</div>'
+					+ 	'<div class="col-md-2">Factor</div>'
+					+ 	'<div class="col-md-2">Model Weight (%)</div>'
+					+ 	'<div class="col-md-2">Risk Level 3</div>'
+					+ 	'<div class="col-md-3">Risk Level 2</div>'
+					+ 	'<div class="col-md-2">Risk Level 1</div></b>'
+					+   '</div>';
+		    	
+		    	// Reset arrays for available Factors. paramFactors is the actual name, modelFactors is the name with underscores replacing spaces.
+		    	modelFactors = [];
+		    	paramFactors = [];
+		    	
+		    	// Query the PreProcInputs table
+		    	$.when(app.runQuery(appConfig.URL_PRIOR_PREPROC_INPUTS, "SWRCBRegID = '" + paAttr.SWRCBRegID + "'", false, function(res) {
+					// Dynamically build the forms for parameter input
+					var qryRes = res.features;
+					$.each(qryRes, function(i) {
+						console.log(qryRes[i].attributes);
+						var paramName = qryRes[i].attributes.PreProcDataSourceName;
+						var paramNameTrim = paramName.replace(/\s+/g , "_");
+						modelFactors.push(paramNameTrim);
+						paramFactors.push(paramName);
+						modelInput += ""
+							+ '<div class="row">'
+							+ 	'<div class="col-md-1">'
+							+ 		'<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="70">'
+							+ 	'</div>'
+							+ 	'<div class="col-md-2">'
+							+		'<label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
+							+ 	'</div>'
+							+ 	'<div class="col-md-2">'
+							+ 		'<div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight</div>'
+							+ 		'<input type="number" min="0" max="100" value="10" class="form-control form-value" id="input' + paramNameTrim + '" name=""></div>'
+							+ 	'</div>'
+							+ 	'<div class="col-md-2">'
+							+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel3 + '</label>'
+							+ 	'</div>'
+							+ 	'<div class="col-md-3">'
+							+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel2 + '</label>'
+							+ 	'</div>'
+							+ 	'<div class="col-md-2">'
+							+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel1 + '</label>'
+							+ 	'</div>'
+							+ '</div>';
+					});
+					$("#modelParameters").html(modelInput);
+					$("#inputModelReg").val(paAttr.SWRCBRegID);
+					$("#inputModelPaId").val(paAttr.PrioritizAreaKey);
+					$("#inputModelPaName").val(paAttr.PrioritizAreaName);
+					$("#inputModelRunId").val(newModelNum);
+					$("#modelInstructions").html("Enter the Model Name, select the parameters you want to use, and specify weights");
+					$("#modelPopup").modal("show");
+					
+					// initialize the bootstrapToggle checkbox function
+					$.each(modelFactors, function(i) {
+						$('#toggle' + modelFactors[i]).bootstrapToggle();
+						// Set on-change behavior for Model Parameter toggles
+		    			$("#toggle" + modelFactors[i]).change(function() {
+			    			if ($(this).prop("checked")) {
+					    		$("#input" + modelFactors[i]).prop('disabled', false);
+					    	} else {
+					    		$("#input" + modelFactors[i]).prop('disabled', true);
+					    		$("#input" + modelFactors[i]).val(0);
+					    	}
+		    			});
+					});
+					esri.hide(loading);
+				}));
+			//}));
+		}));
 	};
 	
 	app.existingModel = function() {
-		// Load existing model parameters into modal popup
-		console.log("load existing model");
-		$("#modelSelect").modal("hide");
-		$("#modelPopup").modal("show");
+		// Create new Prioritization Model
+		esri.show(loading);
 		
-		// Query to get record values
+		$("#modelSelect").modal("hide");
+		
+		app.resetModelPopup(); // removes any previously-created elements
 		var selModel = $("#selectPriorModel").val();
-		var query = new Query();
-		var queryTask = new QueryTask(appConfig.URL_PRIOR_MODELS);
-		query.where = "ModelRunKey = '" + selModel + "'";
-		query.returnGeometry = false;
-		query.outFields = ["*"];
-		queryTask.execute(query, function(res) {
-			var qryAttr = res.features[0].attributes;	
-			console.log(qryAttr);
-			$("#inputModelName").val(qryAttr.ModelRunName);
+		modelNewOrEdit = "edit";
+		
+		
+		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "ModelRunKey = '" + selModel + "'", false, function(inputFtr) {
+			console.log(inputFtr);
+
+			var paAttr = inputFtr.features[0].attributes;
+			regionNum = paAttr.SWRCBRegID;	
 			
-			$.each(res.features[0].attributes, function(i) {
-				console.log(res.features[0].attributes);
-			});
-		});
+			// Dynamically build the elemments on the Model popup based upon what is available from the PreProcInputs table
+			
+			// Column headers
+	    	var modelInput = '<div class="row"><b>'
+				+ 	'<div class="col-md-1">Include?</div>'
+				+ 	'<div class="col-md-2">Factor</div>'
+				+ 	'<div class="col-md-2">Model Weight (%)</div>'
+				+ 	'<div class="col-md-2">Risk Level 3</div>'
+				+ 	'<div class="col-md-3">Risk Level 2</div>'
+				+ 	'<div class="col-md-2">Risk Level 1</div></b>'
+				+   '</div>';
+	    	
+	    	// Reset arrays for available Factors. paramFactors is the actual name, modelFactors is the name with underscores replacing spaces.
+	    	modelFactors = [];
+	    	paramFactors = [];
+	    	
+	    	// Query the PreProcInputs table
+	    	$.when(app.runQuery(appConfig.URL_PRIOR_PREPROC_INPUTS, "SWRCBRegID = '" + paAttr.SWRCBRegID + "'", false, function(res) {
+				// Dynamically build the forms for parameter input
+				var qryRes = res.features;
+				$.each(qryRes, function(i) {
+
+					var paramName = qryRes[i].attributes.PreProcDataSourceName;
+					var paramNameTrim = paramName.replace(/\s+/g , "_");
+
+					for (j = 1; j < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; j++) { 
+					    if (paAttr["Input" + j + "DataSourceName"] === paramName) {
+					    	console.log("match", paramName);
+					    	var inputWeight = (parseFloat(paAttr["Input" + j + "Weight"])) * 100;
+					    	//console.log(inputWeight);
+					    	break;
+					    }
+					}
+					
+					modelFactors.push(paramNameTrim);
+					paramFactors.push(paramName);
+					modelInput += ""
+						+ '<div class="row">'
+						+ 	'<div class="col-md-1">'
+						+ 		'<input id="toggle' + paramNameTrim + '" type="checkbox" checked data-toggle="toggle" data-size="small" data-on="Include" data-off="Exclude" data-width="70">'
+						+ 	'</div>'
+						+ 	'<div class="col-md-2">'
+						+		'<label class="checkbox-inline model-label">' + paramName + '&nbsp;</label>'
+						+ 	'</div>'
+						+ 	'<div class="col-md-2">'
+						+ 		'<div class="input-group"><div class="input-group-addon input-group-sm input-label">Weight</div>'
+						+ 		'<input type="number" min="0" max="100" value="' + inputWeight + '" class="form-control form-value" id="input' + paramNameTrim + '" name=""></div>'
+						+ 	'</div>'
+						+ 	'<div class="col-md-2">'
+						+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel3 + '</label>'
+						+ 	'</div>'
+						+ 	'<div class="col-md-3">'
+						+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel2 + '</label>'
+						+ 	'</div>'
+						+ 	'<div class="col-md-2">'
+						+ 		'<label class="checkbox-inline model-label">' + qryRes[i].attributes.PreProcLevel1 + '</label>'
+						+ 	'</div>'
+						+ '</div>';
+				});
+				$("#modelParameters").html(modelInput);
+				$("#inputModelReg").val(paAttr.SWRCBRegID);
+				$("#inputModelPaId").val(paAttr.PrioritizAreaKey);
+				$("#inputModelName").val(paAttr.ModelRunName);
+				$("#inputModelName").prop(paAttr.ModelRunName);
+				$("#inputModelName").prop("disabled",true);
+				$("#inputModelRunId").val(paAttr.ModelRunID);
+				$("#modelInstructions").html("Modify the model parameters.");
+				$("#modelPopup").modal("show");
+				
+				// initialize the bootstrapToggle checkbox function
+				$.each(modelFactors, function(k) {
+					$('#toggle' + modelFactors[k]).bootstrapToggle();
+					// Set on-change behavior for Model Parameter toggles
+	    			$("#toggle" + modelFactors[k]).change(function() {
+		    			if ($(this).prop("checked")) {
+				    		$("#input" + modelFactors[k]).prop('disabled', false);
+				    	} else {
+				    		$("#input" + modelFactors[k]).prop('disabled', true);
+				    		$("#input" + modelFactors[k]).val(0);
+				    	}
+	    			});
+				});
+				esri.hide(loading);
+			}));
+		}));
 	};
 	
 	app.saveModel = function() {
-		// Prioritization Model
-		
+		esri.show(loading);
+		// Save Prioritization Model from the modal popup
+
 		// Check to make sure a Model Name is entered
 		if ($("#inputModelName").val() === "") {
-			$("#modelCheck").html("<br/>Please enter a Model Name");
+			$("#modelCheck").html("<br/><mark>Please enter a Model Name.</mark>");
+			esri.hide(loading);
 		} else {
 			// Check to verify the total weight of all included parameters equals 100
-			var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
-	    	var totalWeight = 0;
-	    	$.each(modelParams, function(i) {
-	    		var paramVal = parseInt($("#" + modelParams[i]).val());
+			var totalWeight = 0;
+	    	$.each(modelFactors, function(i) {
+	    		var paramVal = parseInt($("#input" + modelFactors[i]).val());
 	    		totalWeight += paramVal;
 	    	});
-	    	console.log(totalWeight);
 	    	if (totalWeight < 100) {
-	    		$("#modelCheck").html("<br/>Current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100");
+	    		$("#modelCheck").html("<br/><mark>The current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100.</mark>");
+	    		esri.hide(loading);
 	    	} else {
 	    		if (totalWeight > 100) {
-	    			$("#modelCheck").html("<br/>Current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100");
+	    			$("#modelCheck").html("<br/><mark>The current total of all Weights is <b>" + totalWeight + "</b>. Please adjust the weights until the total is 100.</mark>");
+	    			esri.hide(loading);
 	    		} else {
-	    			// OK to proceed
-	    			$("#modelCheck").html("");
-	    			// Build the feature to be passed via ajax call
-	    			var addFeature = {
-						"attributes": {
-							SWRCBRegID: 1,
-							PrioritizAreaID: "1_1",
-							ModelRunName: $("#inputModelName").val()
-						}
-					};
-					$.each(modelParams, function(i) {
-			    		if (!($("#" + modelParams[i]).prop("disabled"))) {
-			    			var fieldName = $("#" + modelParams[i]).prop("name");
-			    			var fieldVal = $("#" + modelParams[i]).val();
-			    			addFeature.attributes[fieldName] = fieldVal;
-			    		}
-			    	});
-			    	
-			    	console.log(addFeature);
-			    	$("#modelParameters").hide();
-			    	$("#modelProgress").show();
-			    	$("#modelBtnCancel").hide();
-			    	$("#modelBtnSave").hide();
-			    	$("#modelBtnClose").show();
-			    	
-	    		}
-	    	}
+	    			// OK to proceed	
+	
+					// If editing an existing model, alert user prior to over-writing previous run.
+					if (modelNewOrEdit === "edit") {
+						bootbox.confirm("<b>Warning</b> any previously generated results from this existing Prioritization Model will be overwritten. Click OK to proceed.", function(result) {
+							if (result) {
+								saveModelProceed();
+							} else {
+								esri.hide(loading);
+							}
+						});
+					} else {
+						// This is a new model. Check to make model name isn't duplicated.
+						var regNum = $("#inputModelReg").val();
+						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "SWRCBRegID = '" + regNum + "'", false, function(checkNameRes) {
+							$.each(checkNameRes.features, function(r){
+								if (checkNameRes.features[r].attributes.ModelRunName === $("#inputModelName").val()) {
+									$("#modelCheck").html("<br/><mark>The Model Name is already in use. Please use a different name.</mark>");
+									esri.hide(loading);
+								} else {
+									// OK to proceed with saving new model.
+									// Update the last used model number with + 1
+									$.when(app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, modelNumObjectId, "Reg" + regionNum + "LastModelNumAssigned", newModelNum, function(callback2) {
+										saveModelProceed();
+									}));
+								};
+							});
+						}));
+						
+					}
+					
+					function saveModelProceed() {
+						$("#modelCheck").html("");
+		    			
+		    			// build the parameters that will be submitted to the gp service
+		    			var gpParams = {
+							"PrioritizAreaKey" : $("#inputModelPaId").val(),
+							"ModelRunID" : $("#inputModelRunId").val(),
+							"Model_Run_Name" : $("#inputModelName").val(),
+							"Huc12_feature_class_name" : "HUC_12_Watersheds",
+						};
+						// Loop through model factors to build the parameters that will be used in the gp tool
+						$.each(paramFactors, function(i) {
+							if (!($("#input" + modelFactors[i]).prop('disabled'))) {
+								gpParams["Input" + i+1 + "_DataSource"] = paramFactors[i];
+								gpParams["Input" + i+1 + "_Level_Combo"] = "1";
+								gpParams["Input" + i+1 + "_Weight"] = parseInt($("#input" + modelFactors[i]).val()) / 100;
+							}
+						});
+			
+						//console.log(gpParams);
+						esri.hide(loading);
+				    	
+				    	//app.gpModelPrioritizGrows(gpParams);
+				    	$("#modelParameters").hide();
+				    	$("#modelInstructions").hide();
+				    	$("#modelProgress").show();
+				    	$("#modelProgressImage").show();
+				    	$("#modelBtnCancel").hide();
+				    	$("#modelBtnSave").hide();
+				    	$("#modelBtnClose").show();
+				    	$("#inputModelName").prop("disabled", true);
+		
+						// Initiate and run the geoprocessing service
+						gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
+						gp.submitJob(gpParams, gpCompleteCallback, gpStatusCallback);
+						$("modelProgressImage").show();
+
+						function gpStatusCallback(jobInfo) {
+							//console.log(jobInfo.jobStatus);
+							$("#modelProgressText").html("Status: Modeling in Process");
+						};
+					
+						function gpCompleteCallback(jobInfo) {
+							console.log("completed", jobInfo);
+							$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
+							$("#modelProgressImage").hide();
+						};
+					}
+		    	}
+		    }
 	    }
 	};
 	
@@ -1427,7 +1549,7 @@ function(
 		$.each(map.graphics.graphics, function(i) {
 			//inputPolys.push(map.graphics.graphics[i].geometry);
 			var qryWhere = "OBJECTID=" + map.graphics.graphics[i].attributes.OBJECTID;
-			$.when(app.runQuery(urlSource, qryWhere, function(callback) {
+			$.when(app.runQuery(urlSource, qryWhere, true, function(callback) {
 				inputPolys.push(callback.features[0].geometry);
 				console.log(inputPolys.length, polyCount);
 				if (inputPolys.length === polyCount) {
@@ -1450,7 +1572,7 @@ function(
 									//console.log("region query results", featureset);
 									var regionId = featureset.features[0].attributes.RB;
 									console.log("regionid", regionId);
-									$.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", function(callback) {
+									$.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", false, function(callback) {
 										//console.log("interp num callback", callback);
 										//testObj = callback.features[0];
 										
@@ -1487,7 +1609,7 @@ function(
 									console.log("region query results", featureset);
 									var regionId = featureset.features[0].attributes.RB;
 									console.log("regionid", regionId);
-									$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", function(callback) {
+									$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", false, function(callback) {
 										//console.log("interp num callback", callback);
 										//testObj = callback.features[0];
 										
@@ -1576,6 +1698,7 @@ function(
 	};
 	
 	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {
+		//app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, 1, "Reg1LastModelNumAssigned", 0, null);
 		
 		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
 		//console.log(updateAttributes);			
@@ -1851,90 +1974,28 @@ function(
 	    });
 	};
 	
-	app.gpModelPrioritizGrowsSync = function() {
-		// syncronous GP call, CURRENTLY NOT USED
-		var gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
-		var gpParams = {
-			"PrioritizAreaKey" : "5_1",
-			"ModelRunID" : "2",
-			"Model_Run_Name" : "web app test 1",
-			"Huc12_feature_class_name" : "HUC_12_Watersheds",
-			"Input1_DataSource" : "Cultivated Area",
-			"Input1_Level_Combo" : "1",
-			"Input1_Level_Weight" : 0.4,
-			"Input2_DataSource" : "Water Consumption",
-			"Input2_Level_Combo" : "1",
-			"Input2_Weight" : 0.4,
-			"Input3_DataSource" : "Percent Slope",
-			"Input3_Level_Combo" : "1",
-			"Input3_Weight" : 0.2
-		};
-		//var rerunCount = 0; // this can be used to run the gp tool again on fail
-		gp.execute(gpParams);
-		gp.on("execute-complete", function(results) {
-            console.log("gpModelPrioritizGrows complete", results);
-        });
-        gp.on("error", function(error) {
-            /*if (rerunCount < 2) {
-                gp.execute(gpParams);
-                rerunCount = rerunCount + 1;
-            }*/
-            console.log("error gpModelPrioritizGrows", error);
-        });
-	};
-	
-	app.gpModelPrioritizGrows = function() {
-		// asyncronous GP call
-		
-		/*gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
-		var gpParams = {
-			"PrioritizAreaKey" : "5_1",
-			"ModelRunID" : "2",
-			"Model_Run_Name" : "web app test 1",
-			"Huc12_feature_class_name" : "HUC_12_Watersheds",
-			"Input1_DataSource" : "Cultivated Area",
-			"Input1_Level_Combo" : "1",
-			"Input1_Level_Weight" : 0.4,
-			"Input2_DataSource" : "Water Consumption",
-			"Input2_Level_Combo" : "1",
-			"Input2_Weight" : 0.4,
-			"Input3_DataSource" : "Percent Slope",
-			"Input3_Level_Combo" : "1",
-			"Input3_Weight" : 0.2
-		};*/
-		
-		$("#inputModelReg").val("");
-		$("#inputModelPaId").val("");
-		$("#inputModelPaName").val("");
+	/*app.gpModelPrioritizGrows = function(gpParams) {
+		// Configure and call the asyncronous geoprocessing service.
 		
 		gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
-		var gpParams = {
-			"PrioritizAreaKey" : $("#inputModelPaId").val(),
-			"ModelRunID" : $("#inputModelRunId").val(),
-			"Model_Run_Name" : $("#inputModelName").val(),
-			"Huc12_feature_class_name" : "HUC_12_Watersheds",
-		};
-		// Loop through model factors to build the parameters that will be used in the gp tool
-		$.each(modelFactors, function(i) {
-		//	gpParams.["Input" + i + "_DataSource"] = $("#input")
-		});
-		
-		
-		
 		gp.submitJob(gpParams, app.gpCompleteCallback, app.gpStatusCallback);
+		$("modelProgressImage").show();
 	};
 
 	app.gpStatusCallback = function(jobInfo) {
-		console.log(jobInfo.jobStatus);
+		//console.log(jobInfo.jobStatus);
+		$("#modelProgressText").html("Status: Modeling in Process");
 	};
 
 	app.gpCompleteCallback = function(jobInfo) {
 		console.log("completed, jobInfo");
+		$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
+		$("#modelProgressImage").hide();
 	};
 
 	app.gpcDisplayResult = function(item) {
 		console.log(item.value);
-	};
+	};*/
 	
 	// -- Section 7: Authentication ----------------------------------------------------
 	

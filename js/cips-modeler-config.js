@@ -32,8 +32,9 @@ appConfig = {
 	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/9",
 	URL_PRIOR_MODELS: urlRoot + "CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_20151123/FeatureServer/13",
-	
-	URL_GP_MODEL_PRIOR_GROWS: "http://vags102a/arcgis/rest/services/CIPS/ModelPrioritizGrows/GPServer/V102_ModelPrioritizGrows",
+	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_20151123/FeatureServer/9",
+	URL_GP_MODEL_PRIOR_GROWS: "http://vags102a/arcgis/rest/services/CIPS/ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
+	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
 	
 	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/1",
 	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/0", //urlRoot + "CIPS_20151015/FeatureServer/20",
