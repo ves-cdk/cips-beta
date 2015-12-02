@@ -498,7 +498,7 @@ appWebMap = {
       {
         "id": "CIPS_20151015_8468",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151015/FeatureServer/3",
+        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151123/FeatureServer/5",
         "visibility": true,
         "opacity": 1,
         "title": "Prioritization Areas",

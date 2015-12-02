@@ -5,14 +5,14 @@ var clusterLayer, clusterLayerClickHandler; // used for clustered grow location 
 var basemapGallery, measurement, tb, epWidget, lineSymbol, timeSlider; // map widgets
 var showInfoWindow = "default"; // used to control map behavior based upon selected tool
 var cred = "esri_jsapi_id_manager_data"; // cookie/localStorage variable for ArcGIS for Server authentication
-var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
+var popupInfo, featureInfoTemplate, prModelPoly, prModelPoint, renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo; // editing variables
 var shapeEditLayer, shapeEditStatus, shapeEditBackup, shapeCollection = [], newFeatureName; // editing variables
 var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
-var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
+var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex; // used for getting onClick results from specific layers
 //var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
 //var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
-var modelFactors, paramFactors;  // modelFactors are the factors with _ separators, paramFactors hav spaces
+var modelFactors, paramFactors, priorAreaRecs;  // modelFactors are the factors with _ separators, paramFactors hav spaces
 var modelNewOrEdit; // used for messaging when a Prioritization model is created
 var lastModelNum, newModelNum, modelNumObjectId, regionNum;
 var geometryService, gp;
@@ -42,6 +42,7 @@ require([
     "esri/geometry/Polyline",
     "esri/geometry/Polygon", 
     "esri/renderers/ClassBreaksRenderer",
+    "esri/renderers/UniqueValueRenderer",
     "esri/renderers/SimpleRenderer",
     "esri/renderers/smartMapping",
     "esri/tasks/query",
@@ -97,6 +98,7 @@ function(
 	Polyline,
 	Polygon,
     ClassBreaksRenderer, 
+    UniqueValueRenderer,
     SimpleRenderer, 
     smartMapping,
     Query, 
@@ -254,6 +256,12 @@ function(
             	if (lyr.title === "SWRCB Regions") {
             		regionLyrIndex = i;
             	}
+            	if (lyr.title === "Grow Footprints") {
+            		growLyrIndex = i;
+            	}
+            	if (lyr.title === "Grow Locations") {
+            		growLocLyrIndex = i;
+            	}
             });
  
             clickHandler = response.clickEventHandle;
@@ -409,6 +417,10 @@ function(
 				});
 			}
 			
+			if ($("#optionsRadios10:checked").prop("checked")) {
+				console.log("10 checked");
+			}
+			
 			}); 
 
             mapNav = new Navigation(map);
@@ -454,7 +466,7 @@ function(
         on(popup, "SetFeatures", function() {
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8"];
+        	var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -464,7 +476,8 @@ function(
         	switch (selectedRadio) {
         		case "optionsRadios1": 
         		case "optionsRadios2":
-        		case "optionsRadios3":
+				case "optionsRadios9":
+				case "optionsRadios11":
         			// Do nothing - adding new features, don't want to display popup;
         		break;
         		case "optionsRadios4":
@@ -513,7 +526,10 @@ function(
         			$(".esriPopupWrapper").css("display","none");
             		var editFtr = popup.getSelectedFeature();
             		console.log(editFtr);
-            		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_INTERP_AREA).toLowerCase) {
+            		var selectedUrl = (editFtr._layer._url.path).toLowerCase();
+            		var checkUrl = appConfig.URL_INTERP_AREA.toLowerCase();
+            		if (selectedUrl === checkUrl) {
+            			console.log(editFtr.attributes.StatusInterpArea);
             			if (editFtr.attributes.StatusInterpArea === "In Initial Review") {
 	            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected Interpretation Area. Click OK to proceed, cancel to keep the Area", function(result) {
 	            				if (result) {
@@ -528,10 +544,26 @@ function(
             				popup.clearFeatures();
             			}
             		} else {
+            			console.log("not equal");
             			popup.clearFeatures();
             			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
             			esri.hide(loading);
             		}
+        		break;
+        		case "optionsRadios10":
+        			// Loading Prioritization Model - user clicked on a Pr Area boundary
+        			$(".esriPopupWrapper").css("display","none");
+        			var modelFtr = popup.getSelectedFeature();
+        			var modelFtrName = modelFtr.attributes.PrioritizAreaName;
+            		console.log(modelFtr);
+            		bootbox.confirm("<b>" + modelFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
+        				if (result) {
+        					esri.show(loading);
+							app.loadModel(modelFtr.attributes.PrioritizAreaKey, modelFtrName);
+        				} else {
+        					popup.clearFeatures();
+        				}
+        			});
         		break;
         		default:
         		// Default popup behavior
@@ -904,7 +936,7 @@ function(
     app.hideRibbonMenu = function() {
     	// Map menu items - showing and hiding elements
  		var tabs = $('.tabItems');
-		var containers = $('#menu1, #menu2, #menu3, #menu4, #menu5, #menu6');
+		var containers = $('#menu1, #menu2, #menu3, #menu4, #menu5, #menu6, #menu7');
 		containers.removeClass("slide-out");
 		containers.removeClass("showing");
 		containers.removeClass("active");
@@ -1005,6 +1037,22 @@ function(
 		};
 		query.returnGeometry = geomTrueFalse;
 		query.outFields = ["*"];
+		queryTask.execute(query, function(res) {	
+			callback(res);
+		});
+	};
+	
+	app.runQueryDistinctVal = function(layerUrl, queryWhere, outFields, geomTrueFalse, callback) {
+		// Query task to get distinct (unique) values
+		var query = new Query();
+		var queryTask = new QueryTask(layerUrl);
+		query.where = queryWhere;
+		query.outSpatialReference = {
+			wkid : 102100
+		};
+		query.returnGeometry = geomTrueFalse;
+		query.returnDistinctValues = true;
+		query.outFields = [outFields];
 		queryTask.execute(query, function(res) {	
 			callback(res);
 		});
@@ -1170,6 +1218,7 @@ function(
 			break;
 			case "optionsRadios6":
 				// delete prioritization area
+				app.isolatePopup("Prioritization Areas");
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
@@ -1185,6 +1234,7 @@ function(
 			break;
 			case "optionsRadios7":
 				// delete interpretation area
+				app.isolatePopup("Interpretation Areas");
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
@@ -1209,7 +1259,7 @@ function(
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
-				$("#editInstructions").html("delete a model.");
+				$("#editInstructions").html("Delete model function still under construction.");
 			break;
 		}
 		//dojo.disconnect(clickHandler);
@@ -1235,6 +1285,7 @@ function(
     	modelNumObjectId = null;
     	modelNewOrEdit = null;
     	regionNum = null;
+    	app.resetPopup();
 	};
 	
 	app.newModel = function(editFtr) {
@@ -1997,7 +2048,611 @@ function(
 		console.log(item.value);
 	};*/
 	
-	// -- Section 7: Authentication ----------------------------------------------------
+	// -- Section 7: Load Prioritization Model Results  ----------------------------------------------------
+	
+	app.initLoadModel = function(option) {
+		// radio button options for loading model
+		var selOption = option.id;
+
+		switch(selOption) {
+			case "optionsRadios10":
+				console.log("select by map");
+				$("#editRadios11").hide();
+				$("#modelInstructions").html("Click on the Prioritization Model boundary from the map.");
+				app.isolatePopup("Prioritization Areas");
+			break;
+			case "optionsRadios11":
+				console.log("select by list");
+				app.initLoadRegionList();
+				$("#loadModelFromList").show();
+				$("#editRadios10").hide();
+			break;
+		};
+	};	
+	
+	app.initLoadRegionList = function() {
+		// Populates drop down lists based on regions and models available
+		var regionList = [];
+		regionList += "<option value=''>Select a Region</option>";
+		$.when(app.runQueryDistinctVal(appConfig.URL_PRIOR_MODELS, "0=0", "SWRCBRegID", false, function(res1) {
+			$.each(res1.features, function(i) {
+				//console.log(res.features[i].attributes.ModelRunName);
+				regionList += "<option value='" + res1.features[i].attributes.SWRCBRegID + "'>" + res1.features[i].attributes.SWRCBRegID + "</option>";
+				//modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
+			});
+			$("#selectLoadPrRegion").html(regionList);
+		}));
+		//$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "0=0", false, function(res2) {
+		//	priorModelsRecs = res2;
+			//$("#selectLoadPrModel").html(modelList);
+		//}));
+		$.when(app.runQuery(appConfig.URL_PRIOR_AREA, "0=0", false, function(res2) {
+			priorAreaRecs = res2;
+			//$("#selectLoadPrModel").html(modelList);
+		}));
+	};
+	
+	app.initLoadModelList = function() {
+		// Populates drop down lists based on regions and models available
+		var modelList = [];
+		modelList += "<option value=''>Select a Prioritization Area</option>";
+		$.each(priorAreaRecs.features, function(i) {
+			if (priorAreaRecs.features[i].attributes.SWRCBRegID === $("#selectLoadPrRegion").val()) {
+				modelList += "<option value='" + priorAreaRecs.features[i].attributes.PrioritizAreaKey + "'>" + priorAreaRecs.features[i].attributes.PrioritizAreaName + "</option>";
+			}
+		});
+		$("#selectLoadPrModel").html(modelList);
+		$("#selectLoadPrModel").prop('disabled', false);
+	};
+	
+	//app.initLoadModelFromList = function() {
+	//	var selReg = $('#selectLoadPrModel option:selected').text();
+	//	var selModel = $('#selectLoadPrModel option:selected').text();		
+	//};
+	
+	app.resetLoadModel = function() {
+		// Reset load model menu to default state
+		$("#modelInstructions").html("Select an option.");
+		$("#loadModelFromMap").hide();
+		$("#loadModelFromList").hide();
+		$("#editRadios10").show();
+		$("#editRadios11").show();
+		$("#optionsRadios10:checked").prop("checked",false);
+		$("#optionsRadios11:checked").prop("checked",false);
+		$("#selectLoadPrModel").prop('disabled', true);
+		$("#modelResultsSummary").html("Summary");
+		$("#modelResults").hide();
+		$("#loadModelStatus").html("");
+		$.when(app.removeMapLayer(prModelPoly.id, function(callback) {
+			$.when(app.removeMapLayer(prModelPoint.id, function(callback) {
+				esri.hide(loading);
+			}));
+		}));
+		ftrLayer = null;
+		pointFtrLayer = null;
+		map.graphics.clear();
+	};
+	
+	app.loadModel = function(prioritizAreaID, modelFtrName) {
+		console.log(prioritizAreaID, modelFtrName);
+		// Loads a prioritization model - the PrioritizationGrows polygons + related results
+		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + prioritizAreaID + "'", false, function(resModels) {
+			console.log(resModels);
+			var modelCount = resModels.features.length;
+			if (modelCount > 1) {
+				var selectModel;
+				var modelList = "";
+				$.each(resModels.features, function(i) {
+					modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.ModelRunName + "</option>";
+				});
+				bootbox.dialog({
+					title: "Multiple models exist for this prioritization area. Select one.",
+					message: '<select id="selModelList" class="form-control">' +
+						modelList +
+						'</select>',
+					buttons: {
+						success: {
+							label: "Proceed",
+							callback: function() {
+								selectModel = $("#selModelList").val();
+								selectModelName = resModels.features[selectModel].attributes.ModelRunName;
+								console.log(selectModel);
+								$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[selectModel].attributes.ModelRunKey + "'", false, function(resSummary) {
+									showResults(resSummary.features[0].attributes);
+								}));
+							}
+						}
+					}
+				});
+			} else {
+				selectModelName = resModels.features[0].attributes.ModelRunName;
+				$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[0].attributes.ModelRunKey + "'", false, function(resSummary) {
+					showResults(resSummary.features[0].attributes);
+				}));
+
+			}
+		}));
+		
+		
+		function showResults(sumAttr) {
+			$("#modelResults").show();
+			
+			// Loop through the input factors and create a drop down for displaying points by each
+			var inputList = [];
+			inputList += "<option value='0'>Weighted Average Score</option>";
+			for (i = 1; i < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; i++) { 
+				var attrRecord = sumAttr["Input" + i + "DataSourceName"];
+			    if (!(attrRecord === "")) {
+			    	console.log(attrRecord);
+			    	inputList += "<option value='" + i + "'>" + attrRecord + "</option>";
+			    }
+			}
+			$("#modelDisplayBy").html(inputList);
+			
+			// Generate short summary of model results
+			var shortSummary = ""
+				+ "Prioritization Area: <b> " + modelFtrName + "</b><br/>"
+				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>"
+				+ "Number of Grows: " + sumAttr.NumGrows + "<br/>"
+				+ "&nbsp;&nbsp;Outdoor: " + sumAttr.NumOutdoorGrows + "<br/>"
+				+ "&nbsp;&nbsp;Greenhouse: " + sumAttr.NumGreenHouseGrows + "<br/>"
+				+ "Total Acreage of Grows: " + sumAttr.TotalAcreageGrows + "<br/>";
+			$("#modelResultsSummary").html(shortSummary);
+
+			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
+				
+				$.when(app.polyToPointLayer(selectModelName + " - point", appConfig.URL_PRIOR_MODELS_RESULTS, "ModelRunKey='" + sumAttr.ModelRunKey + "'", appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", function(ptCallback) {
+					
+					app.updateRenderer();
+					$("#optionsRadios10:checked").prop("checked",false);
+					$("#optionsRadios11:checked").prop("checked",false);
+					$("#editRadios10").hide();
+					$("#editRadios11").hide();
+					$("#loadModelFromList").hide();
+					$("#loadModelStatus").html("Prioritization Model Loaded.");
+					$("#modelInstructions").html("Prioritization Model Loaded.<br/>Click Reset to remove and start over.");
+					app.resetPopup();
+					app.zoomToLayerExtent(selectModelName);
+					esri.hide(loading);
+					//layers[growLyrIndex].layer.setVisibility(false);
+					layers[growLocLyrIndex].layer.setVisibility(false);
+					map.graphics.clear();
+				}));
+			}));
+		}
+	};
+	
+	app.createAppendedLayer = function(featureUrl, relateUrl, qryWhere, relateField, featureName, callback) {
+		var ftrLayer, relateLayer;
+
+		$.when(app.runQuery(featureUrl, qryWhere, true, function(qryResultsLyr) {
+			ftrLayer = qryResultsLyr;
+			$.when(app.runQuery(relateUrl, qryWhere, false, function(qryResultsRelate) {
+				relateLayer = qryResultsRelate;
+
+				$.extend(ftrLayer.fields, relateLayer.fields);
+				var relateLayerAttr = [];
+				$.each(relateLayer.features, function(i) {
+					relateLayerAttr.push(relateLayer.features[i].attributes);
+				});
+
+				$.each(ftrLayer.features, function(i) {
+					var relateId = ftrLayer.features[i].attributes[relateField];
+					var relateObjects = $.grep(relateLayerAttr, function(item) {
+						return item[relateField] === relateId;
+					});
+					$.extend(ftrLayer.features[i].attributes, ftrLayer.features[i].attributes, relateObjects[0]);
+				});
+
+				$.when(app.createPolyFC(featureName, ftrLayer, function(createdFC) {
+					//console.log(createdFC);
+					$.when(app.addToFeature(createdFC, ftrLayer, function(addedFeature) {
+						console.log("Create feature complete: ", addedFeature);
+						//addLayers.push(addedFeature);
+						
+						$.each(addedFeature.fields, function(i) {
+							var fldName = addedFeature.fields[i].name;
+							$('#frmModelFields').append($('<option>', {
+								value : fldName
+							}).text(fldName));
+						});
+
+						callback("Load Complete");
+					}));
+				}));
+			}));
+		}));
+	}; 
+
+	
+	app.createPolyFC = function(fcTitle, qryResults, callback) {
+		
+		if (!(fcTitle)) {
+			fcTitle = "Poly Layer";
+		}
+		
+		var featureCollection = {
+			"layerDefinition" : null,
+			"featureSet" : { "features" : [], "geometryType" : "esriGeometryPoly"}
+		};
+		featureCollection.layerDefinition = {
+			"geometryType" : "esriGeometryPolygon",
+			"objectIdField" : "ObjectID",
+			/*"drawingInfo" : {
+				"renderer" : {
+					"type" : "simple",
+					"symbol" : {
+						"type" : "esriPMS",
+						"url" : "http://static.arcgis.com/images/Symbols/Basic/RedSphere.png",
+						//"imageData" : "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQBQYWludC5ORVQgdjMuNS4xTuc4+QAAB3VJREFUeF7tmPlTlEcexnve94U5mANQbgQSbgiHXHINlxpRIBpRI6wHorLERUmIisKCQWM8cqigESVQS1Kx1piNi4mW2YpbcZONrilE140RCTcy3DDAcL/zbJP8CYPDL+9Ufau7uqb7eZ7P+/a8PS8hwkcgIBAQCAgEBAICAYGAQEAgIBAQCAgEBAICAYGAQEAgIBAQCDx/AoowKXFMUhD3lQrioZaQRVRS+fxl51eBTZUTdZ41U1Rox13/0JF9csGJ05Qv4jSz/YPWohtvLmSKN5iTGGqTm1+rc6weICOBRbZs1UVnrv87T1PUeovxyNsUP9P6n5cpHtCxu24cbrmwKLdj+osWiqrVKhI0xzbmZ7m1SpJ+1pFpvE2DPvGTomOxAoNLLKGLscZYvB10cbYYjrJCb7A5mrxleOBqim+cWJRakZY0JfnD/LieI9V1MrKtwokbrAtU4Vm0A3TJnphJD4B+RxD0u0LA7w7FTE4oprOCMbklEGNrfdGf4IqnQTb4wc0MFTYibZqM7JgjO8ZdJkpMln/sKu16pHZGb7IfptIWg389DPp9kcChWODoMuDdBOhL1JgpisbUvghM7AqFbtNiaFP80RLnhbuBdqi0N+1dbUpWGde9gWpuhFi95yL7sS7BA93JAb+Fn8mh4QujgPeTgb9kAZf3Apd2A+fXQ38yHjOHozB1IAJjOSEY2RSIwVUv4dd4X9wJccGHNrJ7CYQ4GGjLeNNfM+dyvgpzQstKf3pbB2A6m97uBRE0/Ergcxr8hyqg7hrwn0vAtRIKIRX6Y2pMl0RhIj8co9nBGFrvh55l3ngU7YObng7IVnFvGS+BYUpmHziY/Ls2zgP9SX50by/G9N5w6I+ogYvpwK1SoOlHQNsGfWcd9Peqof88B/rTyzF9hAIopAByQzC0JQB9ST5oVnvhnt+LOGsprvUhxNIwa0aY7cGR6Cp7tr8+whkjawIxkRWC6YJI6N+lAKq3Qf/Tx+B77oGfaQc/8hB8w2Xwtw9Bf3kzZspXY/JIDEbfpAB2BKLvVV90Jvjgoac9vpRxE8kciTVCBMMkNirJ7k/tRHyjtxwjKV4Yp3t/6s+R4E+/DH3N6+BrS8E314Dvvg2+/Sb4hxfBf5sP/up2TF3ZhonK1zD6dhwGdwail26DzqgX8MRKiq9ZBpkSkmeYOyPM3m9Jjl+1Z9D8AgNtlAq6bZ70qsZi+q+bwV/7I/hbB8D/dAr8Axq89iz474p/G5++koHJy1sx/lkGdBc2YjA3HF0rHNHuboomuQj/5DgclIvOGCGCYRKFFuTMV7YUAD3VDQaLMfyqBcZORGPy01QKYSNm/rYV/Nd/Av9NHvgbueBrsjDzRQamKKDxT9Kgq1iLkbIUDOSHoiNcgnYHgnYZi+9ZExSbiSoMc2eE2flKcuJLa4KGRQz6/U0wlGaP0feiMH4uFpMXEjBVlYjp6lWY+SSZtim0kulYMiYuJEJXuhTDJ9UYPByOvoIwdCxfgE4bAo0Jh39xLAoVpMwIEQyTyFCQvGpLon9sJ0K3J4OBDDcMH1dj9FQsxkrjMPFRPCbOx2GyfLal9VEcxstioTulxjAFNfROJPqLl6Bnfyg6V7ugz5yBhuHwrZjBdiU5YJg7I8wOpifAKoVIW7uQ3rpOBH2b3ekVjYT2WCRG3o+mIGKgO0OrlIaebU/HYOQDNbQnojB4NJyGD0NPfjA0bwTRE6Q7hsUcWhkWN8yZqSQlWWGECAZLmJfJmbrvVSI8taK37xpbdB/wQW8xPee/8xIGjvlj8IQ/hk4G0JbWcX8MHPVDX4kveoq8ocn3xLM33NCZRcPHOGJYZIKfpQyq7JjHS6yJjcHujLHADgkpuC7h8F8zEVqXSNC2awE69lqhs8AamkO26HrbDt2H7dBVQov2NcW26CiwQtu+BWjdY4n2nZboTbfCmKcCnRyDO/YmyLPnDlHvjDH8G6zhS9/wlEnYR7X00fWrFYuWdVI0ZpuhcbcczW/R2qdAcz6t/bRov4mONeaaoYl+p22rHF0bVNAmKtBvweIXGxNcfFH8eNlC4m6wMWMusEnKpn5hyo48pj9gLe4SNG9QoGGLAk8z5XiaJUd99u8122/IpBA2K9BGg2vWWKAvRYVeLzEa7E1R422m2+MsSTem97nSYnfKyN6/mzATv7AUgqcMrUnmaFlLX3ysM0fj+t/b5lQLtK22QEfyAmiSLKFZpUJ7kBRPXKW4HqCYynWVHKSG2LkyZex1uO1mZM9lKem9Tx9jjY5iNEYo0bKMhn7ZAu0r6H5PpLXCAq0rKJClSjSGynE/QIkrQYqBPe6S2X+AJsY2Ped6iWZk6RlL0c2r5szofRsO9R5S1IfQLRCpQL1aifoYFerpsbkuTImaUJXuXIDiH6/Ys8vm3Mg8L2i20YqsO7fItKLcSXyn0kXccclVqv3MS6at9JU/Ox+ouns+SF6Z4cSupz7l8+z1ucs7LF1AQjOdxfGZzmx8Iu1TRcfnrioICAQEAgIBgYBAQCAgEBAICAQEAgIBgYBAQCAgEBAICAQEAv8H44b/6ZiGvGAAAAAASUVORK5CYII=",
+						"width" : 15,
+						"height" : 15
+					}
+				}
+			},*/
+			"fields" : [
+				{ "name" : "ObjectID", "alias" : "ObjectID", "type" : "esriFieldTypeOID" }
+			]
+		};
+		
+		featureInfoTemplate = new InfoTemplate();
+		featureInfoTemplate.setTitle(fcTitle);
+		var featureInfoTemplateContent = "";
+		
+		$.each(qryResults.fields, function(i) { 
+			//pointFeature.fields.push(qryResults.fields[i]);
+			featureCollection.layerDefinition.fields.push(qryResults.fields[i]);
+			featureInfoTemplateContent += "'" + qryResults.fields[i].name + ": ${" + qryResults.fields[i].name + "}<br/>'";
+		});
+		
+		polyFeature = new FeatureLayer(featureCollection, { id: fcTitle , mode: FeatureLayer.MODE_SNAPSHOT});
+		polyFeature.infoTemplate =  featureInfoTemplate;
+		
+		callback(polyFeature);
+			
+	};
+	
+	app.addToFeature = function(addFeature, qryResults, callback) {
+		var graphic;
+		$.each(qryResults.features, function(i) {
+			graphic = new Graphic(qryResults.features[i].geometry);
+			graphic.setAttributes(qryResults.features[i].attributes);
+			addFeature.add(graphic);//, null, null, featureInfoTemplate);		
+		});
+		
+		addFeature.setMinScale(72000);
+		map.addLayers([addFeature]);
+		prModelPoly = addFeature;
+		console.log("addFeature: ", addFeature);
+		toc.layerInfos.push({
+			"layer" : addFeature,
+			"title" : addFeature.id
+		});
+		toc.refresh();
+		callback(addFeature);
+	};
+	
+	app.removeMapLayer = function(layerName, callback) {
+		// remove an added layer from map
+		var layerToRemove = map.getLayer(layerName);
+		map.removeLayer(layerToRemove);
+		// remove an added layer from TOC
+		var tocIndex = 0;
+		toc.layerInfos.forEach(function(i) {
+			if(i.title === layerName) { 
+				toc.layerInfos.splice(tocIndex,1);
+				toc.refresh();
+				callback("complete");
+			} else {
+				tocIndex += 1;
+			}
+		});
+		
+	};
+	
+	app.updateRenderer = function() {
+		app.classBreakRendererPoly('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoly);
+		app.classBreakRendererPoint('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoint);
+	};
+	
+	app.classBreakRendererPoly = function(renderField, renderLayer) {
+		if (renderField === "Input0PreProcScore" || renderField === "WtAveScore") {
+			renderField = "WtAveScore";
+			// simple class break renderer with 3 classes
+			var symbol = new SimpleFillSymbol();
+			symbol.setColor(new Color([150, 150, 150, 0.5]));
+			var renderer = new ClassBreaksRenderer(symbol, renderField);
+	        /*renderer.addBreak(1, 1.5, new SimpleFillSymbol().setColor(new Color([255,182,14, 0.6])));
+	        renderer.addBreak(1.5, 2, new SimpleFillSymbol().setColor(new Color([255,146,0, 0.6])));
+	        renderer.addBreak(2, 2.5, new SimpleFillSymbol().setColor(new Color([230,19,19, 0.6])));
+	        renderer.addBreak(2.5, 3, new SimpleFillSymbol().setColor(new Color([168,41,41, 0.6])));*/
+	        var val1 = new SimpleFillSymbol();
+				val1.setColor(new Color([255,182,14, 0.6]));
+				val1.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,172,4, 0.3]), 5));
+	        	renderer.addBreak(1, 1.5, val1);
+	        var val2 = new SimpleFillSymbol();
+				val2.setColor(new Color([255,146,0, 0.6]));
+				val2.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,136,0, 0.3]), 5));
+	        	renderer.addBreak(1.5, 2, val2);
+	        var val3 = new SimpleFillSymbol();
+	        	val3.setColor(new Color([230,19,19, 0.6]));
+				val3.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([240,9,9, 0.3]), 5));
+	        	renderer.addBreak(2, 2.5, val3);
+	        var val4 = new SimpleFillSymbol();
+		        val4.setColor(new Color([168,41,41, 0.6]));
+				val4.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([158,31,31, 0.3]), 5));
+		        renderer.addBreak(2.5, 3, val4);
+	        // customizing the toc labels:
+	        renderer.infos[0].label = "< 1.5";
+	        renderer.infos[1].label = "1.5 to < 2";
+	        renderer.infos[2].label = "2  to < 2.5";
+	        renderer.infos[3].label = "2.5 to 3";
+	        renderLayer.setRenderer(renderer);
+	        renderLayer.refresh();
+	        toc.refresh();
+		} else {
+			var symbol = new SimpleFillSymbol();
+			symbol.setColor(new Color([150, 150, 150, 0.5]));
+			var renderer = new UniqueValueRenderer(symbol, renderField);
+			var val1 = new SimpleFillSymbol();
+				val1.setColor(new Color([255,146,0, 0.6]));
+				val1.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,136,0, 0.3]), 5));
+	        	renderer.addValue(1, val1);
+	        var val2 = new SimpleFillSymbol();
+	        	val2.setColor(new Color([230,19,19, 0.6]));
+				val2.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([240,9,9, 0.3]), 5));
+	        	renderer.addValue(2, val2);
+	        var val3 = new SimpleFillSymbol();
+		        val3.setColor(new Color([168,41,41, 0.6]));
+				val3.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([158,31,31, 0.3]), 5));
+		        renderer.addValue(3, val1);
+	        //renderer.addValue(2, new SimpleFillSymbol().setColor(new Color([230,19,19, 0.6])));
+	        //renderer.addValue(3, new SimpleFillSymbol().setColor(new Color([168,41,41, 0.6])));
+	        console.log(renderer);
+	        renderLayer.setRenderer(renderer);
+	        renderLayer.refresh();
+	        toc.refresh();
+		}
+	};
+	
+	app.classBreakRendererPoint = function(renderField, renderLayer) {
+		if (renderField === "Input0PreProcScore" || renderField === "WtAveScore") {
+			renderField = "WtAveScore";
+			var ptSymbol = new SimpleMarkerSymbol();
+	        ptSymbol.setColor(new Color([150, 150, 150, 0.5]));
+			var renderer = new ClassBreaksRenderer(ptSymbol, renderField);
+			renderer.addBreak(1, 1.5, new SimpleMarkerSymbol('circle', 7, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,182,14, 0.25]), 5), new Color([255,182,14, 0.9])));
+	        renderer.addBreak(1.5, 2, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,146,0, 0.25]), 6), new Color([255,146,0, 0.9])));
+	        renderer.addBreak(2, 2.5, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([230,19,19, 0.25]), 6), new Color([230,19,19, 0.9])));
+	        renderer.addBreak(2.5, 3, new SimpleMarkerSymbol('circle', 9, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([168,41,41, 0.25]), 7), new Color([168,41,41, 0.9])));
+	        // customizing the toc labels:
+	        renderer.infos[0].label = "< 1.5";
+	        renderer.infos[1].label = "1.5 to < 2";
+	        renderer.infos[2].label = "2  to < 2.5";
+	        renderer.infos[3].label = "2.5 to 3";
+	        renderLayer.setRenderer(renderer);
+	        renderLayer.refresh();
+	    	toc.refresh();
+		} else {
+			var ptSymbol = new SimpleMarkerSymbol();
+	        ptSymbol.setColor(new Color([150, 150, 150, 0.5]));
+			var renderer = new UniqueValueRenderer(ptSymbol, renderField);
+			renderer.addValue(1, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,146,0, 0.25]), 6), new Color([255,146,0, 0.9])));
+	        renderer.addValue(2, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([230,19,19, 0.25]), 6), new Color([230,19,19, 0.9])));
+	    	renderer.addValue(3, new SimpleMarkerSymbol('circle', 9, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([168,41,41, 0.25]), 7), new Color([168,41,41, 0.9])));
+			renderLayer.setRenderer(renderer);
+	        renderLayer.refresh();
+	        toc.refresh();
+	   }
+	};
+	
+	app.polyToPointLayer = function(newLyrName, polyUrl, queryParams, relateUrl, queryParamsRelate, relateField, callback) {
+		// This function takes an input polygon feature service and converts to a point featureCollection, adding it to the map.
+		// Query the poly feature service to get the returned objects
+		$.when(app.runQuery(polyUrl, queryParams, true, function(qryResultsLyr) {
+			$.when(app.appendRecsToPoint(relateUrl, queryParamsRelate, qryResultsLyr, relateField, function(ftrLayerCallback) {
+				var ftrLayer = ftrLayerCallback;
+
+				// Create the point featureCollection template
+				var featureCollection = {
+					"layerDefinition" : null,
+					"featureSet" : {
+						"features" : [],
+						"geometryType" : "esriGeometryPoint"
+					}
+				};
+				featureCollection.layerDefinition = {
+					"geometryType" : "esriGeometryPoint",
+					"objectIdField" : "ObjectID",
+					"drawingInfo" : {
+						"renderer" : {
+							"type" : "simple",
+							"symbol" : {
+								"type" : "esriPMS",
+								"url" : "http://static.arcgis.com/images/Symbols/Basic/RedSphere.png",
+								"contentType" : "image/png",
+								"width" : 15,
+								"height" : 15
+							}
+						}
+					},
+					"fields" : [
+						{ "name" : "ObjectID", "alias" : "ObjectID", "type" : "esriFieldTypeOID" }
+					]
+				};
+
+				$.each(ftrLayer.fields, function(i) {
+					featureCollection.layerDefinition.fields.push(ftrLayer.fields[i]);
+				});
+
+				//create a feature layer based on the feature collection
+				var pointFtrLayer = new FeatureLayer(featureCollection, {
+					id : newLyrName
+				});
+
+				//associate the features with the popup on click
+				pointFtrLayer.on("click", function(evt) {
+					map.infoWindow.setFeatures([evt.graphic]);
+				});
+
+				//map.on("layers-add-result", function(results) {
+				//	loadData();
+				//});
+
+				map.addLayers([pointFtrLayer]);
+				loadData();
+				toc.layerInfos.push({
+					"layer" : pointFtrLayer,
+					"title" : pointFtrLayer.id
+				});
+				toc.refresh();
+				console.log("addLayers: ", pointFtrLayer);
+				
+				function loadData() {
+					var features = [];
+					var count = 0;
+					$.each(qryResultsLyr.features, function(i) {
+						var geom = qryResultsLyr.features[i].geometry.getCentroid();
+						var graphic = new Graphic();
+						graphic.setAttributes(qryResultsLyr.features[i].attributes);
+						graphic.geometry = geom;
+						features.push(graphic);
+						count = count + 1;
+						if (count == qryResultsLyr.features.length) {
+							//testObj = features;
+							pointFtrLayer.applyEdits(features, null, null);
+							var popupInfo = generateDefaultPopupInfo(featureCollection);
+							var infoTemplate = new InfoTemplate(buildInfoTemplate(popupInfo));
+							pointFtrLayer.infoTemplate = infoTemplate;
+							
+							pointFtrLayer.setMaxScale(72000);
+							
+							prModelPoint = pointFtrLayer;
+							//addPrioritizationLayers[1] = pointFtrLayer;
+							callback("point ftr added");
+						}
+					});
+				};
+				
+				
+				function generateDefaultPopupInfo(featureCollection) {
+					var fields = featureCollection.layerDefinition.fields;
+					var decimal = {
+						'esriFieldTypeDouble' : 1,
+						'esriFieldTypeSingle' : 1
+					};
+					var integer = {
+						'esriFieldTypeInteger' : 1,
+						'esriFieldTypeSmallInteger' : 1
+					};
+					var dt = {
+						'esriFieldTypeDate' : 1
+					};
+					var displayField = null;
+					var fieldInfos = arrayUtil.map(fields, lang.hitch(this, function(item) {
+						if (item.name.toUpperCase() === "NAME") {
+							displayField = item.name;
+						}
+						var visible = (item.type !== "esriFieldTypeOID" && item.type !== "esriFieldTypeGlobalID" && item.type !== "esriFieldTypeGeometry");
+						var format = null;
+						if (visible) {
+							var f = item.name.toLowerCase();
+							var hideFieldsStr = ",stretched value,fnode_,tnode_,lpoly_,rpoly_,poly_,subclass,subclass_,rings_ok,rings_nok,";
+							if (hideFieldsStr.indexOf("," + f + ",") > -1 || f.indexOf("area") > -1 || f.indexOf("length") > -1 || f.indexOf("shape") > -1 || f.indexOf("perimeter") > -1 || f.indexOf("objectid") > -1 || f.indexOf("_") == f.length - 1 || f.indexOf("_i") == f.length - 2) {
+								visible = false;
+							}
+							if (item.type in integer) {
+								format = {
+									places : 0,
+									digitSeparator : true
+								};
+							} else if (item.type in decimal) {
+								format = {
+									places : 2,
+									digitSeparator : true
+								};
+							} else if (item.type in dt) {
+								format = {
+									dateFormat : 'shortDateShortTime'
+								};
+							}
+						}
+						return lang.mixin({}, {
+							fieldName : item.name,
+							label : item.alias,
+							isEditable : false,
+							tooltip : "",
+							visible : visible,
+							format : format,
+							stringFieldOption : 'textbox'
+						});
+					}));
+					var popupInfo = {
+						title : displayField ? '{' + displayField + '}' : '',
+						fieldInfos : fieldInfos,
+						description : null,
+						showAttachments : false,
+						mediaInfos : []
+					};
+					return popupInfo;
+				}
+
+				function buildInfoTemplate(popupInfo) {
+					var json = {
+						content : "<table>"
+					};
+
+					json.content += "<div class='popup-header'>" + newLyrName + "<\/div><div class='popup-hz-line'><\/div>";
+
+					arrayUtil.forEach(popupInfo.fieldInfos, function(field) {
+						if (field.visible) {
+							json.content += "<tr><td valign='top'>" + field.label + ": <\/td><td valign='top'>${" + field.fieldName + "}<\/td><\/tr>";
+						}
+					});
+					json.content += "<\/table>";
+					return json;
+				}
+			}));
+		}));
+	};
+	
+	app.appendRecsToPoint = function(relateUrl, queryParamsRelate, ftrLayer, relateField, callback) {
+		// Called from app.polyToPointLayer, This appends related records to the point feature being created from a poly
+		//  in a separate function to force syncronous behavior
+		if (relateUrl) {
+			// If relateUrl is given, append records
+			$.when(app.runQuery(relateUrl, queryParamsRelate, false, function(qryResultsRelate) {
+				var relateLayer = qryResultsRelate;
+				$.extend(ftrLayer.fields, relateLayer.fields);
+				var relateLayerAttr = [];
+				$.each(relateLayer.features, function(i) {
+					relateLayerAttr.push(relateLayer.features[i].attributes);
+				});
+
+				$.each(ftrLayer.features, function(i) {
+					var relateId = ftrLayer.features[i].attributes[relateField];
+					var relateObjects = $.grep(relateLayerAttr, function(item) {
+						return item[relateField] === relateId;
+					});
+					$.extend(ftrLayer.features[i].attributes, ftrLayer.features[i].attributes, relateObjects[0]);
+
+				});
+				callback(ftrLayer);
+			}));
+		} else {
+			// no relateUrl, no appending of records, just go back to parent function
+			callback(ftrLayer);
+		}
+	}; 
+	
+	app.zoomToLayerExtent  = function(layerName) {
+		var extentLayer = map.getLayer(layerName);
+		var lyrExtent = esri.graphicsExtent(extentLayer.graphics);
+		var newExtent = lyrExtent.expand(1.25);
+		map.setExtent(newExtent);
+	};
+	
+	// -- Section 8: Authentication ----------------------------------------------------
 	
 	// Authentication - when services come from ArcGIS Online
 	if (appConfig.AUTH === "arcgisonline") {

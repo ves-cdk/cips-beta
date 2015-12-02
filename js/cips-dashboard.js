@@ -1234,7 +1234,7 @@ function(
 				$("#frmLoadPM").prop("disabled",true);
 				$("#showModelParams").show();
 				$("#menuModelRenderer").show();
-				app.loadModel();
+				app.loadModel("poly");
 				//app.loadRenderer();
 			break;
 			case "showParams":
@@ -1755,16 +1755,16 @@ function(
 	}; 
 
 	// create layer with appended attrbutes
-	app.loadModel = function() {
+	app.loadModel = function(featureType) {
 		// Run from the Load Model button in the left menu.
 		//var featureUrl = "http://vags103a/arcgis/rest/services/CIPS/CIPS/FeatureServer/0";
-		var featureUrl = "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/1"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/PrioritizationDemo/FeatureServer/3";
+		var featureUrl = "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_20151123/FeatureServer/4"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/PrioritizationDemo/FeatureServer/3";
 		//var relateUrl = "http://vags103a/arcgis/rest/services/CIPS/CIPS/FeatureServer/8";
-		var relateUrl = "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/Deliverable_20150909_forTesting_20151005/FeatureServer/10"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/PrioritizationDemo/FeatureServer/12";
-		var qryWhere = "SWRCBRegID=" + $("#frmLoadRegion").val() + " and PrioritizAreaID=" + $("#frmLoadPA").val() + " and PrioritizAreaID=" + $("#frmLoadPM").val();
-		//var qryWhere = "SWRCBRegID=1 and InterpAreaID=3 and PrioritizAreaID = 1";
+		var relateUrl = "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151123/FeatureServer/11"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/PrioritizationDemo/FeatureServer/12";
+		//var qryWhere = "SWRCBRegID=" + $("#frmLoadRegion").val() + " and PrioritizAreaID=" + $("#frmLoadPA").val() + " and PrioritizAreaID=" + $("#frmLoadPM").val();
+		var qryWhere = "SWRCBRegID=5 and ModelRunID=3 and PrioritizAreaID=1";
 		var relateField = "PrioritizGrowKey";
-		var featureType = "poly"; // "poly" or "point" types allowed
+		//var featureType = "poly"; // "poly" or "point" types allowed
 		var featureName = "Test"; //$("#frmModelName").val();
 		app.createAppendedLayer(featureUrl, relateUrl, qryWhere, relateField, featureType, featureName);
 	};

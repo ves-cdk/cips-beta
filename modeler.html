@@ -79,6 +79,9 @@
 										<a href="#menu6" class="tabItems" role="tab" data-toggle="tab" id="menuEdit" onclick="app.menuChange(this);"><i class="fa fa-cog fa-lg">&nbsp;</i>Model Tools</a>
 									</li>
 									<li>
+										<a href="#menu7" class="tabItems" role="tab" data-toggle="tab" id="menuPrModel" onclick="app.menuChange(this);"><i class="fa fa-cog fa-lg">&nbsp;</i>View Prioritization Model</a>
+									</li>
+									<li>
 										<a href="#menu1" class="tabItems" role="tab" data-toggle="tab" id="menuSearch" onclick="app.menuChange(this);"><i class="fa fa-search fa-lg">&nbsp;</i>Search</a>
 									</li>
 									<li>
@@ -276,6 +279,79 @@
 								</div>
 
 							</div>
+							<!-- Load Prioritization Model -->
+							<div id="menu7" class="tab-pane ribbon-bar-tab">
+								<div class="panel-group" id="accordion7" role="tablist" aria-multiselectable="true">
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel1">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse1" aria-expanded="false" aria-controls="collapse7One"> Load Prioritization Model:</a></h4>
+										</div>
+										<div id="menu7collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel1">
+											<div class="panel-body" id="">
+												<!--<p class="bg-info" id="loadModelTitle">Select a Model:</p>-->
+												<div class="radio" id="editRadios10">
+													<label>
+														<input type="radio" name="optionsRadios10" id="optionsRadios10" value="option1" onclick="app.initLoadModel(this)"> Select by Clicking on Prioritization Model</label>
+												</div>
+												<div class="radio" id="editRadios11">
+													<label>
+														<input type="radio" name="optionsRadios11" id="optionsRadios11" value="option2" onclick="app.initLoadModel(this)"> Select from List</label>
+												</div>
+												<div id="loadModelFromList" style="display:none;">
+													Region<br/>
+										      		<select class="form-control" id="selectLoadPrRegion" onchange="app.initLoadModelList()">
+										      			<option></option>
+													</select><br/>
+													Prioritization Model<br/>
+										      		<select class="form-control" id="selectLoadPrModel" disabled onchange="app.loadModel($('#selectLoadPrModel').val(), $('#selectLoadPrModel option:selected').text())">
+										      			<option></option>
+													</select>	
+												</div>	
+												<div id="loadModelStatus"></div>										
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default" id="modelResults" style="display:none;">
+										<div class="panel-heading" role="tab" id="menu7panel4">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse4" aria-expanded="false" aria-controls="collapse7Four"> Prioritization Model Information</a></h4>
+										</div>
+										<div id="menu7collapse4" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel4">
+											<div class="panel-body">
+												<div id="modelResultsDisplay">
+													Display Grows by:<br/>
+										      		<select class="form-control" id="modelDisplayBy" onchange="app.updateRenderer()">
+										      			<option></option>
+													</select><br/>
+												</div><br/>
+												<div id="modelResultsSummary">Summary</div>
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel2">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse2" aria-expanded="false" aria-controls="collapse7Two"> Instructions</a></h4>
+										</div>
+										<div id="menu7collapse2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel2">
+											<div class="panel-body">
+												<div id="modelInstructions">Select an option.</div>
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel3">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse3" aria-expanded="false" aria-controls="collapse7Three"> Reset</a></h4>
+										</div>
+										<div id="menu7collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel3">
+											<div class="panel-body">
+												<div id="loadResetMenu">
+													<button id="loadResetBtn" onclick="app.resetLoadModel();" class="btn btn-block">Reset</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							
 						</div>
 						<button id="ribbon-bar-toggle" onclick="app.hideRibbonMenu();" style="display:none;" title="Close Menu">
 							<span class="fa fa-minus-square"></span>
@@ -343,16 +419,16 @@
 			      			<div class="form-group">
 								<div class="input-group">
 									<div class="input-group-addon">Region</div>
-									<input type="text" class="form-control" id="inputModelReg">
-								
-									<div class="input-group-addon">Prior. Area Id</div>
-									<input type="text" class="form-control" id="inputModelPaId">
-								
+									<input type="text" class="form-control" id="inputModelReg" disabled>
+									
 									<div class="input-group-addon">Prior. Area Name</div>
-									<input type="text" class="form-control" id="inputModelPaName">
+									<input type="text" class="form-control" id="inputModelPaName" disabled>
+									
+									<div class="input-group-addon" style="display:none;">Prior. Area Id</div>
+									<input type="text" class="form-control" id="inputModelPaId" disabled>
 								
-									<div class="input-group-addon">Model Run Id</div>
-									<input type="text" class="form-control" id="inputModelRunId">
+									<div class="input-group-addon" style="display:none;">Model Run Id</div>
+									<input type="text" class="form-control" id="inputModelRunId" disabled>
 								</div>
 							</div>
 			      		</form><br/>

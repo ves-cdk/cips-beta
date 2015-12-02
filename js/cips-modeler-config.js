@@ -28,9 +28,14 @@ appConfig = {
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/2",
 	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
 	
-	URL_PRIOR_AREA: urlRoot + "CIPS_20151015/FeatureServer/3",
+	URL_PRIOR_AREA: urlRoot + "CIPS_20151123/FeatureServer/5", //  "CIPS_20151015/FeatureServer/3",
 	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/9",
 	URL_PRIOR_MODELS: urlRoot + "CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
+	URL_PRIOR_MODELS_SUMMARY: urlRoot + "CIPS_20151123/FeatureServer/8",
+	
+	URL_PRIOR_MODELS_RESULTS: urlRoot + "CIPS_20151123/FeatureServer/4", // Prioritization Grows (polygons) 
+	URL_PRIOR_MODELS_RESULTS_RELATE: urlRoot + "CIPS_20151123/FeatureServer/11", // Prioritization Model results related table 
+	
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_20151123/FeatureServer/13",
 	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_20151123/FeatureServer/9",
 	URL_GP_MODEL_PRIOR_GROWS: "http://vags102a/arcgis/rest/services/CIPS/ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
