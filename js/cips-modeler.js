@@ -10,9 +10,8 @@ var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, e
 var shapeEditLayer, shapeEditStatus, shapeEditBackup, shapeCollection = [], newFeatureName; // editing variables
 var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
 var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex; // used for getting onClick results from specific layers
-//var modelParams = ["inputWtSlope", "inputWtCult", "inputWtProx", "inputWtDrink", "inputWtRes", "inputWtWtrright", "inputWtWtrcons", "inputWtCrit", "inputWtSens", "inputWtLSA"];
-//var modelToggles = ["toggleElev", "toggleCult", "toggleProx", "toggleDrink", "toggleRes", "toggleWtrright", "toggleWtrcons", "toggleCrit", "toggleSens", "toggleLSA"];
-var modelFactors, paramFactors, priorAreaRecs;  // modelFactors are the factors with _ separators, paramFactors hav spaces
+var modelFactors, paramFactors;  // modelFactors are the factors with _ separators, paramFactors hav spaces
+var priorAreaRecs; // stored records for Priortization Areas, used for loading models
 var modelNewOrEdit; // used for messaging when a Prioritization model is created
 var lastModelNum, newModelNum, modelNumObjectId, regionNum;
 var geometryService, gp;
@@ -160,10 +159,10 @@ function(
 	  urlPrefix: "sampleserver6.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
-	urlUtils.addProxyRule({
+	/*urlUtils.addProxyRule({
 	  urlPrefix: "mapserver.vestra.com",
 	  proxyUrl: appConfig.PROXY_PAGE
-	});
+	});*/
 
     // for the map tool container
     var showing = false;
@@ -347,14 +346,12 @@ function(
 							var evt = featureset.features[0];
 							var symbol = editFillSymbol;
 							var interpName = evt.attributes.InterpAreaName;
-							//console.log(evt);
 							map.graphics.add(new Graphic(evt.geometry, symbol, evt.attributes));
 							bootbox.confirm(interpName + " was selected. Use this Interpretation Area boundary for your new Prioritization Area?", function(result) {
 								if (!(result)) {
 									map.graphics.clear();
 								} else {
-									//bootbox.alert("saving new Prioritization Area."
-									// ADD CODE TO SAVE BOUNDARY TO PRIORITIZATON AREA
+									// saving new Prioritization Area.
 									app.saveEdits();
 								}
 							});
@@ -798,7 +795,7 @@ function(
 	     var sources = sL.get("sources");
 	    
 	     sources.push({
-	        featureLayer: new FeatureLayer(appConfig.SEARCH_WATERSHED),
+	        featureLayer: new FeatureLayer(appConfig.URL_WATERSHED),
 	        searchFields: ["Name"],
 	        suggestionTemplate: "${Name}, HUC12: ${HUC12}",
 	        displayField: "Name",
@@ -1838,7 +1835,7 @@ function(
 		}
 	};
 	
-	app.saveGraphic = function () {
+	/*app.saveGraphic = function () {
 		// new graphic feature was added, save it to the layer
 		esri.show(loading);
 		$("#attributesDiv").show();
@@ -1865,7 +1862,7 @@ function(
 		}
 		$("#saveGraphic").hide();
 		$("#saveEdits").show();
-	};
+	};*/
 	
 	app.stopEdit = function () {
 		
@@ -2134,6 +2131,7 @@ function(
 	};
 	
 	app.loadModel = function(prioritizAreaID, modelFtrName) {
+		esri.show(loading);
 		console.log(prioritizAreaID, modelFtrName);
 		// Loads a prioritization model - the PrioritizationGrows polygons + related results
 		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + prioritizAreaID + "'", false, function(resModels) {
@@ -2648,7 +2646,7 @@ function(
 	app.zoomToLayerExtent  = function(layerName) {
 		var extentLayer = map.getLayer(layerName);
 		var lyrExtent = esri.graphicsExtent(extentLayer.graphics);
-		var newExtent = lyrExtent.expand(1.25);
+		var newExtent = lyrExtent.expand(2);
 		map.setExtent(newExtent);
 	};
 	
@@ -2795,22 +2793,6 @@ function(
         $("#sumWshd-toggle").change(function() {
 	    	app.summarizeWshd($(this).prop("checked"));
 	    });
-	    
-	    /*
-	    // Set on-change behavior for Model Parameter toggles
-	    $.each(modelToggles, function(i) {
-    		$("#" + modelToggles[i]).change(function() {
-    			if ($(this).prop("checked")) {
-		    		$("#" + modelParams[i]).prop('disabled', false);
-		    	} else {
-		    		$("#" + modelParams[i]).prop('disabled', true);
-		    		$("#" + modelParams[i]).val(0);
-		    	}
-    		});
-    	});
-    	*/
-	    
-
 
     });
 });

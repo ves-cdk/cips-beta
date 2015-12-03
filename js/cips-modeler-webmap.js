@@ -12,12 +12,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.5592,
-        38.7849
+        -125.713,
+        38.8106
       ],
       [
-        -118.6653,
-        42.0746
+        -118.5115,
+        42.0501
       ]
     ]
   },
@@ -26,9 +26,10 @@ appWebMap = {
       {
         "id": "CIPS_Base_3356",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_Base/FeatureServer/1",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/0",
         "visibility": true,
         "opacity": 1,
+        "mode": 1,
         "title": "SWRCB Regions",
         "itemId": "7bb40dce21bc4be7b1e455b344bc7d4e",
         "layerDefinition": {
@@ -39,9 +40,10 @@ appWebMap = {
       {
         "id": "CIPS_Operational_5300",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_Operational/FeatureServer/1",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/2",
         "visibility": true,
         "opacity": 1,
+        "mode": 1,
         "title": "Grow Footprints",
         "itemId": "a0c69d0449784ef686a18d3ca5ae7bd2",
         "layerDefinition": {
@@ -192,9 +194,10 @@ appWebMap = {
       {
         "id": "CIPS_Base_3192",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_Base/FeatureServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/1",
         "visibility": false,
         "opacity": 1,
+        "mode": 1,
         "title": "Watershed Boundaries - HUC12",
         "itemId": "7bb40dce21bc4be7b1e455b344bc7d4e",
         "layerDefinition": {
@@ -413,24 +416,33 @@ appWebMap = {
         }
       },
       {
-        "id": "CIPS_Operational_320",
+        "id": "CIPS_Operational_6044",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_Operational/FeatureServer/2",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/7",
         "visibility": true,
         "opacity": 1,
+        "mode": 1,
         "title": "Interpretation Areas",
-        "itemId": "a0c69d0449784ef686a18d3ca5ae7bd2",
         "layerDefinition": {
           "drawingInfo": {
             "renderer": {
               "type": "uniqueValue",
               "field1": "StatusInterpArea",
+              "field2": null,
+              "field3": null,
+              "fieldDelimiter": ", ",
               "defaultSymbol": null,
+              "defaultLabel": null,
               "uniqueValueInfos": [
                 {
                   "value": "Interp Completed",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ],
                     "outline": {
                       "color": [
                         197,
@@ -438,7 +450,7 @@ appWebMap = {
                         255,
                         255
                       ],
-                      "width": 1.125,
+                      "width": 0.75,
                       "type": "esriSLS",
                       "style": "esriSLSSolid"
                     },
@@ -450,15 +462,20 @@ appWebMap = {
                 {
                   "value": "Interp in Progress",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ],
                     "outline": {
                       "color": [
                         230,
-                        76,
+                        152,
                         0,
                         255
                       ],
-                      "width": 1.125,
+                      "width": 0.75,
                       "type": "esriSLS",
                       "style": "esriSLSSolid"
                     },
@@ -470,15 +487,20 @@ appWebMap = {
                 {
                   "value": "In Initial Review",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      0,
+                      0,
+                      0,
+                      0
+                    ],
                     "outline": {
                       "color": [
-                        255,
+                        230,
                         0,
-                        197,
+                        169,
                         255
                       ],
-                      "width": 1.125,
+                      "width": 0.75,
                       "type": "esriSLS",
                       "style": "esriSLSSolid"
                     },
@@ -489,18 +511,167 @@ appWebMap = {
                 }
               ]
             }
-          },
-          "minScale": 13889686,
-          "maxScale": 0
+          }
         },
-        "capabilities": "Query"
+        "popupInfo": {
+          "title": "CIPS_InterpAreas: {InterpAreaName}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpAreaKey",
+              "label": "InterpAreaKey",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpAreaID",
+              "label": "InterpAreaID",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpAreaName",
+              "label": "InterpAreaName",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpAreaSqKm",
+              "label": "InterpAreaSqKm",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpAreaAcres",
+              "label": "InterpAreaAcres",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GrowYear",
+              "label": "GrowYear",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "StatusInterpArea",
+              "label": "StatusInterpArea",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateAerialInterpCompleted",
+              "label": "DateAerialInterpCompleted",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpMethod",
+              "label": "InterpMethod",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "InterpImageryNamesDates",
+              "label": "InterpImageryNamesDates",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "TotalNumberGrowsIdentified",
+              "label": "TotalNumberGrowsIdentified",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "NumberIdentifiedGrowsPerSqKm",
+              "label": "NumberIdentifiedGrowsPerSqKm",
+              "isEditable": true,
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
       },
       {
         "id": "CIPS_20151015_8468",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_20151123/FeatureServer/5",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/6",
         "visibility": true,
         "opacity": 1,
+        "mode": 1,
         "title": "Prioritization Areas",
         "layerDefinition": {
           "drawingInfo": {
@@ -651,9 +822,10 @@ appWebMap = {
       {
         "id": "CIPS_Operational_8869",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/CIPS_Operational/FeatureServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/1",
         "visibility": true,
         "opacity": 1,
+        "mode": 1,
         "title": "Grow Locations",
         "itemId": "a0c69d0449784ef686a18d3ca5ae7bd2",
         "layerDefinition": {
