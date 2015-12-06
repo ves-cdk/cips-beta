@@ -79,7 +79,7 @@
 										<a href="#menu6" class="tabItems" role="tab" data-toggle="tab" id="menuEdit" onclick="app.menuChange(this);"><i class="fa fa-cog fa-lg">&nbsp;</i>Model Tools</a>
 									</li>
 									<li>
-										<a href="#menu7" class="tabItems" role="tab" data-toggle="tab" id="menuPrModel" onclick="app.menuChange(this);"><i class="fa fa-cog fa-lg">&nbsp;</i>View Prioritization Model</a>
+										<a href="#menu7" class="tabItems" role="tab" data-toggle="tab" id="menuPrModel" onclick="app.menuChange(this);"><i class="fa fa-sort-amount-asc fa-lg">&nbsp;</i>View Prioritization Model</a>
 									</li>
 									<li>
 										<a href="#menu1" class="tabItems" role="tab" data-toggle="tab" id="menuSearch" onclick="app.menuChange(this);"><i class="fa fa-search fa-lg">&nbsp;</i>Search</a>
@@ -129,18 +129,18 @@
 									An Interpretation Area
 									<select class="form-control" id="frmSearchInterp" onchange="app.findInterpArea()">
 										<option>Select an Interpretation Area</option>
-										<option class="option-data">Bear Creek</option>
-										<option class="option-data">Cottonwood Creek</option>
-										<option class="option-data">Deer Creek</option>
-										<option class="option-data">Feather River</option>
-										<option class="option-data">Navarro River</option>
-										<option class="option-data">Redwood Creek</option>
+										<option>Bear Creek</option>
+										<option>Cottonwood Creek</option>
+										<option>Deer Creek</option>
+										<option>Feather River</option>
+										<option>Navarro River</option>
+										<option>Redwood Creek</option>
 										<option>Robinson Creek</option>
-										<option class="option-data">South Fork Trinity River</option>
+										<option>South Fork Trinity River</option>
 										<option>Region 1 South of Ferndale</option>
-										<option class="option-data">Willow Creek</option>
+										<option>Willow Creek</option>
 									</select>
-									Completed Interpretation Areas are highlighted in <span class="option-data">bold</span>.
+									
 								</div>
 								<div class="menuLevel3">
 									A Watershed (HUC12)
@@ -248,6 +248,16 @@
 													<label>
 														<input type="radio" name="optionsRadios" id="optionsRadios8" value="option8" onclick="app.initModelMenu(this)"> Model</label>
 												</div>
+												<div id="deleteModelFromList" style="display:none;">
+													Region<br/>
+										      		<select class="form-control" id="selectDelPrRegion" onchange="app.initDelModelList()">
+										      			<option></option>
+													</select><br/>
+													Prioritization Area<br/>
+										      		<select class="form-control" id="selectDelPrModel" disabled onchange="app.loadDelModel($('#selectDelPrModel').val(), $('#selectDelPrModel option:selected').text())">
+										      			<option></option>
+													</select>	
+												</div>	
 												<!--<div id="editorDiv"></div>
 												<div id="attributesDiv"></div>-->
 												

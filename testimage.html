@@ -1,0 +1,115 @@
+<!--<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Create Map and add a dynamic layer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css"/>
+    <style>
+      html, body, #mapDiv{
+        padding: 0;
+        margin: 0;
+        height: 100%;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script>
+      var map, testvar;
+
+      require([
+        "esri/map",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/layers/ImageParameters",
+      ], function (
+        Map, ArcGISDynamicMapServiceLayer, ImageParameters) {
+
+        map = new Map("mapDiv", {
+          sliderOrientation : "horizontal"
+        });
+
+        var imageParameters = new ImageParameters();
+        console.log(imageParameters);
+        //imageParameters.format = "jpeg"; //set the image type to PNG24, note default is PNG8.
+		
+		var layerDefs = [];
+        layerDefs[1] = "Name='CIPS_PrioritizModel_1_1_1'";
+        layerDefs[2] = "Name='CIPS_PrioritizModel_1_1_1'";
+        layerDefs[3] = "Name='CIPS_PrioritizModel_1_1_1'";
+        //dynamicMapServiceLayer.setLayerDefinitions(layerDefinitions);	
+        imageParameters.layerDefinitions = layerDefs;
+
+        //Takes a URL to a non cached map service.
+        var dynamicMapServiceLayer = new ArcGISDynamicMapServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Raster/MapServer", {
+          "opacity" : 0.5,
+          "imageParameters" : imageParameters
+        });
+        
+        map.addLayer(dynamicMapServiceLayer);
+        console.log(dynamicMapServiceLayer);
+        testvar = dynamicMapServiceLayer;
+
+      });
+    </script>
+  </head>
+  <body>
+    <div id="mapDiv"></div>
+  </body>
+</html>-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Simple Image Service</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css" />
+
+    <style>
+      html, body, #map { height: 100%; width: 100%; margin: 0; padding: 0; }
+    </style>
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script>
+      var map, testvar, rasterFunction, functionArguments;
+      require([
+        "esri/map", "esri/layers/ArcGISImageServiceLayer", 
+        "esri/layers/ImageServiceParameters", "esri/layers/RasterFunction", "esri/config", "dojo/parser", "dojo/domReady!"
+      ], function(
+        Map, ArcGISImageServiceLayer, 
+        ImageServiceParameters, RasterFunction, esriConfig, parser
+      ) {
+        parser.parse();
+		
+        map = new Map("map", {
+          basemap: "topo",
+          center: [-123.023970 	, 40.052481],
+          zoom: 8
+        });
+
+
+        var params = new ImageServiceParameters();
+        params.noData = 0;
+        
+        var imageServiceLayer = new ArcGISImageServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ImageService/ImageServer", {
+          imageServiceParameters: params,
+          opacity: 0.75
+        });
+        
+        map.addLayer(imageServiceLayer);
+        console.log(imageServiceLayer);
+        
+        testvar = imageServiceLayer;
+        
+        //testvar.setDefinitionExpression("Name='CIPS_PrioritizModel_1_1_1'");
+        //testvar.setRenderingRule(rasterFunction);
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="map"> </div>
+  </body>
+
+</html>

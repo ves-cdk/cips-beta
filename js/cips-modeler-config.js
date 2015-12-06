@@ -16,15 +16,12 @@ appConfig = {
     PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
     PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
-    INIT_EXTENT: { xmin: 	-14295287.001905905, ymin: 4652688.941886589, xmax: -12901075.60598466, ymax: 5203035.545539711, spatialReference: { wkid: 102100 } },
+    INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
     
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
-    
-    //SEARCH_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/0",
-    //GROW_POLYS_URL: urlRoot + "CIPS_Operational/FeatureServer/1",
-    //GROW_POINTS_URL: urlRoot + "CIPS_Operational/FeatureServer/0",
-    //GROW_PREPROC_RESULTS_URL: urlRoot + "CIPS_Operational/FeatureServer/6",
+    WEBMAP_ID: "", // Use "" if defining below in WEBMAP_JSON. If an ID is used, the WEBMAP_JSON content below will be ignored.
+  
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7", //"CIPS_Operational/FeatureServer/2",
 	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
 	
@@ -39,14 +36,18 @@ appConfig = {
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/13", //"CIPS_20151123/FeatureServer/13",
 	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/9",
 	
-	URL_GP_MODEL_PRIOR_GROWS: "http://mapserver.vestra.com/arcgis/rest/services/CIPS/ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
+	URL_GP_MODEL_DELETE_MODEL: urlRoot + "####",
+	URL_GP_MODEL_PRIOR_GROWS: urlRoot + "ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
 	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
 	
 	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/0", //1
 	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/1", //0 //urlRoot + "CIPS_20151015/FeatureServer/20",
-    //URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/4", //urlRoot + "CIPS_20151015/FeatureServer/11",
-    //URL_EDIT_POINT: urlRoot + "CIPS_20151009/FeatureServer/0",
-    //URL_EDIT_POLYLINE: urlRoot + "CIPS_20151009/FeatureServer/1",
-    //URL_EDIT_POLYGON: urlRoot + "CIPS_20151009/FeatureServer/2"
-    //WEBMAP_ID: "" // Use "" if defining below in WEBMAP_JSON. If an ID is used, the WEBMAP_JSON content below will be ignored.
+  
+    // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file
+    LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
+    LAYER_NAME_INTERP: "Interpretation Areas",
+    LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
+    LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
+    LAYER_NAME_GROW_FOOTPRINTS: "Grow Footprints",
+    LAYER_NAME_GROW_LOCATIONS: "Grow Locations"
 };

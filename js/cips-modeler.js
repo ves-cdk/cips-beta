@@ -243,22 +243,22 @@ function(
             	if (i > 0) {
             		lyr.layer.advancedQueryCapabilities.supportsPagination = true;
             	}
-            	if (lyr.title === "Watershed Boundaries - HUC12") {
+            	if (lyr.title === appConfig.LAYER_NAME_WSHD) {
             		wshdLyrIndex = i;
             	}
-            	if (lyr.title === "Interpretation Areas") {
+            	if (lyr.title === appConfig.LAYER_NAME_INTERP) {
             		interpLyrIndex = i;
             	}
-            	if (lyr.title === "Interpretation Area Watersheds") {
+            	if (lyr.title === appConfig.LAYER_NAME_INTERP_WSHD) {
             		interpWshdLyrIndex = i;
             	}
-            	if (lyr.title === "SWRCB Regions") {
+            	if (lyr.title === appConfig.LAYER_NAME_SWRCB_REGIONS) {
             		regionLyrIndex = i;
             	}
-            	if (lyr.title === "Grow Footprints") {
+            	if (lyr.title === appConfig.LAYER_NAME_GROW_FOOTPRINTS) {
             		growLyrIndex = i;
             	}
-            	if (lyr.title === "Grow Locations") {
+            	if (lyr.title === appConfig.LAYER_NAME_GROW_LOCATIONS) {
             		growLocLyrIndex = i;
             	}
             });
@@ -414,9 +414,9 @@ function(
 				});
 			}
 			
-			if ($("#optionsRadios10:checked").prop("checked")) {
-				console.log("10 checked");
-			}
+			/*if ($("#optionsRadios10:checked").prop("checked")) {
+				// Selecting from a list
+			}*/
 			
 			}); 
 
@@ -478,18 +478,51 @@ function(
         			// Do nothing - adding new features, don't want to display popup;
         		break;
         		case "optionsRadios4":
+        			// New Prioritization Area Model - map click to select Pr Area
         			$(".esriPopupWrapper").css("display","none");
+        			var selCount = popup.count;
             		var editFtr = popup.getSelectedFeature();
             		var editFtrName = editFtr.attributes.PrioritizAreaName;
             		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
-            			bootbox.confirm("<b>" + editFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
-            				if (result) {
- 								app.newModel(editFtr);
-            				} else {
-            					popup.clearFeatures();
-            					esri.hide(loading);
-            				}
-            			});
+            			if (selCount === 1) { // one Pr Area exists under the map click
+            				bootbox.confirm("<b>" + editFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
+	            				if (result) {
+	 								app.newModel(editFtr);
+	            				} else {
+	            					popup.clearFeatures();
+	            					esri.hide(loading);
+	            				}
+	            			});
+            			} else { // multiple Pr Areas, loop through them
+            				var editFtrMult = [];
+            				editFtrMult.push(editFtr);
+            				for (i = 1; i < selCount; i++) { 
+            					popup.selectNext();
+            					var editFtr = popup.getSelectedFeature();
+            					editFtrMult.push(editFtr);
+            				};
+            				console.log(editFtrMult);
+            				var selectArea;
+							var modelList = "";
+							$.each(editFtrMult, function(i) {
+								modelList += "<option value='" + i + "'>" + editFtrMult[i].attributes.PrioritizAreaName + "</option>";
+							});
+            				bootbox.dialog({
+								title: "Multiple Prioritization Areas exist at this location, please select one, then click 'Proceed'",
+								message: '<select id="selAreaList" class="form-control">' +
+									modelList +
+									'</select>',
+								buttons: {
+									success: {
+										label: "Proceed",
+										callback: function() {
+											selectArea = $("#selAreaList").val();
+											app.newModel(editFtrMult[selectArea]);
+										}
+									}
+								}
+							});
+            			}
             			
             		} else {
             			popup.clearFeatures();
@@ -499,38 +532,94 @@ function(
             		}
         		break;
         		case "optionsRadios6":
+            		// Delete Prioritization Model - user clicked on a Pr Area boundary
         			$(".esriPopupWrapper").css("display","none");
-            		var editFtr = popup.getSelectedFeature();
-            		if ((editFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
-            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected Prioritization Area, along with any associated Prioritization Models. <br/><br/>Click OK to proceed, or click Cancel and keep the Prioritization Area.", function(result) {
+        			var selCount = popup.count;
+            		var modelFtr = popup.getSelectedFeature();
+            		var modelFtrName = modelFtr.attributes.PrioritizAreaName;
+            		if ((modelFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
+            			if (selCount === 1) { // one Pr Area exists under the map click
+            				bootbox.confirm("<b>Warning</b> you will permanently delete the selected Prioritization Area, along with any associated Prioritization Models. <br/><br/>Click OK to proceed, or click Cancel and keep the Prioritization Area.", function(result) {
             				if (result) {
-            					app.deleteFeature(editFtr);
-            					
-            					// ALSO NEED TO ADD WARNING AND CODE TO DELETE ANY ASSOCIATED PRIORITIZATION AREA MODELS
+            					console.log("delete: ", modelFtr);
+            					esri.show(loading);
+            					app.deleteFeature(modelFtr, null);
+
+            					// Also delete any associated Prioritization Area Models      
+             					var delPrAreaKey = modelFtr.attributes.PrioritizAreaKey;           					      					
+            					app.initDeletePrAreaModels(delPrAreaKey);
 
             				} else {
             					popup.clearFeatures();
             					esri.hide(loading);
             				}
             			});
+            			} else { // multiple Pr Areas, loop through them
+            				var modelFtrMult = [];
+            				modelFtrMult.push(modelFtr);
+            				for (i = 1; i < selCount; i++) { 
+            					popup.selectNext();
+            					var modelFtr = popup.getSelectedFeature();
+            					modelFtrMult.push(modelFtr);
+            				};
+            				console.log(modelFtrMult);
+            				var selectArea;
+							var modelList = "";
+							$.each(modelFtrMult, function(i) {
+								modelList += "<option value='" + i + "'>" + modelFtrMult[i].attributes.PrioritizAreaName + "</option>";
+							});
+            				bootbox.dialog({
+								title: "Multiple Prioritization Areas exist at this location, please select one, then click 'Proceed'.<br/><br/><b>Warning</b> you will permanently delete the selected Prioritization Area, along with any associated Prioritization Models. ",
+								message: '<select id="selAreaListDel" class="form-control">' +
+									modelList +
+									'</select>',
+								buttons: {
+									success: {
+										label: "Proceed",
+										className: "btn-danger",
+										callback: function() {
+											selectArea = $("#selAreaListDel").val();
+											console.log("delete: ", modelFtrMult[selectArea]);
+											esri.show(loading);
+											app.deleteFeature(modelFtrMult[selectArea], null);
+											
+											// Also delete any associated Prioritization Area Models      
+			             					var delPrAreaKey = modelFtrMult[selectArea].attributes.PrioritizAreaKey;           					      					
+			            					app.deletePrAreaModels(delPrAreaKey);
+										}
+									},
+									cancel: {
+										label: "Cancel",
+										callback: function() {
+											map.graphics.clear();
+										}
+									}
+								}
+							});
+            			}
+            			
             		} else {
             			popup.clearFeatures();
             			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
             			esri.hide(loading);
             		}
+            		
+            		
+            		
         		break;
         		case "optionsRadios7":
         			$(".esriPopupWrapper").css("display","none");
             		var editFtr = popup.getSelectedFeature();
-            		console.log(editFtr);
+            		//console.log(editFtr);
             		var selectedUrl = (editFtr._layer._url.path).toLowerCase();
             		var checkUrl = appConfig.URL_INTERP_AREA.toLowerCase();
             		if (selectedUrl === checkUrl) {
-            			console.log(editFtr.attributes.StatusInterpArea);
+            			//console.log(editFtr.attributes.StatusInterpArea);
             			if (editFtr.attributes.StatusInterpArea === "In Initial Review") {
 	            			bootbox.confirm("<b>Warning</b> you will permanently delete the selected Interpretation Area. Click OK to proceed, cancel to keep the Area", function(result) {
 	            				if (result) {
-	            					app.deleteFeature(editFtr);
+	            					esri.show(loading);
+	            					app.deleteFeature(editFtr, null);
 	            				} else {
 	            					popup.clearFeatures();
 	            					esri.hide(loading);
@@ -541,7 +630,7 @@ function(
             				popup.clearFeatures();
             			}
             		} else {
-            			console.log("not equal");
+            			//console.log("not equal");
             			popup.clearFeatures();
             			bootbox.alert("You cannot delete features from " + editFtr._layer.name + ". <br/><br/>If you are trying to select a feature from a different layer, try turning off any other layers that might be selected instead.");
             			esri.hide(loading);
@@ -550,17 +639,55 @@ function(
         		case "optionsRadios10":
         			// Loading Prioritization Model - user clicked on a Pr Area boundary
         			$(".esriPopupWrapper").css("display","none");
-        			var modelFtr = popup.getSelectedFeature();
-        			var modelFtrName = modelFtr.attributes.PrioritizAreaName;
-            		console.log(modelFtr);
-            		bootbox.confirm("<b>" + modelFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
-        				if (result) {
-        					esri.show(loading);
-							app.loadModel(modelFtr.attributes.PrioritizAreaKey, modelFtrName);
-        				} else {
-        					popup.clearFeatures();
-        				}
-        			});
+        			var selCount = popup.count;
+            		var modelFtr = popup.getSelectedFeature();
+            		var modelFtrName = modelFtr.attributes.PrioritizAreaName;
+            		if ((modelFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
+            			if (selCount === 1) { // one Pr Area exists under the map click
+            				bootbox.confirm("<b>" + modelFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
+	            				if (result) {
+	 								app.loadModel(modelFtr.attributes.PrioritizAreaKey, modelFtrName);
+	            				} else {
+	            					popup.clearFeatures();
+	            					esri.hide(loading);
+	            				}
+	            			});
+            			} else { // multiple Pr Areas, loop through them
+            				var modelFtrMult = [];
+            				modelFtrMult.push(modelFtr);
+            				for (i = 1; i < selCount; i++) { 
+            					popup.selectNext();
+            					var modelFtr = popup.getSelectedFeature();
+            					modelFtrMult.push(modelFtr);
+            				};
+            				console.log(modelFtrMult);
+            				var selectArea;
+							var modelList = "";
+							$.each(modelFtrMult, function(i) {
+								modelList += "<option value='" + i + "'>" + modelFtrMult[i].attributes.PrioritizAreaName + "</option>";
+							});
+            				bootbox.dialog({
+								title: "Multiple Prioritization Areas exist at this location, please select one, then click 'Proceed'",
+								message: '<select id="selAreaList" class="form-control">' +
+									modelList +
+									'</select>',
+								buttons: {
+									success: {
+										label: "Proceed",
+										callback: function() {
+											selectArea = $("#selAreaList").val();
+											app.loadModel(modelFtrMult[selectArea].attributes.PrioritizAreaKey, modelFtrMult[selectArea].attributes.PrioritizAreaName);
+										}
+									}
+								}
+							});
+            			}
+            			
+            		} else {
+            			popup.clearFeatures();
+            			bootbox.alert("A Prioritization Area feature was not selected.<br/><br/>Try turning off any other layers that might be selected instead.");
+            			esri.hide(loading);
+            		}
         		break;
         		default:
         		// Default popup behavior
@@ -852,13 +979,14 @@ function(
 			if (shapeEditStatus === true) {
 				//console.log(shapeEditStatus);
 				shapeEditLayer.applyEdits(null, [evt.graphic], null, function success() {
-					console.log("update feature successful");
+					//console.log("update feature successful");
 					shapeEditStatus = null;
 					shapeEditBackup = null;
 					app.stopEdit();
 					shapeEditLayer.refresh();	
 				}, function error() {
-					console.log("error");
+					bootbox.alert("An error occured when applying the update.");
+					//console.log("error");
 				});
 				
 				
@@ -1171,6 +1299,7 @@ function(
 			break;
 			case "optionsRadios4":
 				// create new prioritization area model
+				app.resetLoadModel();
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
@@ -1187,6 +1316,7 @@ function(
 			case "optionsRadios5":
 				// edit prioritization area model
 				esri.show(loading);
+				app.resetLoadModel();
 				$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
@@ -1204,7 +1334,7 @@ function(
 				
 				$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "0=0", false, function(res) {
 					$.each(res.features, function(i) {
-						console.log(res.features[i].attributes.ModelRunName);
+						//console.log(res.features[i].attributes.ModelRunName);
 						modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
 					});
 					$("#selectPriorModel").html(modelList);
@@ -1256,7 +1386,9 @@ function(
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
-				$("#editInstructions").html("Delete model function still under construction.");
+				app.initDelRegionList();
+				$("#deleteModelFromList").show();
+				$("#editInstructions").html("Identify the Prioritization Model to delete by:<br/> Selecting the Region<br/> Then selecting the Prioritization Areas");
 			break;
 		}
 		//dojo.disconnect(clickHandler);
@@ -1292,6 +1424,7 @@ function(
 		app.resetModelPopup(); // removes any previously-created elements
 		var paAttr = editFtr.attributes;
 		regionNum = paAttr.SWRCBRegID;
+		map.graphics.clear();
 		
 		// Get the last used model number
 		$.when(app.runQuery(appConfig.URL_PRIOR_MODEL_NUMBER, "0=0", false, function(callback1) {
@@ -1323,7 +1456,7 @@ function(
 					// Dynamically build the forms for parameter input
 					var qryRes = res.features;
 					$.each(qryRes, function(i) {
-						console.log(qryRes[i].attributes);
+						//console.log(qryRes[i].attributes);
 						var paramName = qryRes[i].attributes.PreProcDataSourceName;
 						var paramNameTrim = paramName.replace(/\s+/g , "_");
 						modelFactors.push(paramNameTrim);
@@ -1390,7 +1523,7 @@ function(
 		
 		
 		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "ModelRunKey = '" + selModel + "'", false, function(inputFtr) {
-			console.log(inputFtr);
+			//console.log(inputFtr);
 
 			var paAttr = inputFtr.features[0].attributes;
 			regionNum = paAttr.SWRCBRegID;	
@@ -1422,7 +1555,7 @@ function(
 
 					for (j = 1; j < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; j++) { 
 					    if (paAttr["Input" + j + "DataSourceName"] === paramName) {
-					    	console.log("match", paramName);
+					    	//console.log("match", paramName);
 					    	var inputWeight = (parseFloat(paAttr["Input" + j + "Weight"])) * 100;
 					    	//console.log(inputWeight);
 					    	break;
@@ -1520,18 +1653,30 @@ function(
 						// This is a new model. Check to make model name isn't duplicated.
 						var regNum = $("#inputModelReg").val();
 						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "SWRCBRegID = '" + regNum + "'", false, function(checkNameRes) {
-							$.each(checkNameRes.features, function(r){
-								if (checkNameRes.features[r].attributes.ModelRunName === $("#inputModelName").val()) {
-									$("#modelCheck").html("<br/><mark>The Model Name is already in use. Please use a different name.</mark>");
-									esri.hide(loading);
-								} else {
+							if (checkNameRes.features.length > 0) {
+								var proceedWithRun = true;
+								$.each(checkNameRes.features, function(r) {
+									if (checkNameRes.features[r].attributes.ModelRunName === $("#inputModelName").val()) {
+										proceedWithRun = false;
+										$("#modelCheck").html("<br/><mark>The Model Name is already in use. Please use a different name.</mark>");
+										esri.hide(loading);
+										//console.log("dup names");
+									}
+								});
+								if (proceedWithRun) {
+									console.log("proceed");
 									// OK to proceed with saving new model.
 									// Update the last used model number with + 1
+									$("#modelCheck").html("");
 									$.when(app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, modelNumObjectId, "Reg" + regionNum + "LastModelNumAssigned", newModelNum, function(callback2) {
 										saveModelProceed();
 									}));
 								};
-							});
+							} else {
+								$.when(app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, modelNumObjectId, "Reg" + regionNum + "LastModelNumAssigned", newModelNum, function(callback2) {
+									saveModelProceed();
+								}));
+							}
 						}));
 						
 					}
@@ -1558,7 +1703,6 @@ function(
 						//console.log(gpParams);
 						esri.hide(loading);
 				    	
-				    	//app.gpModelPrioritizGrows(gpParams);
 				    	$("#modelParameters").hide();
 				    	$("#modelInstructions").hide();
 				    	$("#modelProgress").show();
@@ -1579,7 +1723,7 @@ function(
 						};
 					
 						function gpCompleteCallback(jobInfo) {
-							console.log("completed", jobInfo);
+							console.log("Geoprocessing Model completed: ", jobInfo);
 							$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
 							$("#modelProgressImage").hide();
 						};
@@ -1599,7 +1743,7 @@ function(
 			var qryWhere = "OBJECTID=" + map.graphics.graphics[i].attributes.OBJECTID;
 			$.when(app.runQuery(urlSource, qryWhere, true, function(callback) {
 				inputPolys.push(callback.features[0].geometry);
-				console.log(inputPolys.length, polyCount);
+				//console.log(inputPolys.length, polyCount);
 				if (inputPolys.length === polyCount) {
 					geometryService.union(inputPolys, function(result) {
 						map.graphics.clear();
@@ -1609,7 +1753,7 @@ function(
 						switch(outputLayer) {
 							case "interpretation":
 								// new interpretation area being created
-								console.log("save interpretation ", newFeatureName, result);
+								//console.log("save interpretation ", newFeatureName, result);
 								//testObj = result;
 								var center = result.getCentroid();
 								
@@ -1619,7 +1763,7 @@ function(
 								layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
 									//console.log("region query results", featureset);
 									var regionId = featureset.features[0].attributes.RB;
-									console.log("regionid", regionId);
+									//console.log("regionid", regionId);
 									$.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", false, function(callback) {
 										//console.log("interp num callback", callback);
 										//testObj = callback.features[0];
@@ -1647,16 +1791,16 @@ function(
 								});
 							break;
 							case "prioritization":
-								console.log("save prioritization ", newFeatureName, result);
+								//console.log("save prioritization ", newFeatureName, result);
 								var center = result.getCentroid();
 								
 								//get the Region that the new interp area falls within
 								var query = new Query();
 								query.geometry = center;
 								layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
-									console.log("region query results", featureset);
+									//console.log("region query results", featureset);
 									var regionId = featureset.features[0].attributes.RB;
-									console.log("regionid", regionId);
+									//console.log("regionid", regionId);
 									$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", false, function(callback) {
 										//console.log("interp num callback", callback);
 										//testObj = callback.features[0];
@@ -1715,7 +1859,7 @@ function(
 				var addFeature = {
 					"attributes": {
 						PrioritizAreaName: newFeatureName,
-						StatusPrioritizArea: "Approved for Modeling",
+						//StatusPrioritizArea: "Approved for Modeling",
 						PrioritizAreaKey: param2 + "_" + param1,
 						SWRCBRegID: param2,
 						PrioritizAreaID: param1
@@ -1748,15 +1892,15 @@ function(
 	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {
 		//app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, 1, "Reg1LastModelNumAssigned", 0, null);
 		
-		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
+		var updFeature = '[{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}]';	
 		//console.log(updateAttributes);			
 
 		var url = ftrUrl + "/updateFeatures";
 		var updString = {
 	        f: 'json',
 	        //where: "objectId=" + objId,
-	        features: updFeature,
-	        token: token
+	        features: updFeature//,
+	        //token: token
 	    };
 		//console.log(updFeature, url, updString);
 			
@@ -1777,6 +1921,170 @@ function(
 	    });
 	};
 	
+	app.initDelRegionList = function() {
+		// Populates drop down lists based on regions and models available
+		var regionList = [];
+		regionList += "<option value=''>Select a Region</option>";
+		$.when(app.runQueryDistinctVal(appConfig.URL_PRIOR_MODELS, "0=0", "SWRCBRegID", false, function(res1) {
+			$.each(res1.features, function(i) {
+				//console.log(res.features[i].attributes.ModelRunName);
+				regionList += "<option value='" + res1.features[i].attributes.SWRCBRegID + "'>" + res1.features[i].attributes.SWRCBRegID + "</option>";
+				//modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
+			});
+			$("#selectDelPrRegion").html(regionList);
+		}));
+		//$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "0=0", false, function(res2) {
+		//	priorModelsRecs = res2;
+			//$("#selectLoadPrModel").html(modelList);
+		//}));
+		$.when(app.runQuery(appConfig.URL_PRIOR_AREA, "0=0", false, function(res2) {
+			priorAreaRecs = res2;
+			//$("#selectLoadPrModel").html(modelList);
+		}));
+	};
+	
+	app.initDelModelList = function() {
+		// Populates drop down lists based on regions and models available
+		var modelList = [];
+		modelList += "<option value=''>Select a Prioritization Area</option>";
+		$.each(priorAreaRecs.features, function(i) {
+			if (priorAreaRecs.features[i].attributes.SWRCBRegID === $("#selectDelPrRegion").val()) {
+				modelList += "<option value='" + priorAreaRecs.features[i].attributes.PrioritizAreaKey + "'>" + priorAreaRecs.features[i].attributes.PrioritizAreaName + "</option>";
+			}
+		});
+		$("#selectDelPrModel").html(modelList);
+		$("#selectDelPrModel").prop('disabled', false);
+	};
+	
+	app.loadDelModel = function(prioritizAreaID, modelFtrName) {
+		//esri.show(loading);
+		//console.log(prioritizAreaID, modelFtrName);
+		// Loads a prioritization model - the PrioritizationGrows polygons + related results
+		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + prioritizAreaID + "'", false, function(resModels) {
+			console.log(resModels);
+			var modelCount = resModels.features.length;
+			if (modelCount === 0) {
+				bootbox.alert("No Prioritization Models have been created for this Prioritization Area.");
+				//esri.hide(loading);
+				map.graphics.clear();
+				//app.resetLoadModel();
+			} else {
+				if (modelCount > 1) {
+					var selectModel;
+					var modelList = "";
+					$.each(resModels.features, function(i) {
+						modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.ModelRunName + "</option>";
+					});
+					bootbox.dialog({
+						title: "Multiple models exist for this prioritization area. Select one.",
+						message: '<select id="delModelList" class="form-control">' +
+							modelList +
+							'</select>',
+						buttons: {
+							success: {
+								label: "Proceed",
+								callback: function() {
+									selectModel = $("#delModelList").val();
+									//console.log(selectModel);
+									//selectModelName = resModels.features[selectModel].attributes.ModelRunKey;
+									bootbox.confirm(resModels.features[selectModel].attributes.ModelRunName + " will be deleted. Are you sure?", function(result) {
+										if (!(result)) {
+											
+										} else {
+											console.log("delete:", resModels.features[selectModel].attributes.ModelRunKey, resModels.features[selectModel].attributes.OBJECTID);
+											esri.show(loading);
+											app.deleteFeature(resModels.features[selectModel], appConfig.URL_PRIOR_MODELS);
+										}
+									});
+									//console.log(selectModelName, resModels.features[selectModel].attributes.OBJECTID);
+									//app.deletePrAreaModels(selectModelName);
+									/*if (resModels.features[selectModel].attributes.ModelRunCompleted) {
+										$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[selectModel].attributes.ModelRunKey + "'", false, function(resSummary) {
+											showResults(resSummary.features[0].attributes);
+										}));
+									} else {
+										bootbox.alert("Modeling is still processing for this Prioritization Model. Please try again later.");
+										map.graphics.clear();
+										esri.hide(loading);
+									}*/
+									
+								}
+							}
+						}
+					});
+				} else {
+					bootbox.confirm(resModels.features[0].attributes.ModelRunName + " will be deleted. Are you sure?", function(result) {
+						if (!(result)) {
+							
+						} else {
+							console.log("delete:", resModels.features[0].attributes.ModelRunKey, resModels.features[0].attributes.OBJECTID);
+							//resModels.features[0];
+							esri.show(loading);
+							app.deleteFeature(resModels.features[0], appConfig.URL_PRIOR_MODELS);
+						}
+					});
+					//app.deletePrAreaModels(selectModelName);
+					/*if (resModels.features[0].attributes.ModelRunCompleted) {
+						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[0].attributes.ModelRunKey + "'", false, function(resSummary) {
+							showResults(resSummary.features[0].attributes);
+						}));
+					} else {
+						bootbox.alert("Modeling is still processing for this Prioritization Model. Please try again later.");
+					}*/
+	
+				}
+			}
+		}));
+		
+		/*
+		function showResults(sumAttr) {
+			$("#modelResults").show();
+			
+			// Loop through the input factors and create a drop down for displaying points by each
+			var inputList = [];
+			inputList += "<option value='0'>Weighted Average Score</option>";
+			for (i = 1; i < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; i++) { 
+				var attrRecord = sumAttr["Input" + i + "DataSourceName"];
+			    if (!(attrRecord === "")) {
+			    	//console.log(attrRecord);
+			    	inputList += "<option value='" + i + "'>" + attrRecord + "</option>";
+			    }
+			}
+			$("#modelDisplayBy").html(inputList);
+			
+			// Generate short summary of model results
+			var shortSummary = ""
+				+ "Prioritization Area: <b> " + modelFtrName + "</b><br/>"
+				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>"
+				+ "Number of Grows: " + sumAttr.NumGrows + "<br/>"
+				+ "&nbsp;&nbsp;Outdoor: " + sumAttr.NumOutdoorGrows + "<br/>"
+				+ "&nbsp;&nbsp;Greenhouse: " + sumAttr.NumGreenHouseGrows + "<br/>"
+				+ "Total Acreage of Grows: " + sumAttr.TotalAcreageGrows + "<br/>";
+			$("#modelResultsSummary").html(shortSummary);
+
+			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
+				
+				$.when(app.polyToPointLayer(selectModelName + " - point", appConfig.URL_PRIOR_MODELS_RESULTS, "ModelRunKey='" + sumAttr.ModelRunKey + "'", appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", function(ptCallback) {
+					
+					app.updateRenderer();
+					$("#optionsRadios10:checked").prop("checked",false);
+					$("#optionsRadios11:checked").prop("checked",false);
+					$("#editRadios10").hide();
+					$("#editRadios11").hide();
+					$("#loadModelFromList").hide();
+					$("#loadModelStatus").html("Prioritization Model Loaded.");
+					$("#modelInstructions").html("Prioritization Model Loaded.<br/>Click Reset to remove and start over.");
+					app.resetPopup();
+					app.zoomToLayerExtent(selectModelName);
+					esri.hide(loading);
+					//layers[growLyrIndex].layer.setVisibility(false);
+					layers[growLocLyrIndex].layer.setVisibility(false);
+					map.graphics.clear();
+				}));
+			}));
+		}*/
+	};
+	
 	app.startDelete = function(source) {
 		// editing - initial steps for user to delete a feature
 		switch(source) {
@@ -1788,14 +2096,20 @@ function(
 		}		
 	};
 	
-	app.deleteFeature = function(ftr) {
+	app.deleteFeature = function(ftr, url) {
 		// user confirmed delete, now delete the feature with an ajax call
-		var url = ftr._layer._url.path + "/deleteFeatures";
+		//console.log(ftr);
+		if (!(url)) {
+			var url = ftr._layer._url.path + "/deleteFeatures";
+		} else {
+			url += "/deleteFeatures";
+		}
+		
 		var params = "OBJECTID = " + ftr.attributes.OBJECTID;
 		var dataString = {
 			f: "json",
-			where: params,
-			token: token
+			where: params//,
+			//token: token
 		};
 
 	    $.ajax({
@@ -1804,10 +2118,17 @@ function(
 	        dataType: "json",
 	        data: dataString,
 	        success: function (data) {
-	        	bootbox.alert("Delete feature successful.");
+	        	//bootbox.alert("Delete feature successful.");
 	        	app.stopEdit();
-	        	ftr._layer.clearSelection();
-	        	ftr._layer.refresh();
+	        	if(ftr._layer) {
+	        		ftr._layer.clearSelection();
+	        		ftr._layer.refresh();
+	        	} else {
+	        		$.each(layers, function(i) { 
+	        			layers[i].clearSelection();
+	        			layers[i].refresh();
+ 					});
+	        	}
 	        	esri.hide(loading);
 	        },
 	        error: function (response) {
@@ -1817,6 +2138,60 @@ function(
 	        }
 	    });
 		
+	};
+	
+	app.deletePrAreaModels = function (delPrAreaKey) {
+    	$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + delPrAreaKey + "'", false, function(resPrModels) {
+    		var delModelId = "";
+    		var resultCount = resPrModels.features.length;
+    		//console.log(resultCount, resPrModels);
+    		if (resultCount > 0) {
+    			if (resultCount === 1) {
+    				console.log("deleting", resPrModels.features[0]);
+    				esri.show(loading);
+    				app.deleteFeature(resPrModels.features[0], appConfig.URL_PRIOR_MODELS);
+    				//delModelId += resPrModels.features[0].attributes.ModelRunKey;
+    				//console.log(delModelId);
+    				//app.gpDeleteModels(delModelId);
+    			} else {
+    				$.each(resPrModels.features, function(i) {
+    					esri.show(loading);
+    					app.deleteFeature(resPrModels.features[i], appConfig.URL_PRIOR_MODELS);
+    					console.log("deleting", resPrModels.features[i]);
+    					//delModelId += resPrModels.features[i].attributes.ModelRunKey;
+    					//if (i+1 < resultCount) {
+    					//	delModelId += ",";
+    					//}
+    					
+    				});
+    				//console.log(delModelId);
+    				//app.gpDeleteModels(delModelId);
+    			}
+    		}
+		}));
+	};
+	
+	app.gpDeleteModels = function (delModelId) {
+    			
+		var gpParams = {
+			"###" : delModelId
+		};	
+		
+		// Initiate and run the geoprocessing service
+		gp = new Geoprocessor(appConfig.URL_GP_MODEL_DELETE_MODEL);
+		console.log("ready to run gp model", gpParams);
+		//gp.submitJob(gpParams, gpCompleteCallback, gpStatusCallback);
+
+		function gpStatusCallback(jobInfo) {
+			console.log(jobInfo.jobStatus);
+			//$("#modelProgressText").html("Status: Modeling in Process");
+		};
+	
+		function gpCompleteCallback(jobInfo) {
+			console.log("Geoprocessing Model completed: ", jobInfo);
+			//$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
+			//$("#modelProgressImage").hide();
+		};
 	};
 	
 	app.editFeature = function(ftr, type) {
@@ -1894,6 +2269,7 @@ function(
 		};
 		$("#attributesDiv").hide();
 		$("#editButtons").hide();
+		$("#deleteModelFromList").hide();
 		map.graphics.clear();
 
 	};
@@ -1999,13 +2375,18 @@ function(
 	
 	app.saveNewFeature = function(feature, url, callback) {
 		// Write new feature to layer using object created in createNewFeature
-		var addFeature = JSON.stringify(feature);
+		// NOTES: token removed from addParams below, necessary with move of data from AGOL to AGS
+		//        Added "[" and "]" to addFeature, necessary with move of data from AGOL to AGS
+		var addFeature = "[" + JSON.stringify(feature) + "]";
+		
 		var urlEdit = url + "/addFeatures";
 		var addParams = {
 	        f: "json",
-	        features: addFeature,
-	        token: token
+	        features: addFeature//,
+	        //token: token
 	    };
+	    
+	    testvar = addFeature;
 	
 	    // Add feature
 	    $.ajax({
@@ -2022,29 +2403,6 @@ function(
 	    });
 	};
 	
-	/*app.gpModelPrioritizGrows = function(gpParams) {
-		// Configure and call the asyncronous geoprocessing service.
-		
-		gp = new Geoprocessor(appConfig.URL_GP_MODEL_PRIOR_GROWS);
-		gp.submitJob(gpParams, app.gpCompleteCallback, app.gpStatusCallback);
-		$("modelProgressImage").show();
-	};
-
-	app.gpStatusCallback = function(jobInfo) {
-		//console.log(jobInfo.jobStatus);
-		$("#modelProgressText").html("Status: Modeling in Process");
-	};
-
-	app.gpCompleteCallback = function(jobInfo) {
-		console.log("completed, jobInfo");
-		$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
-		$("#modelProgressImage").hide();
-	};
-
-	app.gpcDisplayResult = function(item) {
-		console.log(item.value);
-	};*/
-	
 	// -- Section 7: Load Prioritization Model Results  ----------------------------------------------------
 	
 	app.initLoadModel = function(option) {
@@ -2053,13 +2411,13 @@ function(
 
 		switch(selOption) {
 			case "optionsRadios10":
-				console.log("select by map");
+				// select Model by clicking on Pr Area from 
 				$("#editRadios11").hide();
 				$("#modelInstructions").html("Click on the Prioritization Model boundary from the map.");
 				app.isolatePopup("Prioritization Areas");
 			break;
 			case "optionsRadios11":
-				console.log("select by list");
+				// select Model from a list
 				app.initLoadRegionList();
 				$("#loadModelFromList").show();
 				$("#editRadios10").hide();
@@ -2120,11 +2478,15 @@ function(
 		$("#modelResultsSummary").html("Summary");
 		$("#modelResults").hide();
 		$("#loadModelStatus").html("");
-		$.when(app.removeMapLayer(prModelPoly.id, function(callback) {
+		if (prModelPoly) {
+			$.when(app.removeMapLayer(prModelPoly.id, function(callback) {
 			$.when(app.removeMapLayer(prModelPoint.id, function(callback) {
 				esri.hide(loading);
+				prModelPoly = null;
+				prModelPoint = null;
 			}));
 		}));
+		}
 		ftrLayer = null;
 		pointFtrLayer = null;
 		map.graphics.clear();
@@ -2132,42 +2494,60 @@ function(
 	
 	app.loadModel = function(prioritizAreaID, modelFtrName) {
 		esri.show(loading);
-		console.log(prioritizAreaID, modelFtrName);
+		//console.log(prioritizAreaID, modelFtrName);
 		// Loads a prioritization model - the PrioritizationGrows polygons + related results
 		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + prioritizAreaID + "'", false, function(resModels) {
-			console.log(resModels);
+			//console.log(resModels);
 			var modelCount = resModels.features.length;
-			if (modelCount > 1) {
-				var selectModel;
-				var modelList = "";
-				$.each(resModels.features, function(i) {
-					modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.ModelRunName + "</option>";
-				});
-				bootbox.dialog({
-					title: "Multiple models exist for this prioritization area. Select one.",
-					message: '<select id="selModelList" class="form-control">' +
-						modelList +
-						'</select>',
-					buttons: {
-						success: {
-							label: "Proceed",
-							callback: function() {
-								selectModel = $("#selModelList").val();
-								selectModelName = resModels.features[selectModel].attributes.ModelRunName;
-								console.log(selectModel);
-								$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[selectModel].attributes.ModelRunKey + "'", false, function(resSummary) {
-									showResults(resSummary.features[0].attributes);
-								}));
+			if (modelCount === 0) {
+				bootbox.alert("No Prioritization Models have been created for this Prioritization Area.");
+				esri.hide(loading);
+				map.graphics.clear();
+				//app.resetLoadModel();
+			} else {
+				if (modelCount > 1) {
+					var selectModel;
+					var modelList = "";
+					$.each(resModels.features, function(i) {
+						modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.ModelRunName + "</option>";
+					});
+					bootbox.dialog({
+						title: "Multiple models exist for this prioritization area. Select one.",
+						message: '<select id="selModelList" class="form-control">' +
+							modelList +
+							'</select>',
+						buttons: {
+							success: {
+								label: "Proceed",
+								callback: function() {
+									selectModel = $("#selModelList").val();
+									//console.log(selectModel);
+									selectModelName = resModels.features[selectModel].attributes.ModelRunName;
+									if (resModels.features[selectModel].attributes.ModelRunCompleted) {
+										$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[selectModel].attributes.ModelRunKey + "'", false, function(resSummary) {
+											showResults(resSummary.features[0].attributes);
+										}));
+									} else {
+										bootbox.alert("Modeling is still processing for this Prioritization Model. Please try again later.");
+										map.graphics.clear();
+										esri.hide(loading);
+									}
+									
+								}
 							}
 						}
+					});
+				} else {
+					selectModelName = resModels.features[0].attributes.ModelRunName;
+					if (resModels.features[0].attributes.ModelRunCompleted) {
+						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[0].attributes.ModelRunKey + "'", false, function(resSummary) {
+							showResults(resSummary.features[0].attributes);
+						}));
+					} else {
+						bootbox.alert("Modeling is still processing for this Prioritization Model. Please try again later.");
 					}
-				});
-			} else {
-				selectModelName = resModels.features[0].attributes.ModelRunName;
-				$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[0].attributes.ModelRunKey + "'", false, function(resSummary) {
-					showResults(resSummary.features[0].attributes);
-				}));
-
+	
+				}
 			}
 		}));
 		
@@ -2181,7 +2561,7 @@ function(
 			for (i = 1; i < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; i++) { 
 				var attrRecord = sumAttr["Input" + i + "DataSourceName"];
 			    if (!(attrRecord === "")) {
-			    	console.log(attrRecord);
+			    	//console.log(attrRecord);
 			    	inputList += "<option value='" + i + "'>" + attrRecord + "</option>";
 			    }
 			}
@@ -2245,7 +2625,7 @@ function(
 				$.when(app.createPolyFC(featureName, ftrLayer, function(createdFC) {
 					//console.log(createdFC);
 					$.when(app.addToFeature(createdFC, ftrLayer, function(addedFeature) {
-						console.log("Create feature complete: ", addedFeature);
+						//console.log("Create feature complete: ", addedFeature);
 						//addLayers.push(addedFeature);
 						
 						$.each(addedFeature.fields, function(i) {
@@ -2321,7 +2701,7 @@ function(
 		addFeature.setMinScale(72000);
 		map.addLayers([addFeature]);
 		prModelPoly = addFeature;
-		console.log("addFeature: ", addFeature);
+		//console.log("addFeature: ", addFeature);
 		toc.layerInfos.push({
 			"layer" : addFeature,
 			"title" : addFeature.id
@@ -2365,26 +2745,21 @@ function(
 	        renderer.addBreak(2, 2.5, new SimpleFillSymbol().setColor(new Color([230,19,19, 0.6])));
 	        renderer.addBreak(2.5, 3, new SimpleFillSymbol().setColor(new Color([168,41,41, 0.6])));*/
 	        var val1 = new SimpleFillSymbol();
-				val1.setColor(new Color([255,182,14, 0.6]));
-				val1.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,172,4, 0.3]), 5));
-	        	renderer.addBreak(1, 1.5, val1);
+				val1.setColor(new Color([255,146,0, 0.6]));
+				val1.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,136,0, 0.3]), 5));
+	        	renderer.addBreak(1, 2, val1);
 	        var val2 = new SimpleFillSymbol();
-				val2.setColor(new Color([255,146,0, 0.6]));
-				val2.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([245,136,0, 0.3]), 5));
-	        	renderer.addBreak(1.5, 2, val2);
+	        	val2.setColor(new Color([230,19,19, 0.6]));
+				val2.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([240,9,9, 0.3]), 5));
+	        	renderer.addBreak(2, 3, val2);
 	        var val3 = new SimpleFillSymbol();
-	        	val3.setColor(new Color([230,19,19, 0.6]));
-				val3.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([240,9,9, 0.3]), 5));
-	        	renderer.addBreak(2, 2.5, val3);
-	        var val4 = new SimpleFillSymbol();
-		        val4.setColor(new Color([168,41,41, 0.6]));
-				val4.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([158,31,31, 0.3]), 5));
-		        renderer.addBreak(2.5, 3, val4);
+		        val3.setColor(new Color([168,41,41, 0.6]));
+				val3.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([158,31,31, 0.3]), 5));
+		        renderer.addBreak(3, 4, val3);
 	        // customizing the toc labels:
-	        renderer.infos[0].label = "< 1.5";
-	        renderer.infos[1].label = "1.5 to < 2";
-	        renderer.infos[2].label = "2  to < 2.5";
-	        renderer.infos[3].label = "2.5 to 3";
+	        renderer.infos[0].label = "1";
+	        renderer.infos[1].label = "2";
+	        renderer.infos[2].label = "3";
 	        renderLayer.setRenderer(renderer);
 	        renderLayer.refresh();
 	        toc.refresh();
@@ -2403,10 +2778,10 @@ function(
 	        var val3 = new SimpleFillSymbol();
 		        val3.setColor(new Color([168,41,41, 0.6]));
 				val3.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([158,31,31, 0.3]), 5));
-		        renderer.addValue(3, val1);
+		        renderer.addValue(3, val3);
 	        //renderer.addValue(2, new SimpleFillSymbol().setColor(new Color([230,19,19, 0.6])));
 	        //renderer.addValue(3, new SimpleFillSymbol().setColor(new Color([168,41,41, 0.6])));
-	        console.log(renderer);
+	        //console.log(renderer);
 	        renderLayer.setRenderer(renderer);
 	        renderLayer.refresh();
 	        toc.refresh();
@@ -2419,15 +2794,13 @@ function(
 			var ptSymbol = new SimpleMarkerSymbol();
 	        ptSymbol.setColor(new Color([150, 150, 150, 0.5]));
 			var renderer = new ClassBreaksRenderer(ptSymbol, renderField);
-			renderer.addBreak(1, 1.5, new SimpleMarkerSymbol('circle', 7, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,182,14, 0.25]), 5), new Color([255,182,14, 0.9])));
-	        renderer.addBreak(1.5, 2, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,146,0, 0.25]), 6), new Color([255,146,0, 0.9])));
-	        renderer.addBreak(2, 2.5, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([230,19,19, 0.25]), 6), new Color([230,19,19, 0.9])));
-	        renderer.addBreak(2.5, 3, new SimpleMarkerSymbol('circle', 9, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([168,41,41, 0.25]), 7), new Color([168,41,41, 0.9])));
+	        renderer.addBreak(1, 2, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,146,0, 0.25]), 6), new Color([255,146,0, 0.9])));
+	        renderer.addBreak(2, 3, new SimpleMarkerSymbol('circle', 8, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([230,19,19, 0.25]), 6), new Color([230,19,19, 0.9])));
+	        renderer.addBreak(3, 4, new SimpleMarkerSymbol('circle', 9, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([168,41,41, 0.25]), 7), new Color([168,41,41, 0.9])));
 	        // customizing the toc labels:
-	        renderer.infos[0].label = "< 1.5";
-	        renderer.infos[1].label = "1.5 to < 2";
-	        renderer.infos[2].label = "2  to < 2.5";
-	        renderer.infos[3].label = "2.5 to 3";
+	        renderer.infos[0].label = "1";
+	        renderer.infos[1].label = "2";
+	        renderer.infos[2].label = "3";
 	        renderLayer.setRenderer(renderer);
 	        renderLayer.refresh();
 	    	toc.refresh();
@@ -2504,7 +2877,7 @@ function(
 					"title" : pointFtrLayer.id
 				});
 				toc.refresh();
-				console.log("addLayers: ", pointFtrLayer);
+				//console.log("addLayers: ", pointFtrLayer);
 				
 				function loadData() {
 					var features = [];
@@ -2646,7 +3019,7 @@ function(
 	app.zoomToLayerExtent  = function(layerName) {
 		var extentLayer = map.getLayer(layerName);
 		var lyrExtent = esri.graphicsExtent(extentLayer.graphics);
-		var newExtent = lyrExtent.expand(2);
+		var newExtent = lyrExtent.expand(1.75);
 		map.setExtent(newExtent);
 	};
 	
@@ -2770,7 +3143,7 @@ function(
 		}
 	}
 	
-	// -- Section 8: Page Ready ----------------------------------------------------
+	// -- Section 9: Page Ready ----------------------------------------------------
 
     $(document).ready(function() {
 		// Page has loaded, set on- events	
