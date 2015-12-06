@@ -1,7 +1,7 @@
 // Application configuration settings
 
 var appConfig = dojo.getObject('appConfig', true);
-var urlRoot = "http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/";
+var urlRoot = "http://mapserver.vestra.com/arcgis/rest/services/CIPS/";
 
 appConfig = {
 	APP_NAME: "CIPS",
@@ -10,32 +10,31 @@ appConfig = {
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
     ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.3",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
+    
     PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
     PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
-    INIT_EXTENT: { xmin: 	-14295287.001905905, ymin: 4652688.941886589, xmax: -12901075.60598466, ymax: 5203035.545539711, spatialReference: { wkid: 102100 } },
+    INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
+   
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
-    SEARCH_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/0",
-    GROW_POLYS_URL: urlRoot + "CIPS_Operational/FeatureServer/1",
-    GROW_POINTS_URL: urlRoot + "CIPS_Operational/FeatureServer/0",
-    GROW_PREPROC_RESULTS_URL: urlRoot + "CIPS_Operational/FeatureServer/6",
-    //PRIORIT_POLYS_URL: urlRoot + "Deliverable_20150909_forTesting_20151005/FeatureServer/1",
-    //PRIORIT_JOIN_TABLE_URL: urlRoot + "Deliverable_20150909_forTesting_20151005/FeatureServer/10",
-	//PRIORIT_JOIN_KEY: "PrioritizGrowKey",
-	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/2",
-	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/1",
-	URL_GROW_NUM: urlRoot + "CIPS_Editor/FeatureServer/9",
-	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational/FeatureServer/3", //urlRoot + "CIPS_20151015/FeatureServer/20",
-    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/4", //urlRoot + "CIPS_20151015/FeatureServer/11",
-    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Editor/FeatureServer/1",
-    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Editor/FeatureServer/7",
-    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Editor/FeatureServer/5",
-    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Editor/FeatureServer/0",
-    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Editor/FeatureServer/4"
     
-    //URL_EDIT_POINT: urlRoot + "CIPS_20151009/FeatureServer/0",
-    //URL_EDIT_POLYLINE: urlRoot + "CIPS_20151009/FeatureServer/1",
-    //URL_EDIT_POLYGON: urlRoot + "CIPS_20151009/FeatureServer/2"
-    //WEBMAP_ID: "" // Use "" if defining below in WEBMAP_JSON. If an ID is used, the WEBMAP_JSON content below will be ignored.
+    URL_REGION: urlRoot + "CIPS_Base/FeatureServer/0",
+	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/1",
+    
+    URL_GROW_POLYS: urlRoot + "CIPS_Operational/FeatureServer/2",
+    URL_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
+    GROW_POINTS_NAME: "Grow Locations (Grouped)", // name used for clustered point layer
+    GROW_POINTS_SCALE: 73000, // minimum scale the clustered point layer will be displayed at.
+
+	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7",
+	URL_GROW_NUM: urlRoot + "CIPS_Operational/FeatureServer/8",
+	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational/FeatureServer/19",
+    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/11", //urlRoot + "CIPS_20151015/FeatureServer/11",
+    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational/FeatureServer/0",
+    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Operational/FeatureServer/3",
+    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational/FeatureServer/4",
+    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
+    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational/FeatureServer/2"
+    
 };

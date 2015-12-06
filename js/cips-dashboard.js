@@ -134,10 +134,10 @@ function(
 	  urlPrefix: "tasks.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
-	urlUtils.addProxyRule({
+	/*urlUtils.addProxyRule({
 	  urlPrefix: "mapserver.vestra.com",
 	  proxyUrl: appConfig.PROXY_PAGE
-	});
+	});*/
 
 	// Carousel settings - for charts to work, they have to be initialized after the slide is loaded.
 	//$('.carousel').carousel({  interval: false }); // prevent auto-cycle of carousel
@@ -228,7 +228,7 @@ function(
                     totalGrowAcreage += sumRegion[i].TotalAcreageGrows;
                     totalGrowOutdoor += sumRegion[i].NumOutdoorGrows;
                     totalGrowGreenhouse += sumRegion[i].NumGreenHouseGrows;
-                    totalWaterUse += sumRegion[i].TotalWaterUse;
+                    totalWaterUse += sumRegion[i].AnnualWaterUse_acft;
                     totalLevel1 += sumRegion[i].NumCultAreaScore1Grows;
                     totalLevel2 += sumRegion[i].NumCultAreaScore2Grows;
                     totalLevel3 += sumRegion[i].NumCultAreaScore3Grows;
@@ -306,7 +306,7 @@ function(
             totalGrowAcreage = sumRegion[regNum].TotalAcreageGrows;
             totalGrowOutdoor = sumRegion[regNum].NumOutdoorGrows;
             totalGrowGreenhouse = sumRegion[regNum].NumGreenHouseGrows;
-            totalWaterUse = sumRegion[regNum].TotalWaterUse;
+            totalWaterUse = sumRegion[regNum].AnnualWaterUse_acft;
             totalLevel1 = sumRegion[regNum].NumCultAreaScore1Grows;
             totalLevel2 = sumRegion[regNum].NumCultAreaScore2Grows;
             totalLevel3 = sumRegion[regNum].NumCultAreaScore3Grows;
@@ -368,13 +368,13 @@ function(
             var numWaterUseScore1Grows = 0, numWaterUseScore2Grows = 0, numWaterUseScore3Grows = 0;
         
             $.each(sumRegion, function(i) {
-               totalWaterUse += sumRegion[i].TotalWaterUse;
-               totalWaterUseScore1Grows += sumRegion[i].TotalWaterUseScore1Grows;
-               totalWaterUseScore2Grows += sumRegion[i].TotalWaterUseScore2Grows;
-               totalWaterUseScore3Grows += sumRegion[i].TotalWaterUseScore3Grows;
-               numWaterUseScore1Grows += sumRegion[i].NumWaterUseScore1Grows;
-               numWaterUseScore2Grows += sumRegion[i].NumWaterUseScore2Grows;
-               numWaterUseScore3Grows += sumRegion[i].NumWaterUseScore3Grows;
+               totalWaterUse += sumRegion[i].AnnualWaterUse_acft;
+               totalWaterUseScore1Grows += sumRegion[i].NumWaterUseScore1Grows;
+               totalWaterUseScore2Grows += sumRegion[i].NumWaterUseScore2Grows;
+               totalWaterUseScore3Grows += sumRegion[i].NumWaterUseScore3Grows;
+               numWaterUseScore1Grows += sumRegion[i].PeakMoWaterUseScore1Grows;
+               numWaterUseScore2Grows += sumRegion[i].PeakMoWaterUseScore2Grows;
+               numWaterUseScore3Grows += sumRegion[i].PeakMoWaterUseScore3Grows;
             });
         
             var totalWaterUseGal = totalWaterUse * 325851;
@@ -389,7 +389,6 @@ function(
             dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
             dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
             
-            
             // Bar Chart for Water Use by Risk Level
             var barChartData = {
             labels : ["Risk Level 1","Risk Level 2", "Risk Level 3"],
@@ -400,7 +399,7 @@ function(
                     strokeColor : "#FFF",
                     highlightFill: "#aafbbd",
                     highlightStroke: "#FFF",
-                    data : [sumRegion[1].TotalWaterUseScore1Grows, sumRegion[1].TotalWaterUseScore2Grows, sumRegion[1].TotalWaterUseScore3Grows]
+                    data : [sumRegion[1].numWaterUseScore1Grows, sumRegion[1].numWaterUseScore2Grows, sumRegion[1].numWaterUseScore3Grows]
                 },
                 {
                     label: "Region 5",
@@ -408,7 +407,7 @@ function(
                     strokeColor : "#FFF",
                     highlightFill: "#f8c884",
                     highlightStroke: "#FFF",
-                    data : [sumRegion[5].TotalWaterUseScore1Grows, sumRegion[5].TotalWaterUseScore2Grows, sumRegion[5].TotalWaterUseScore3Grows]
+                    data : [sumRegion[5].numWaterUseScore1Grows, sumRegion[5].numWaterUseScore2Grows, sumRegion[5].numWaterUseScore3Grows]
                 },
             ]
         };
@@ -429,12 +428,13 @@ function(
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
 		
-		// Get the map extent from previous session or page. Only has to be done for first map, the rest are based on extent of this map after load
-		if (localStorage.extent) {
+		// Get the map extent from previous session or page.
+		/*if (localStorage.extent) {
 			var ext = $.parseJSON(localStorage.extent);
 			var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
 				new esri.SpatialReference({wkid:102100}));
-		}
+		}*/
+		
 	
         var webMapIDorJson, urlObj = urlUtils.urlToObject(document.location.href);
 
@@ -454,6 +454,8 @@ function(
         	}
 		});*/
 		
+		
+		
 		// Using the BootstrapMap library to create a map
 		mapDeferred = BootstrapMap.createWebMap(appWebMap.WEBMAP_JSON, "mapDiv",
           {
@@ -467,9 +469,9 @@ function(
 
         mapDeferred.then(function(response) {
             
-            if (startExtent) {
-            	response.map.setExtent(startExtent);
-            }
+            //if (startExtent) {
+            //	response.map.setExtent(startExtent);
+            //}
             
             mapResponse = response;
             map = response.map;
@@ -491,6 +493,7 @@ function(
 	        });
 	    	on(map, "update-end", function() {
 	    		esri.hide(loading);
+	    		//console.log("update end");
 	    	});
 	    	on(map, "extent-change", function() {
 	    		app.syncMaps(map);
@@ -524,14 +527,24 @@ function(
     };
     
     app.buildMapItems = function (response) {
-
+		//esri.show(loading);
     	app.buildTOC(response);
     	app.buildBasemap();
     	app.buildSearch();
     	app.buildSearchWatershed();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.GROW_POINTS_URL, appConfig.GROW_POINTS_SCALE, null, function(callback) {
+    	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.URL_GROW_POINTS, appConfig.GROW_POINTS_SCALE, null, function(callback) {
+    		//console.log("buildCluster done");
+    		// Get the map extent from previous session or page.
+			if (localStorage.extent) {
+				var ext = $.parseJSON(localStorage.extent);
+				var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
+					new esri.SpatialReference({wkid:102100}));
+					map.setExtent(startExtent);
+					//esri.hide(loading);
+			}
+			//$.unblockUI();
 		}));
     };
 
@@ -709,7 +722,7 @@ function(
 	    basemapGallery.on("selection-change", function(){  
 			var currentBasemap = basemapGallery.getSelected();
 		  	localStorage.currentBasemap = currentBasemap.id;
-		  	esri.hide(loading);
+		  	//esri.hide(loading);
 		});
 		
 		if (localStorage.currentBasemap) {
@@ -742,7 +755,7 @@ function(
 	     var sources = sL.get("sources");
 	    
 	     sources.push({
-	        featureLayer: new FeatureLayer(appConfig.SEARCH_WATERSHED),
+	        featureLayer: new FeatureLayer(appConfig.URL_WATERSHED),
 	        searchFields: ["Name"],
 	        suggestionTemplate: "${Name}, HUC12: ${HUC12}",
 	        displayField: "Name",
@@ -893,7 +906,8 @@ function(
 		clickHandler = null;
 		map.graphics.clear();
 		tb.on("draw-end", app.addElevGraphic);
-		tb.activate(toolName);;
+		tb.activate(toolName);
+		//map.disableMapNavigation();
 	};
 
 	app.addElevGraphic = function(evt) {
@@ -998,7 +1012,16 @@ function(
 			"title" : newLyrName
 		});
 		toc.refresh();
-			
+		callback("complete");	
+		
+		/*clusterLayer.on("clusters-shown", function() {
+			esri.hide(loading);
+			console.log("clusters shown");
+		});
+		clusterLayer.on("update", function() {
+			//esri.hide(loading);
+			console.log("cl graphic update");
+		});*/
 	};
 		
 	app.summarizeWshd = function(option) {
@@ -1016,8 +1039,8 @@ function(
 				}
 				showInfoWindow = "sumWshd";
 				var currentClick = null;
-				var queryTask = new QueryTask(appConfig.SEARCH_WATERSHED);
-				var queryTaskGrow = new QueryTask(appConfig.GROW_POLYS_URL);
+				var queryTask = new QueryTask(appConfig.URL_WATERSHED);
+				var queryTaskGrow = new QueryTask(appConfig.URL_GROW_POLYS);
 				var query = new Query();
 				var results1, results2, results3;
 				query.returnGeometry = true;
@@ -1282,8 +1305,8 @@ function(
 	
 	app.createGrowSum = function() {
 		
-		$.when(app.runQuery(appConfig.GROW_POLYS_URL, "0=0", function(qryResultsLyr) {
-			$.when(app.appendRecsToPoint(appConfig.GROW_PREPROC_RESULTS_URL, "PreProcDataSourceName='Cultivated Area'", qryResultsLyr, "GrowID", function(ftrLayerCallback) {
+		$.when(app.runQuery(appConfig.URL_GROW_POLYS, "0=0", function(qryResultsLyr) {
+			$.when(app.appendRecsToPoint(appConfig.URL_GROW_PREPROC_RESULTS, "PreProcDataSourceName='Cultivated Area'", qryResultsLyr, "GrowID", function(ftrLayerCallback) {
 				//console.log(ftrLayerCallback);
 			}));
 		}));
@@ -1668,7 +1691,7 @@ function(
 					app.removeMapLayer("Grow Locations");
 				};
 				queryParams = "0=0";
-				$.when(app.polyToClusterPointLayer("Grow Locations", appConfig.GROW_POLYS_URL, queryParams, null, null, null, 72223, null, function(callback) {
+				$.when(app.polyToClusterPointLayer("Grow Locations", appConfig.URL_GROW_POLYS, queryParams, null, null, null, 72223, null, function(callback) {
 					app.zoomToLayerExtent("Grow Locations");
 					$("#loadStatus").html("Status: Grow Locations added");
 				}));
@@ -1695,7 +1718,7 @@ function(
 					app.removeMapLayer("Grow Locations");
 				};
 				queryParams = "SWRCBRegID=" + option.value;
-				$.when(app.polyToClusterPointLayer("Grow Locations", appConfig.GROW_POLYS_URL, queryParams, null, null, null, 72223, null, function(callback) {
+				$.when(app.polyToClusterPointLayer("Grow Locations", appConfig.URL_GROW_POLYS, queryParams, null, null, null, 72223, null, function(callback) {
 					app.zoomToLayerExtent("Grow Locations");
 					$("#loadStatus").html("Status: Grow Locations added");
 				}));
@@ -2032,6 +2055,7 @@ function(
 					$("#about-cips").hide();
 					$("#open-editor").hide();
 					$("#sign-in").show();
+					//$.unblockUI();
 				 }
 			);
 	

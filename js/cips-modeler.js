@@ -547,7 +547,7 @@ function(
 
             					// Also delete any associated Prioritization Area Models      
              					var delPrAreaKey = modelFtr.attributes.PrioritizAreaKey;           					      					
-            					app.initDeletePrAreaModels(delPrAreaKey);
+            					app.deletePrAreaModels(delPrAreaKey);
 
             				} else {
             					popup.clearFeatures();
@@ -1186,6 +1186,7 @@ function(
 	// Section 6: Model Functionality ------------------------------------------
 	
 	app.initModelMenu = function(option) {
+		// For Model Tools menu items - sets behavior for each radio button option
 		var selOption = option.id;
 
 		switch(selOption) {
@@ -1372,7 +1373,7 @@ function(
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
-				$("#editInstructions").html("Click on the Interpretation Area you want to delete.<br/><br/>Note, you can only delete areas that are 'In Initial Review'.");
+				$("#editInstructions").html("Click on the Interpretation Area you want to delete.<br/><br/><b>Note</b>, you can only delete areas that are 'In Initial Review'.");
 			break;
 			case "optionsRadios8":
 				// delete model
@@ -1388,7 +1389,7 @@ function(
 				$("#editButtons").show();
 				app.initDelRegionList();
 				$("#deleteModelFromList").show();
-				$("#editInstructions").html("Identify the Prioritization Model to delete by:<br/> Selecting the Region<br/> Then selecting the Prioritization Areas");
+				$("#editInstructions").html("1. Select the Region the Model resides within.<br/>2. Select the Prioritization Area that the Model belongs to.<br/>3. A popup dialog will appear with next steps.");
 			break;
 		}
 		//dojo.disconnect(clickHandler);
@@ -2125,8 +2126,8 @@ function(
 	        		ftr._layer.refresh();
 	        	} else {
 	        		$.each(layers, function(i) { 
-	        			layers[i].clearSelection();
-	        			layers[i].refresh();
+	        			layers[i].layer.clearSelection();
+  						layers[i].layer.refresh();
  					});
 	        	}
 	        	esri.hide(loading);
@@ -2263,7 +2264,7 @@ function(
 		$("#optionsRadios6:checked").prop("checked",false);
 		$("#optionsRadios7:checked").prop("checked",false);
 		$("#optionsRadios8:checked").prop("checked",false);
-		$("#editInstructions").html("Select a modeling option.");
+		$("#editInstructions").html("Select an option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
 		};

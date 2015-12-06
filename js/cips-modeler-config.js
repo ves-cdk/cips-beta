@@ -20,7 +20,7 @@ appConfig = {
     
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
-    WEBMAP_ID: "", // Use "" if defining below in WEBMAP_JSON. If an ID is used, the WEBMAP_JSON content below will be ignored.
+    WEBMAP_ID: "", // Use "" if cips-modeler-webmap.js file. If an ID is used, the WEBMAP_JSON content below will be ignored.
   
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7", //"CIPS_Operational/FeatureServer/2",
 	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",

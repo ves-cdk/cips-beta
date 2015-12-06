@@ -150,10 +150,10 @@ function(
 	  urlPrefix: "tasks.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
-	urlUtils.addProxyRule({
+	/*urlUtils.addProxyRule({
 	  urlPrefix: "mapserver.vestra.com",
 	  proxyUrl: appConfig.PROXY_PAGE
-	});
+	});*/
 
     // for the map tool container
     var showing = false;
@@ -412,7 +412,7 @@ function(
     	app.buildSearchWatershed();
     	//app.buildPrint();
     	app.buildMeasure();
-    	$.when(app.buildClusterLayer("Grow Locations (Grouped)", "http://services.arcgis.com/pc0EXLr0PbESBcyz/ArcGIS/rest/services/CIPS_Operational/FeatureServer/0", 80000, null, function(callback) {
+    	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.URL_GROW_POINTS, appConfig.GROW_POINTS_SCALE, null, function(callback) {
 			$.when(app.buildEditor(function(buildCallback) {
 			}));
 		}));
@@ -627,7 +627,7 @@ function(
 	     var sources = sL.get("sources");
 	    
 	     sources.push({
-	        featureLayer: new FeatureLayer(appConfig.SEARCH_WATERSHED),
+	        featureLayer: new FeatureLayer(appConfig.URL_WATERSHED),
 	        searchFields: ["Name"],
 	        suggestionTemplate: "${Name}, HUC12: ${HUC12}",
 	        displayField: "Name",
@@ -819,6 +819,7 @@ function(
 	app.initElevToolbar = function(toolName) {
 		// Elevation Profile Widget - initialize
 		epWidget.clearProfile();
+		dojo.disconnect(clickHandler);
 		//Clear profile
 		map.graphics.clear();
 		tb = new Draw(map);
@@ -943,8 +944,8 @@ function(
 				}
 				showInfoWindow = "sumWshd";
 				var currentClick = null;
-				var queryTask = new QueryTask(appConfig.SEARCH_WATERSHED);
-				var queryTaskGrow = new QueryTask(appConfig.GROW_POLYS_URL);
+				var queryTask = new QueryTask(appConfig.URL_WATERSHED);
+				var queryTaskGrow = new QueryTask(appConfig.URL_GROW_POLYS);
 				var query = new Query();
 				var results1, results2, results3;
 				query.returnGeometry = true;
@@ -1139,8 +1140,8 @@ function(
 		var params = "OBJECTID = " + ftr.attributes.OBJECTID;
 		var dataString = {
 			f: "json",
-			where: params,
-			token: token
+			where: params//,
+			//token: token
 		};
 
 	    $.ajax({
@@ -1487,17 +1488,18 @@ function(
 		}
 	};
 	
-	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {		
+	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {
+		//app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, 1, "Reg1LastModelNumAssigned", 0, null);
 		
-		var updFeature = '{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}';	
+		var updFeature = '[{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}]';	
 		//console.log(updateAttributes);			
 
 		var url = ftrUrl + "/updateFeatures";
 		var updString = {
 	        f: 'json',
 	        //where: "objectId=" + objId,
-	        features: updFeature,
-	        token: token
+	        features: updFeature//,
+	        //token: token
 	    };
 		//console.log(updFeature, url, updString);
 			
@@ -1591,13 +1593,18 @@ function(
 	
 	app.saveNewFeature = function(feature, url, callback) {
 		// Write new feature to layer using object created in createNewFeature
-		var addFeature = JSON.stringify(feature);
+		// NOTES: token removed from addParams below, necessary with move of data from AGOL to AGS
+		//        Added "[" and "]" to addFeature, necessary with move of data from AGOL to AGS
+		var addFeature = "[" + JSON.stringify(feature) + "]";
+		
 		var urlEdit = url + "/addFeatures";
 		var addParams = {
 	        f: "json",
-	        features: addFeature,
-	        token: token
+	        features: addFeature//,
+	        //token: token
 	    };
+	    
+	    testvar = addFeature;
 	
 	    // Add feature
 	    $.ajax({
