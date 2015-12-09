@@ -9,9 +9,9 @@
 		<link rel="shortcut icon" href="img/favicon.png">
 		<title>CIPS</title>
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+		<link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.15/esri/css/esri.css">
 		<link rel="stylesheet" type="text/css" href="fonts/font-awesome/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.14compact/dijit/themes/claro/claro.css">
+		<link rel="stylesheet" type="text/css" href="//js.arcgis.com/3.15compact/dijit/themes/claro/claro.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrapmap.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap-toggle.min.css">
 		<link rel="stylesheet" type="text/css" href="css/cips.css">
@@ -358,6 +358,9 @@
 									<li>
 										<a href="#menu5" class="tabItems" role="tab" data-toggle="tab" id="menuMapTools" onclick="app.menuChange(this);"><i class="fa fa-wrench fa-lg">&nbsp;</i>Map Tools</a>
 									</li>
+									<li>
+										<a href="#menu7" class="tabItems" role="tab" data-toggle="tab" id="menuPrModel" onclick="app.menuChange(this);"><i class="fa fa-sort-amount-asc fa-lg">&nbsp;</i>View Prioritization Model</a>
+									</li>
 								</ul>
 							</div>
 						</div>
@@ -521,6 +524,9 @@
 												<button id="enable-time" onclick="app.buildTimeSlider();" class="btn btn-block" title="Enable the Time Slider, allowing you to view time-enabled layers by year.">
 													Enable Time Slider
 												</button><br/>
+												<button id="disable-time" onclick="app.removeTimeSlider();" class="btn btn-block" title="Enable the Time Slider, allowing you to view time-enabled layers by year." style="display:none;" >
+													Disable Time Slider
+												</button><br/>
 												When enabled, the Time Slider will display at the bottom of the map.<br/><br/>
 												The following layers are time-enabled:<br/>
 												- Timber Harvest Plans<br/>
@@ -529,8 +535,81 @@
 										</div>
 									</div>
 								</div>
-
 							</div>
+							<!-- Load Prioritization Model -->
+							<div id="menu7" class="tab-pane ribbon-bar-tab">
+								<div class="panel-group" id="accordion7" role="tablist" aria-multiselectable="true">
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel1">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse1" aria-expanded="false" aria-controls="collapse7One"> Load Prioritization Model:</a></h4>
+										</div>
+										<div id="menu7collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel1">
+											<div class="panel-body" id="">
+												<!--<p class="bg-info" id="loadModelTitle">Select a Model:</p>-->
+												<div class="radio" id="editRadios10">
+													<label>
+														<input type="radio" name="optionsRadios10" id="optionsRadios10" value="option1" onclick="app.initLoadModel(this)"> Select by Clicking on Prioritization Model</label>
+												</div>
+												<div class="radio" id="editRadios11">
+													<label>
+														<input type="radio" name="optionsRadios11" id="optionsRadios11" value="option2" onclick="app.initLoadModel(this)"> Select from List</label>
+												</div>
+												<div id="loadModelFromList" style="display:none;">
+													Region<br/>
+										      		<select class="form-control" id="selectLoadPrRegion" onchange="app.initLoadModelList()">
+										      			<option></option>
+													</select><br/>
+													Prioritization Model<br/>
+										      		<select class="form-control" id="selectLoadPrModel" disabled onchange="app.loadModel($('#selectLoadPrModel').val(), $('#selectLoadPrModel option:selected').text())">
+										      			<option></option>
+													</select>	
+												</div>	
+												<div id="loadModelStatus"></div>										
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default" id="modelResults" style="display:none;">
+										<div class="panel-heading" role="tab" id="menu7panel4">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse4" aria-expanded="false" aria-controls="collapse7Four"> Prioritization Model Information</a></h4>
+										</div>
+										<div id="menu7collapse4" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel4">
+											<div class="panel-body">
+												<div id="modelResultsDisplay">
+													Display Grows by:<br/>
+										      		<select class="form-control" id="modelDisplayBy" onchange="app.updateRenderer()">
+										      			<option></option>
+													</select>
+												</div><br/>
+												<div id="modelResultsSummary">Summary</div>
+												<div id="modelResultsIndividual"></div>
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel2">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse2" aria-expanded="false" aria-controls="collapse7Two"> Instructions</a></h4>
+										</div>
+										<div id="menu7collapse2" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel2">
+											<div class="panel-body">
+												<div id="modelInstructions">Select an option.</div>
+											</div>
+										</div>
+									</div>
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu7panel3">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" href="#menu7collapse3" aria-expanded="false" aria-controls="collapse7Three"> Reset</a></h4>
+										</div>
+										<div id="menu7collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel3">
+											<div class="panel-body">
+												<div id="loadResetMenu">
+													<button id="loadResetBtn" onclick="app.resetLoadModel();" class="btn btn-block">Reset</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							
 						</div>
 						<button id="ribbon-bar-toggle" onclick="app.hideRibbonMenu();" style="display:none;" title="Close Menu">
 							<span class="fa fa-minus-square"></span>
@@ -567,6 +646,25 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" id="modalTable" data-backdrop="static">
+			<div class="modal-dialog modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+			        	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			        	<h4 class="modal-title">Table View</h4>
+			      	</div>
+			      	<div class="modal-body" style="height: 600px;">
+			      		<button title="Create comma separated content (CSV) that can be pasted into Excel" type="button" onclick="app.exportTable();">
+							Export
+						</button>
+			      		<div id="tblGrid" data-dojo-type="dijit/layout/ContentPane" style="height:90%">
+				        	<div id="myTableNode"></div>
+				    	</div>
+			      	</div>
+			    </div>
+			 </div>
+		</div>
 
 		<!-- JS libraries, placed at the end of the document so the pages load faster -->
 		<script src="js/lib/jquery-1.11.3.min.js"></script>
@@ -581,7 +679,7 @@
 		<script type="text/javascript" src="js/lib/bootbox.min.js"></script>
 		<script type="text/javascript" src="js/lib/Chart.min.js"></script>
 		<script type="text/javascript" src="js/lib/bootstrap-toggle.min.js"></script>
-		<script type="text/javascript" src="http://js.arcgis.com/3.14compact"></script>
+		<script type="text/javascript" src="http://js.arcgis.com/3.15compact"></script>
 		<script type="text/javascript" src="js/cips-dashboard-webmap.js"></script>
 		<script type="text/javascript" src="js/cips-dashboard-config.js"></script>
 		<script type="text/javascript" src="js/cips-dashboard.js"></script>

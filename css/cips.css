@@ -73,6 +73,13 @@ body {
 .esriControlsBR {
 	display: none;
 }
+.claro .dijitPopup {
+	z-index: 9000 !important;
+}
+.claro .dijitContentPane {
+	padding: 0px !important;
+	/*height: 30px !important;*/
+}
 .alert {
 	margin-bottom: 2px;
 }

@@ -31,6 +31,27 @@ appConfig = {
     URL_GROW_POINTS: urlRoot + "CIPS_Operational/MapServer/1",
     GROW_POINTS_NAME: "Grow Locations (Grouped)", // name used for clustered point layer
     GROW_POINTS_SCALE: 73000, // minimum scale the clustered point layer will be displayed at.
-    URL_GROW_PREPROC_RESULTS: urlRoot + "CIPS_Operational/MapServer/9"
+    URL_GROW_PREPROC_RESULTS: urlRoot + "CIPS_Operational/MapServer/9",
+    
+    URL_PRIOR_AREA: urlRoot + "CIPS_Operational/MapServer/6", //"CIPS_20151123/MapServer/5", //  "CIPS_20151015/FeatureServer/3",
+	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/14", //"CIPS_Operational/FeatureServer/9",
+	URL_PRIOR_MODELS: urlRoot + "CIPS_Operational/FeatureServer/16", //"CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
+	URL_PRIOR_MODELS_SUMMARY: urlRoot + "CIPS_Operational/FeatureServer/18", //"CIPS_20151123/FeatureServer/8",
+	
+	URL_PRIOR_MODELS_RESULTS: urlRoot + "CIPS_Operational/FeatureServer/5", //"CIPS_20151123/FeatureServer/4", // Prioritization Grows (polygons) 
+	URL_PRIOR_MODELS_RESULTS_RELATE: urlRoot + "CIPS_Operational/FeatureServer/15", //"CIPS_20151123/FeatureServer/11", // Prioritization Model results related table 
+	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
+
+	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/13", //"CIPS_20151123/FeatureServer/13",
+	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/9",
+	
+	// LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file
+    LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
+    LAYER_NAME_INTERP: "Interpretation Areas",
+    LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
+    LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
+    LAYER_NAME_GROW_FOOTPRINTS: "Grow Footprints",
+    LAYER_NAME_GROW_LOCATIONS: "Grow Locations"
+
 	
 	};

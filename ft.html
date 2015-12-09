@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Using FeatureTable</title>
+  <link rel="stylesheet" href="//js.arcgis.com/3.15/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" href="//js.arcgis.com/3.15/esri/css/esri.css">
+  <script src="//js.arcgis.com/3.15/"></script>
+
+  <style>
+    html, body, #map{
+      width:100%;
+      height:100%;
+      margin:0;
+      padding:0;
+    }
+  </style>
+
+  <script>
+    var map;
+    var grid, foo;
+
+    require([
+	  "esri/IdentityManager",
+	  "esri/layers/FeatureLayer",
+	  "esri/dijit/FeatureTable",
+	  "esri/geometry/webMercatorUtils",
+	  "esri/map",
+	  "dojo/dom-construct",
+	  "dojo/dom",
+	  "dojo/parser",
+	  "dojo/ready",
+	  "dojo/on",
+	  "dojo/_base/lang",
+	  "dijit/registry",
+	  "dijit/form/Button",
+	  "dijit/layout/ContentPane",
+	  "dijit/layout/BorderContainer",
+	  "dijit/form/TextBox"
+      
+    ], function (
+      IdentityManager, FeatureLayer, FeatureTable, webMercatorUtils, Map,
+      domConstruct, dom, parser, ready, on, lang,
+      registry, Button, ContentPane, BorderContainer, TextBox
+    ) {
+
+      parser.parse();
+
+      ready(function(){
+      	
+      	var app = dojo.getObject('app', true); // global object to allow function calls from the app.
+ 
+
+        var myFeatureLayer;
+        //var map = new Map("map",{
+        //  basemap: "dark-gray"
+        //});
+
+        //map.on("load", loadTable);
+        loadTable();
+
+        /*var myButton = new Button({
+          label: "Load",
+          onClick: loadTable
+        }, "loadButton").startup();*/
+
+
+        function loadTable(){
+
+          // Create the feature layer
+          myFeatureLayer = new FeatureLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/7", {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            outFields:  ["InterpAreaKey ","SWRCBRegID","InterpAreaID","InterpAreaName","InterpAreaSqKm","InterpAreaAcres","GrowYear","StatusInterpArea"],
+            visible: true,
+            id: "fLayer"
+          });
+
+          /*on(myFeatureLayer, "load", function(evt){
+            console.log("Layer loaded");
+            var extent = myFeatureLayer.fullExtent;
+            if (webMercatorUtils.canProject(extent, map)) {
+              map.setExtent( webMercatorUtils.project(extent, map) );
+            }
+          });*/
+
+          /*if(registry.byId("myTableNode")){
+            registry.byId("myTableNode").destroy();
+            domConstruct.create("div", {id: "myTableNode"}, dom.byId("bot"));
+            console.log("re-creating table");
+          }*/
+
+          // Add the feature layer to the map
+          /*var oldLayer = map.getLayer("fLayer");
+          if(oldLayer){
+            map.removeLayer(oldLayer);
+          }
+          map.addLayer(myFeatureLayer);*/
+
+          myTable = new FeatureTable({
+            "featureLayer" : myFeatureLayer//,
+            //"dateOptions": {
+            //  "timeEnabled" : true,
+            //  "timePattern" : "HH:mm:ss",
+            //  "datePattern" : "YYYY-MM-DD"
+            //},
+            //"hiddenFields": [],  // field that end-user can show, but is hidden on startup
+            //"map" : map
+          }, 'myTableNode');
+
+          // load event (must be before startup)
+          on(myTable, "load", function(evt){
+            console.log("The load event - ", evt);
+            //exportTable();
+          });
+
+          myTable.startup();
+
+          on(myTable, "dgrid-refresh-complete", function(evt){
+            console.log("The dgrid-refresh-complete event - ", evt);
+          });
+
+          on(myTable, "dgrid-select", function(evt){
+            console.log("The dgrid-select event - ", evt);
+          });
+
+          on(myTable, "dgrid-deselect", function(evt){
+            console.log("The dgrid-deselect event - ", evt);
+          });
+
+        }
+        
+        app.exportTable = function() {
+        	grid = registry.byId("myTableNode");
+        	var expTable = app.csvExp(grid.dataStore.data);
+        	alert(expTable);
+        	//grid.exportGrid("csv", function(str){
+			//alert(str);
+			//});
+        };
+        
+        // Returns a csv from an array of objects with
+		// values separated by tabs and rows separated by newlines
+		app.csvExp = function(array) {
+		    // Use first element to choose the keys and the order
+		    var keys = [];
+		    for (var k in array[0]) keys.push(k);
+		
+		    // Build header
+		    var result = keys.join("\t") + "\n";
+		
+		    // Add the rows
+		    array.forEach(function(obj){
+		        keys.forEach(function(k, ix){
+		            if (ix) result += "\t";
+		            result += obj[k];
+		        });
+		        result += "\n";
+		    });
+		
+		    return result;
+		};
+      });
+    });
+  </script>
+</head>
+
+<body class="claro esri">
+  <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline'" style="width:100%; height:100%;">
+    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center', splitter:true" style="height:50%">
+      <div id="map"></div>
+    </div>
+    <button onclick="app.exportTable()">Export</button>
+    <div data-dojo-type="dijit/layout/ContentPane" style="height:100%">
+      <div id="myTableNode"></div>
+    </div>
+  </div>
+</body>
+
+</html> 

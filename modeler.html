@@ -331,9 +331,10 @@
 													Display Grows by:<br/>
 										      		<select class="form-control" id="modelDisplayBy" onchange="app.updateRenderer()">
 										      			<option></option>
-													</select><br/>
+													</select>
 												</div><br/>
 												<div id="modelResultsSummary">Summary</div>
+												<div id="modelResultsIndividual"></div>
 											</div>
 										</div>
 									</div>
@@ -460,11 +461,12 @@
 						<div id="modelCheck" class="text-center"></div>
 
 						<div id="modelProgress" style="display:none;" class="text-center">
-							<div id="modelProgressText">Status: Modeling in Process</div>
 							<div id="modelProgressImage">
 								<img src="img/loading.gif" style="width: 50px;"/>
 							</div>
-							<div class="text-center">Note: You can close this dialog, along with the CIPS web application (your web browser) at any time.<br/>The Modeling processes will continue to run until completed.</div>
+							<div id="modelProgressText">Status: Modeling in Process
+							</div>
+							<button type="button" class="btn btn-default" data-dismiss="modal" id="loadCompletedModel" style="display:none;" onclick="app.loadModel($('#inputModelPaId').val(), 'PrioritizAreaName');">Load the Model</button>
 						</div>
 						
 					</div>

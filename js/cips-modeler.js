@@ -14,6 +14,7 @@ var modelFactors, paramFactors;  // modelFactors are the factors with _ separato
 var priorAreaRecs; // stored records for Priortization Areas, used for loading models
 var modelNewOrEdit; // used for messaging when a Prioritization model is created
 var lastModelNum, newModelNum, modelNumObjectId, regionNum;
+var loadedModelResults; // records for a loaded model, used for summary display
 var geometryService, gp;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
@@ -1131,6 +1132,7 @@ function(
 		/*if (showInfoWindow === "sumWshd") {
 			$("#sumWshd-toggle").bootstrapToggle("off");
 		};*/
+		console.log(option);
 		if (option.id === "menuMapTools") {
 			dojo.disconnect(clickHandler);
 			clickHandler = null;
@@ -1524,10 +1526,16 @@ function(
 		
 		
 		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "ModelRunKey = '" + selModel + "'", false, function(inputFtr) {
+			
+			
 			//console.log(inputFtr);
 
 			var paAttr = inputFtr.features[0].attributes;
 			regionNum = paAttr.SWRCBRegID;	
+			
+			$.when(app.runQuery(appConfig.URL_PRIOR_AREA, "PrioritizAreaKey = '" + paAttr.PrioritizAreaKey + "'", false, function(prAreaQry) {
+				var prAreaName = prAreaQry.features[0].attributes.PrioritizAreaName;
+			
 			
 			// Dynamically build the elemments on the Model popup based upon what is available from the PreProcInputs table
 			
@@ -1591,8 +1599,8 @@ function(
 				$("#modelParameters").html(modelInput);
 				$("#inputModelReg").val(paAttr.SWRCBRegID);
 				$("#inputModelPaId").val(paAttr.PrioritizAreaKey);
+				$("#inputModelPaName").val(prAreaName);
 				$("#inputModelName").val(paAttr.ModelRunName);
-				$("#inputModelName").prop(paAttr.ModelRunName);
 				$("#inputModelName").prop("disabled",true);
 				$("#inputModelRunId").val(paAttr.ModelRunID);
 				$("#modelInstructions").html("Modify the model parameters.");
@@ -1612,6 +1620,7 @@ function(
 	    			});
 				});
 				esri.hide(loading);
+			}));
 			}));
 		}));
 	};
@@ -1694,16 +1703,20 @@ function(
 						};
 						// Loop through model factors to build the parameters that will be used in the gp tool
 						$.each(paramFactors, function(i) {
+							var i2 = i + 1;
 							if (!($("#input" + modelFactors[i]).prop('disabled'))) {
-								gpParams["Input" + i+1 + "_DataSource"] = paramFactors[i];
-								gpParams["Input" + i+1 + "_Level_Combo"] = "1";
-								gpParams["Input" + i+1 + "_Weight"] = parseInt($("#input" + modelFactors[i]).val()) / 100;
+								gpParams["Input" + i2 + "_DataSource"] = paramFactors[i];
+								gpParams["Input" + i2 + "_Level_Combo"] = "1";
+								gpParams["Input" + i2 + "_Weight"] = parseInt($("#input" + modelFactors[i]).val()) / 100;
 							}
 						});
+						
+						
 			
-						//console.log(gpParams);
+						console.log(gpParams);
 						esri.hide(loading);
 				    	
+				    	$('#loadCompletedModel').hide();
 				    	$("#modelParameters").hide();
 				    	$("#modelInstructions").hide();
 				    	$("#modelProgress").show();
@@ -1720,13 +1733,14 @@ function(
 
 						function gpStatusCallback(jobInfo) {
 							//console.log(jobInfo.jobStatus);
-							$("#modelProgressText").html("Status: Modeling in Process");
+							$("#modelProgressText").html("Status: Modeling in Process<br/><br/>Note: You can close this dialog, along with the CIPS web application (your web browser) at any time.<br/>The Modeling processes will continue to run until completed.");
 						};
 					
 						function gpCompleteCallback(jobInfo) {
 							console.log("Geoprocessing Model completed: ", jobInfo);
 							$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
 							$("#modelProgressImage").hide();
+							$('#loadCompletedModel').show();
 						};
 					}
 		    	}
@@ -2172,7 +2186,7 @@ function(
 		}));
 	};
 	
-	app.gpDeleteModels = function (delModelId) {
+	/*app.gpDeleteModels = function (delModelId) {
     			
 		var gpParams = {
 			"###" : delModelId
@@ -2193,7 +2207,7 @@ function(
 			//$("#modelProgressText").html("<b>Status: Modeling Complete!</b><br/><br/>");
 			//$("#modelProgressImage").hide();
 		};
-	};
+	};*/
 	
 	app.editFeature = function(ftr, type) {
 		// second step for editing attribute or shape features
@@ -2404,6 +2418,12 @@ function(
 	    });
 	};
 	
+	app.numberWithCommas = function (x) {
+        // converts number to a string with comma separators (used for summary section)
+        x = x.toFixed(0);
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+	
 	// -- Section 7: Load Prioritization Model Results  ----------------------------------------------------
 	
 	app.initLoadModel = function(option) {
@@ -2479,6 +2499,8 @@ function(
 		$("#modelResultsSummary").html("Summary");
 		$("#modelResults").hide();
 		$("#loadModelStatus").html("");
+		$("#modelResultsIndividual").html("");
+		
 		if (prModelPoly) {
 			$.when(app.removeMapLayer(prModelPoly.id, function(callback) {
 			$.when(app.removeMapLayer(prModelPoint.id, function(callback) {
@@ -2494,6 +2516,11 @@ function(
 	};
 	
 	app.loadModel = function(prioritizAreaID, modelFtrName) {
+		if ($("#optionsRadios5:checked").prop("checked") || $("#optionsRadios4:checked").prop("checked")) {
+			// loading the model after a model run.
+			app.stopEdit();
+			$("#menuPrModel").click();
+		}
 		esri.show(loading);
 		//console.log(prioritizAreaID, modelFtrName);
 		// Loads a prioritization model - the PrioritizationGrows polygons + related results
@@ -2554,6 +2581,8 @@ function(
 		
 		
 		function showResults(sumAttr) {
+			loadedModelResults = sumAttr;
+			console.log(sumAttr);
 			$("#modelResults").show();
 			
 			// Loop through the input factors and create a drop down for displaying points by each
@@ -2572,10 +2601,17 @@ function(
 			var shortSummary = ""
 				+ "Prioritization Area: <b> " + modelFtrName + "</b><br/>"
 				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>"
-				+ "Number of Grows: " + sumAttr.NumGrows + "<br/>"
-				+ "&nbsp;&nbsp;Outdoor: " + sumAttr.NumOutdoorGrows + "<br/>"
-				+ "&nbsp;&nbsp;Greenhouse: " + sumAttr.NumGreenHouseGrows + "<br/>"
-				+ "Total Acreage of Grows: " + sumAttr.TotalAcreageGrows + "<br/>";
+				+ "Totals:"
+				+ "<dl class='dl-horizontal'>"
+				+ "<dt>Total Grow Count</dt><dd>" + sumAttr.NumGrows + "</dd>"
+				+ "<dt>Outdoor Grows</dt><dd>" + sumAttr.NumOutdoorGrows + "</dd>"
+				+ "<dt>Greenhouse Grows</dt><dd>" + sumAttr.NumGreenHouseGrows + "</dd>"
+				+ "<dt>Total Grow Acreage</dt><dd>" + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</dd>"
+				+ "</dl>";
+				//+ "Number of Grows: <span class='badge-sum badge-4'>" + sumAttr.NumGrows + "</span><br/>"
+				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumOutdoorGrows + "</span> Outdoor<br/>"
+				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumGreenHouseGrows + "</span> Greenhouse<br/>"
+				//+ "Total Acreage of Grows:<span class='badge-sum badge-3'> " + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</span><br/>";
 			$("#modelResultsSummary").html(shortSummary);
 
 			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
@@ -2589,6 +2625,7 @@ function(
 					$("#editRadios11").hide();
 					$("#loadModelFromList").hide();
 					$("#loadModelStatus").html("Prioritization Model Loaded.");
+					$("#modelInstructions").show();
 					$("#modelInstructions").html("Prioritization Model Loaded.<br/>Click Reset to remove and start over.");
 					app.resetPopup();
 					app.zoomToLayerExtent(selectModelName);
@@ -2601,6 +2638,27 @@ function(
 		}
 	};
 	
+	app.updateModelSummary = function() {
+		var selFactor = $('#modelDisplayBy').val();
+		
+		//if (selFactor === "0") {
+		//	$("#modelResultsIndividual").html("");
+		//} else {
+			var level1Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level1"];
+			var level2Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level2"];
+			var level3Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level3"];
+			
+			var factorSummary = ""
+					+ "Total Grow Count by Selected Factor:"
+					+ "<dl class='dl-horizontal'>"
+					+ "<dt>Threat Level 1</dt><dd>" + level1Grows + "</dd>"
+					+ "<dt>Threat Level 2</dt><dd>" + level2Grows + "</dd>"
+					+ "<dt>Threat Level 3</dt><dd>" + level3Grows + "</dd>"
+					+ "</dl>";
+			$("#modelResultsIndividual").html(factorSummary);
+		//}
+	};
+	
 	app.createAppendedLayer = function(featureUrl, relateUrl, qryWhere, relateField, featureName, callback) {
 		var ftrLayer, relateLayer;
 
@@ -2611,9 +2669,31 @@ function(
 
 				$.extend(ftrLayer.fields, relateLayer.fields);
 				var relateLayerAttr = [];
+				var threat1 = 0, threat2 = 0, threat3 = 0;
+				relateCount = 0;
+				
 				$.each(relateLayer.features, function(i) {
 					relateLayerAttr.push(relateLayer.features[i].attributes);
+					
+					// Dynamically counting the totals for the Weighted Average Score since this isn't done in the summary table
+					var valWtAveScore = relateLayer.features[i].attributes.WtAveScore;
+					if (valWtAveScore < 2) {
+						threat1 += 1;
+					};
+					if (valWtAveScore >= 2 && valWtAveScore < 3) {
+						threat2 += 1;
+					};
+					if (valWtAveScore >= 3) {
+						threat3 += 1;
+					};
 				});
+				
+				// Adding the totals to the object used for displaying summary totals.
+				loadedModelResults.NumGrowsInput0Level1 = threat1;
+				loadedModelResults.NumGrowsInput0Level2 = threat2;
+				loadedModelResults.NumGrowsInput0Level3 = threat3;
+				
+				//console.log(threat1, threat2, threat3);
 
 				$.each(ftrLayer.features, function(i) {
 					var relateId = ftrLayer.features[i].attributes[relateField];
@@ -2622,6 +2702,8 @@ function(
 					});
 					$.extend(ftrLayer.features[i].attributes, ftrLayer.features[i].attributes, relateObjects[0]);
 				});
+				
+				testvar = ftrLayer.features;
 
 				$.when(app.createPolyFC(featureName, ftrLayer, function(createdFC) {
 					//console.log(createdFC);
@@ -2732,6 +2814,7 @@ function(
 	app.updateRenderer = function() {
 		app.classBreakRendererPoly('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoly);
 		app.classBreakRendererPoint('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoint);
+		app.updateModelSummary();
 	};
 	
 	app.classBreakRendererPoly = function(renderField, renderLayer) {

@@ -200,6 +200,7 @@ define([
         },
         handleAs: 'json'
       }).then(lang.hitch(this, function(response) {
+      	//console.log("url response");
         this._defaultRenderer = this._singleRenderer ||
           rendererJsonUtil.fromJson(response.drawingInfo.renderer);
         this.native_geometryType = response.geometryType;
@@ -412,6 +413,7 @@ define([
       }
       this._clusterData = concat(features, inExtent);
       this._clusterGraphics();
+      
       //var end = new Date().valueOf();
       //console.debug('#_onFeaturesReturned end', (end - start)/1000);
     },
@@ -538,7 +540,7 @@ define([
 
         if ( ! clustered ) {
           this._clusterCreate(feature, point);
-        }
+        } 
       }
       this._showAllClusters();
     },
@@ -623,6 +625,8 @@ define([
       this.emit('clusters-shown', this._clusters);
       //var end = new Date().valueOf();
       //console.debug('#_showAllClusters end', (end - start)/1000);
+      //console.log("showClusters end");
+      esri.hide(loading);
     },
 
     _showCluster: function(c) {

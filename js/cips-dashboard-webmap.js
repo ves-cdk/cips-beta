@@ -12,12 +12,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -126.366,
-        38.6663
+        -126.4401,
+        38.6899
       ],
       [
-        -118.8678,
-        42.0065
+        -118.7937,
+        41.9841
       ]
     ]
   },
@@ -2629,7 +2629,7 @@ appWebMap = {
               ]
             }
           },
-          "minScale": 13889686,
+          "minScale": 5334509,
           "maxScale": 0
         },
         "popupInfo": {
@@ -2801,6 +2801,160 @@ appWebMap = {
         }
       },
       {
+        "id": "CIPS_Operational_328",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/MapServer/6",
+        "visibility": true,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Prioritization Areas",
+        "layerDefinition": {
+          "drawingInfo": {
+            "renderer": {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": null,
+                "outline": {
+                  "color": [
+                    255,
+                    0,
+                    0,
+                    255
+                  ],
+                  "width": 1.5,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                },
+                "type": "esriSFS",
+                "style": "esriSFSSolid"
+              }
+            }
+          }
+        },
+        "popupInfo": {
+          "title": "CIPS_PrioritizAreas: {PrioritizAreaName}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PrioritizAreaKey",
+              "label": "PrioritizAreaKey",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SWRCBRegID",
+              "label": "SWRCBRegID",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PrioritizAreaID",
+              "label": "PrioritizAreaID",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PrioritizAreaName",
+              "label": "PrioritizAreaName",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PrioritizAreaSqKm",
+              "label": "PrioritizAreaSqKm",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PrioritizAreaAcres",
+              "label": "PrioritizAreaAcres",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateCreated",
+              "label": "DateCreated",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateLastPrioritizModelRun",
+              "label": "DateLastPrioritizModelRun",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape.STArea()",
+              "label": "Shape.STArea()",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape.STLength()",
+              "label": "Shape.STLength()",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
         "id": "CIPS_Operational_4098",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/MapServer/1",
@@ -2827,7 +2981,7 @@ appWebMap = {
               }
             }
           },
-          "minScale": 73000,
+          "minScale": 70000,
           "maxScale": 37000
         },
         "popupInfo": {

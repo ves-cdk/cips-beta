@@ -36,7 +36,6 @@ appConfig = {
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/13", //"CIPS_20151123/FeatureServer/13",
 	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/9",
 	
-	URL_GP_MODEL_DELETE_MODEL: urlRoot + "####",
 	URL_GP_MODEL_PRIOR_GROWS: urlRoot + "ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
 	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
 	
