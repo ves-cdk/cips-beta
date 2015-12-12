@@ -13,6 +13,7 @@ var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer,
 var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex; // used for getting onClick results from specific layers
 var myFeatureLayer;
 var loadedModelResults; // records for a loaded model, used for summary display
+var modelHeatMapLayer; // image layer for prioritization model heat map
 var testvar; //generic variable for testing
 
 // -- Section 2: Requires -------------------------------------------------------------
@@ -61,6 +62,8 @@ require([
     "esri/TimeExtent",
     "esri/dijit/TimeSlider",
     "esri/dijit/FeatureTable",
+    "esri/layers/ArcGISImageServiceLayer", 
+    "esri/layers/ImageServiceParameters",
     //"./js/ClusterLayer.js",
     //"./js/clusterfeaturelayer.js",
     "./js/lib/ClusterFeatureLayer.js",
@@ -113,6 +116,8 @@ function(
     TimeExtent,
     TimeSlider,
     FeatureTable,
+    ArcGISImageServiceLayer, 
+    ImageServiceParameters,
     //ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
@@ -142,10 +147,14 @@ function(
 	  urlPrefix: "tasks.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
 	});
-	/*urlUtils.addProxyRule({
-	  urlPrefix: "mapserver.vestra.com",
+	urlUtils.addProxyRule({
+	  urlPrefix: "sampleserver6.arcgisonline.com",
 	  proxyUrl: appConfig.PROXY_PAGE
-	});*/
+	});
+	urlUtils.addProxyRule({
+	  urlPrefix: "utility.arcgisonline.com",
+	  proxyUrl: appConfig.PROXY_PAGE
+	});
 
 	// Carousel settings - for charts to work, they have to be initialized after the slide is loaded.
 	//$('.carousel').carousel({  interval: false }); // prevent auto-cycle of carousel
@@ -397,6 +406,16 @@ function(
             dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
             dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
             
+            var valR1S1 = sumRegion[1].NumWaterUseScore1Grows;
+            var valR1S2 = sumRegion[1].NumWaterUseScore2Grows;
+            var valR1S3 = sumRegion[1].NumWaterUseScore3Grows;
+            var valR5S1 = sumRegion[5].NumWaterUseScore1Grows;
+            var valR5S2 = sumRegion[5].NumWaterUseScore2Grows;
+            var valR5S3 = sumRegion[5].NumWaterUseScore3Grows;
+            
+            console.log(valR1S1, valR1S2, valR1S3,valR5S1,valR5S2,valR5S3);
+            
+            
             // Bar Chart for Water Use by Risk Level
             var barChartData = {
             labels : ["Risk Level 1","Risk Level 2", "Risk Level 3"],
@@ -407,7 +426,7 @@ function(
                     strokeColor : "#FFF",
                     highlightFill: "#aafbbd",
                     highlightStroke: "#FFF",
-                    data : [sumRegion[1].numWaterUseScore1Grows, sumRegion[1].numWaterUseScore2Grows, sumRegion[1].numWaterUseScore3Grows]
+                    data : [valR1S1,valR1S2,valR1S3]
                 },
                 {
                     label: "Region 5",
@@ -415,23 +434,28 @@ function(
                     strokeColor : "#FFF",
                     highlightFill: "#f8c884",
                     highlightStroke: "#FFF",
-                    data : [sumRegion[5].numWaterUseScore1Grows, sumRegion[5].numWaterUseScore2Grows, sumRegion[5].numWaterUseScore3Grows]
+                    data : [valR5S1,valR5S2,valR5S3]
                 },
             ]
         };
         
         var bar1 = document.getElementById("bar1").getContext("2d");
-        window.myBar = new Chart(bar1).Bar(barChartData, {
+        var bar1Chart = new Chart(bar1).Bar(barChartData, {
             responsive : true,
             animation: false,
             multiTooltipTemplate: "<%= datasetLabel %> - <%= value %>"
         });
+        /*window.myBar = new Chart(bar1).Bar(barChartData, {
+            responsive : true,
+            animation: false,
+            multiTooltipTemplate: "<%= datasetLabel %> - <%= value %>"
+        });*/
     };
 
     // -- Section 5: Build Map Elements -------------------------------------------------------------
         
     // Initialize the map
-    app.buildMap = function(e) {
+    app.buildMap = function() {
     	
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
@@ -488,13 +512,7 @@ function(
             layers = esri.arcgis.utils.getLegendLayers(response);
            	$.each(layers, function(i, lyr) {
             	lyrInfoTemplate.push({infoTemplate: lyr.layer.infoTemplate,lyrTitle: lyr.title});
-            	//if (i > 0) {
-            	//	lyr.layer.advancedQueryCapabilities.supportsPagination = true;
-            	//}
-            	lyrInfoTemplate.push({infoTemplate: lyr.layer.infoTemplate,lyrTitle: lyr.title});
-            	//if (i > 0) {
-            	//	lyr.layer.advancedQueryCapabilities.supportsPagination = true;
-            	//}
+            	
             	if (lyr.title === appConfig.LAYER_NAME_WSHD) {
             		wshdLyrIndex = i;
             	}
@@ -610,8 +628,88 @@ function(
         toc.startup();
     };
     
-    app.buildBasemap = function () {
+    app.buildBasemap = function() {
+    	// builds the basemap from definition set in config file.
+    	var basemaps = [];
     	
+    	$.each(appConfig.BASEMAPS, function(i) {
+    		switch(appConfig.BASEMAPS[i].numberOfLayers) {
+				case 1:
+	    			var base = new Basemap({
+		    			layers:[ new BasemapLayer({
+		    				url: appConfig.BASEMAPS[i].url
+		    			})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+		    	break;
+		    	case 2:
+    				var base = new Basemap({
+		    			layers:[ 
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url1
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url2
+		    				})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+    			break;
+		    	case 3:
+    				var base = new Basemap({
+		    			layers:[ 
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url1
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url2
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url3
+		    				})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+    			break;
+    		};
+    		
+    	});
+    	//console.log(basemaps);
+    	
+    	basemapGallery = new BasemapGallery({
+            showArcGISBasemaps : false,
+            map : map,
+            basemaps: basemaps,
+        }, "basemapGallery");
+        basemapGallery.startup();
+        
+        basemapGallery.on("error", function() {
+			bootbox.alert("An error occured while trying to load the basemap.<br/><br/>Please try a different basemap.");
+			//console.log("error loading basemap");
+		});
+        
+        // set a listener for changing the basemap. if changed, save this to localStorage to be used next time the app loads
+	    basemapGallery.on("selection-change", function(){  
+			var currentBasemap = basemapGallery.getSelected();
+		  	localStorage.currentBasemap = currentBasemap.id;
+		  	//esri.hide(loading);
+		});
+		
+		if (localStorage.currentBasemap) {
+			//console.log(localStorage.currentBasemap, basemapGallery.getSelected());
+			if (!(localStorage.currentBasemap === "basemap_0")) {
+				basemapGallery.select(localStorage.currentBasemap);
+			};
+		};
+    };
+    
+    
+    app.buildBasemapOLD = function () {
+    /* OLD METHOD OF BASEMAPS, CAN DELETE */	
     	var basemaps = [];
     	
     	/*var baseAerial = new Basemap({
@@ -787,7 +885,9 @@ function(
 	    // Customize popup behavior when editing features
         var popup = map.infoWindow;
         
+        
         on(popup, "SetFeatures", function() {
+        	console.log(popup);
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
         	var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
@@ -797,6 +897,7 @@ function(
         			selectedRadio = editRadios[i];
         		};
         	});
+        	//console.log(selectedRadio);
         	switch (selectedRadio) {
         		
         		case "optionsRadios10":
@@ -855,6 +956,7 @@ function(
         		break;
         		default:
         		// Default popup behavior
+        			console.log("default");
         			$(".esriPopupWrapper").css("display","block");
         		break;
         	}
@@ -911,7 +1013,7 @@ function(
 			map: map,
 			url: appConfig.PRINT_SERVICE,
 			templates: [{
-				format: "PDF",
+				format: "jpg",
 				layout: "A3 Landscape",
 				layoutOptions: {
 					titleText: "CIPS"
@@ -1093,7 +1195,7 @@ function(
     app.exportTable = function() {
     	var grid = registry.byId("myTableNode");
     	var expTable = exportCSV(grid.dataStore.data);
-    	bootbox.alert("<b>Instructions:</b> Highlight the following table content, copy it, then paste into Excel:<br/><br/><b>Start Table Content:</b><br/>" + expTable + "<br/><b>End Table Content</b>");
+    	bootbox.alert("<b>Instructions:</b> Highlight the following table content, copy it, then paste into Excel:<br/><br/><br/>" + expTable + "<br/>");
         
         // Returns a csv from an array of objects with
 		// values separated by tabs and rows separated by newlines
@@ -1389,7 +1491,7 @@ function(
  	};
  	
  	app.toggleBox = function(item, element) {
- 		//$("#timeInfo").show();
+ 		// Show or hide the Summary Dashboard
  		if ($("#" + item).css('display') !== 'none') {
             $("#" + item).hide();
             $('#' + element.id).html('<i class="fa fa-chevron-down"></i>');
@@ -1592,12 +1694,15 @@ function(
 	
 	app.loadModel = function(prioritizAreaID, modelFtrName) {
 		// Load prioritization area model. Called after the prioritization area and model name have been identified.
-		clusterLayer.setVisibility(false); // automatically turn off clustered point layer
-		if ($("#optionsRadios5:checked").prop("checked") || $("#optionsRadios4:checked").prop("checked")) {
+		if (clusterLayer) {
+			clusterLayer.setVisibility(false); // automatically turn off clustered point layer
+		}
+		
+		/*if ($("#optionsRadios5:checked").prop("checked") || $("#optionsRadios4:checked").prop("checked")) {
 			// loading the model after a model run.
 			app.stopEdit();
 			$("#menuPrModel").click();
-		}
+		}*/
 		esri.show(loading);
 		//console.log(prioritizAreaID, modelFtrName);
 		// Loads a prioritization model - the PrioritizationGrows polygons + related results
@@ -1708,11 +1813,35 @@ function(
 					app.zoomToLayerExtent(selectModelName);
 					esri.hide(loading);
 					//layers[growLyrIndex].layer.setVisibility(false);
-					layers[growLocLyrIndex].layer.setVisibility(false);
+					//layers[growLocLyrIndex].layer.setVisibility(false);
 					map.graphics.clear();
 				}));
 			}));
 		}
+	};
+	
+	app.loadModelHeatMap = function(defExpr) {
+		var params = new ImageServiceParameters();
+        params.noData = 0;
+        
+        var imageServiceLayer = new ArcGISImageServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_PrtizModel_HeatMap/ImageServer", {
+          imageServiceParameters: params,
+          opacity: 0.75
+        });
+        
+        map.addLayer(imageServiceLayer);
+        modelHeatMapLayer = imageServiceLayer;
+        
+        map.addLayers([imageServiceLayer]);
+		toc.layerInfos.push({
+			"layer" : imageServiceLayer,
+			"title" : "Prioritization Model Heat Map"
+		});
+		toc.refresh();
+        
+        if (defExpr) {
+        	imageServiceLayer.setDefinitionExpression(defExpr);
+        }
 	};
 	
 	app.updateModelSummary = function() {
@@ -1868,6 +1997,7 @@ function(
 		});
 		toc.refresh();
 		callback(addFeature);
+		
 	};
 	
 	app.removeMapLayer = function(layerName, callback) {

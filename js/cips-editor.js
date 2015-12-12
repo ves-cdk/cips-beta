@@ -452,131 +452,56 @@ function(
     };
     
     app.buildBasemap = function () {
-    	
+    	// builds the basemap from definition set in config file.
     	var basemaps = [];
     	
-    	/*var baseAerial = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-	    	})],
-    		title: "World Imagery",
-    		thumbnailUrl: "img/imagery.jpg"
+    	$.each(appConfig.BASEMAPS, function(i) {
+    		switch(appConfig.BASEMAPS[i].numberOfLayers) {
+				case 1:
+	    			var base = new Basemap({
+		    			layers:[ new BasemapLayer({
+		    				url: appConfig.BASEMAPS[i].url
+		    			})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+		    	break;
+		    	case 2:
+    				var base = new Basemap({
+		    			layers:[ 
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url1
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url2
+		    				})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+    			break;
+		    	case 3:
+    				var base = new Basemap({
+		    			layers:[ 
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url1
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url2
+		    				}),
+		    				new BasemapLayer({
+		    					url: appConfig.BASEMAPS[i].url3
+		    				})],
+		    			title: appConfig.BASEMAPS[i].title,
+		    			thumbnailUrl: appConfig.BASEMAPS[i].thumbnailUrl
+		    		});
+		    		basemaps.push(base);
+    			break;
+    		};
+    		
     	});
-      	basemaps.push(baseAerial); */
-      	
-    	var baseTopo = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "http://server.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer"
-	    	})],
-    		title: "Topographic",
-    		thumbnailUrl: "img/topo_map_2.jpg"
-    	});
-     	basemaps.push(baseTopo);  
-     	
-     	/*var baseNG = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "http://server.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer"
-	    	})],
-    		title: "National Geographic",
-    		thumbnailUrl: "img/natgeo.jpg"
-    	});
-     	basemaps.push(baseNG);*/
-    	
-    	var baseAerialOverlay = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"
-	    	}),
-	    		new BasemapLayer({
-	    		url: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer"
-	    	}),
-	    		new BasemapLayer({
-	    		url: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer"
-	    	})],
-	    	
-    		title: "Esri Imagery with Transportation Overlay",
-    		thumbnailUrl: "img/imagery_hybrid.jpg"
-    	});
-      	basemaps.push(baseAerialOverlay); 
-    	
-    	/*var baseAerialOverlay = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014/ImageServer"
-	    	}),
-	    		new BasemapLayer({
-	    		url: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer"
-	    	}),
-	    		new BasemapLayer({
-	    		url: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer"
-	    	})],
-	    	
-    		title: "2014 Imagery (CA NAIP) with Transportation",
-    		thumbnailUrl: "img/base-image-trans.png"
-    	});
-      	basemaps.push(baseAerialOverlay); */
-    	
-    	var baseNaipCA2014 = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014/ImageServer"
-	    	})],
-    		title: "2014 Imagery (CA NAIP)",
-    		thumbnailUrl: "img/base-image-14.png"
-    	});
-      	basemaps.push(baseNaipCA2014);
-    	
-     	var baseNaipCIR = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014_CIR/ImageServer"
-	    	})],
-    		title: "2014 Imagery (CA NAIP) Color Infrared",
-    		//rasterFunction: "FalseColorComposit",
-    		thumbnailUrl: "img/base-infra.png"
-    	});
-      	basemaps.push(baseNaipCIR);
-      	
-      	/*var baseNaip2014NDVI = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014_NDVI/ImageServer"
-	    	})],
-    		title: "2014 Imagery (CA NAIP) NDVI",
-    		thumbnailUrl: "img/base-ndvi.png"
-    	});
-      	basemaps.push(baseNaip2014NDVI);*/
-      	
-      	var baseNaipCA2012 = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2012/ImageServer"
-	    	})],
-    		title: "2012 Imagery (CA NAIP)",
-    		thumbnailUrl: "img/base-image-12.png"
-    	});
-      	basemaps.push(baseNaipCA2012);
-    	
-    	var baseNaipCA2010 = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2010/ImageServer"
-	    	})],
-    		title: "2010 Imagery (CA NAIP)",
-    		thumbnailUrl: "img/base-image-10.png"
-    	});
-      	basemaps.push(baseNaipCA2010);
-    	
-    	var baseNaipCA2009 = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2009/ImageServer"
-	    	})],
-    		title: "2009 Imagery (CA NAIP)",
-    		thumbnailUrl: "img/base-image-09.png"
-    	});
-      	basemaps.push(baseNaipCA2009);
-    	
-    	var baseNaipCA2005 = new Basemap({
-    		layers:[new BasemapLayer({
-	    		url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2005/ImageServer"
-	    	})],
-    		title: "2005 Imagery (CA NAIP)",
-    		thumbnailUrl: "img/base-image-05.png"
-    	});
-      	basemaps.push(baseNaipCA2005);
+    	//console.log(basemaps);
     	
     	basemapGallery = new BasemapGallery({
             showArcGISBasemaps : false,
@@ -585,17 +510,16 @@ function(
         }, "basemapGallery");
         basemapGallery.startup();
         
+        basemapGallery.on("error", function() {
+			bootbox.alert("An error occured while trying to load the basemap.<br/><br/>Please try a different basemap.");
+			//console.log("error loading basemap");
+		});
+        
         // set a listener for changing the basemap. if changed, save this to localStorage to be used next time the app loads
-	    basemapGallery.on("selection-change", function(){
-	    	//console.log("basemap selection change");  
+	    basemapGallery.on("selection-change", function(){  
 			var currentBasemap = basemapGallery.getSelected();
 		  	localStorage.currentBasemap = currentBasemap.id;
 		  	//esri.hide(loading);
-		});
-		
-		basemapGallery.on("error", function() {
-			bootbox.alert("An error occured while trying to load the basemap.<br/><br/>Please try a different basemap.");
-			//console.log("error loading basemap");
 		});
 		
 		if (localStorage.currentBasemap) {
@@ -804,6 +728,25 @@ function(
 				break;
 			}
 			map.graphics.add(new Graphic(evt.geometry, symbol));
+		});
+	};
+	
+	app.isolatePopup = function(item) {
+		// sets the popup results to a single layer, identified with the layer Title passed to the function.
+		//console.log("isolatePopup:", item);
+		$.each(layers, function(i, lyr) {
+		  //console.log(lyr.title);
+		  if (!(lyr.title === item)) {
+		    lyr.layer.infoTemplate = null;
+		  }
+		});
+	};
+	
+	app.resetPopup = function() {
+		// resets popup results to default for all layers.
+		$.each(layers, function(i, lyr) {
+		  //console.log(lyr.title);
+		    lyr.layer.infoTemplate = lyrInfoTemplate[i].infoTemplate;
 		});
 	};
         
@@ -1343,8 +1286,8 @@ function(
 				SWRCBRegID: regionId,
 				GrowID: lastRegNum,
 				GrowAcres: polyAcre,
-				GrowSqFt: polyAcre * 43560,
-				InterpDate: new Date()
+				GrowSqFt: polyAcre * 43560//,
+				//InterpDate: new Date()
 			},
 			"geometry": {
 				rings: polygon.rings
@@ -1362,8 +1305,8 @@ function(
 				SWRCBRegID: regionId,
 				GrowID: lastRegNum,
 				GrowAcres: polyAcre,
-				GrowSqFt: polyAcre * 43560,
-				InterpDate: new Date()
+				GrowSqFt: polyAcre * 43560//,
+				//InterpDate: new Date()
 			},
 			"geometry": {
 				x: center.x,
@@ -1402,17 +1345,22 @@ function(
 			case "disturbed_area":
 				var polygon = new Polygon(graphic.geometry.rings);
 				$("#stopEdit").hide();
+				
+				
+				
 				var addFeature = {
 					"attributes": {
 						SWRCBRegID: attrRegion,
-						DisturbedAreasAcres: attrAcreage,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
+						DisturbedAreasAcres: attrAcreage//,
+						//InterpMethod: "Aerial Imagery"//,
+						//InterpDate: new Date()
 					},
 					"geometry": {
 						rings: polygon.rings
 					}
 				};
+				//console.log(addFeature);
+				//console.log(JSON.stringify(addFeature.attributes), JSON.stringify(addFeature.geometry));
 				$.when(app.saveNewFeature(addFeature, lyrSource, function(saveCallback) {
 					map.graphics.clear();
 					esri.hide(loading);
@@ -1435,8 +1383,8 @@ function(
 					"attributes": {
 						SWRCBRegID: attrRegion,
 						ReserviorAcres: attrAcreage,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
+						InterpMethod: "Aerial Imagery"//,
+						//InterpDate: new Date()
 					},
 					"geometry": {
 						rings: polygon.rings
@@ -1461,9 +1409,9 @@ function(
 				$("#stopEdit").hide();
 				var addFeature = {
 					"attributes": {
-						SWRCBRegID: attrRegion,
-						InterpMethod: "Aerial Imagery",
-						InterpDate: new Date()
+						SWRCBRegID: attrRegion//,
+						//InterpMethod: "Aerial Imagery",
+						//InterpDate: new Date()
 					},
 					"geometry": {
 						x: graphic.geometry.x,
@@ -1581,7 +1529,7 @@ function(
 	app.saveEdits = function () {
 		// For attribute and shape editing
 		
-		// Shape edit - on-deactivate, the editorToolbar will save the change to the shape
+		// Shape edit - on-deactivate, the editToolbar will save the change to the shape
 		if ($("#optionsRadios6:checked").prop("checked")) {
 			editToolbar.deactivate();
 
@@ -1596,7 +1544,7 @@ function(
 		// NOTES: token removed from addParams below, necessary with move of data from AGOL to AGS
 		//        Added "[" and "]" to addFeature, necessary with move of data from AGOL to AGS
 		var addFeature = "[" + JSON.stringify(feature) + "]";
-		
+		console.log(addFeature);
 		var urlEdit = url + "/addFeatures";
 		var addParams = {
 	        f: "json",

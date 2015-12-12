@@ -11,10 +11,11 @@ appConfig = {
     ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Dashboard</br></br>Version: Beta 1.3",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
-    PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
+    PROXY_PAGE: "http://localhost/apps/cips-proxy-1-1-0/DotNet/proxy.ashx",
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
-    PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
-    INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
+    //PRINT_SERVICE: "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task",//"http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
+   	PRINT_SERVICE: "http://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task",
+    INIT_EXTENT: { xmin: -14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
     
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
@@ -45,13 +46,67 @@ appConfig = {
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/13", //"CIPS_20151123/FeatureServer/13",
 	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/9",
 	
-	// LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file
+	// LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
     LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
     LAYER_NAME_INTERP: "Interpretation Areas",
     LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
     LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
     LAYER_NAME_GROW_FOOTPRINTS: "Grow Footprints",
-    LAYER_NAME_GROW_LOCATIONS: "Grow Locations"
+    LAYER_NAME_GROW_LOCATIONS: "Grow Locations",
 
+	BASEMAPS: {
+		// Add as many basemaps as desired below using the same structure.
+		// Note that you can have 1, 2 or 3 layers included in the basemap (see examples of 3 in base2)
+		base1:{
+	    	numberOfLayers: 1,
+	    	url: "http://server.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer",
+    		title: "Topographic",
+    		thumbnailUrl: "img/topo_map_2.jpg"
+    	},
+		base2: {
+	    	numberOfLayers: 3,
+	    	url1: "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+	    	url2: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer",
+	    	url3: "http://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer",
+    		title: "Esri Imagery with Transportation Overlay",
+    		thumbnailUrl: "img/imagery_hybrid.jpg"
+    	},
+    	base3: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014/ImageServer",
+    		title: "2014 Imagery (CA NAIP)",
+    		thumbnailUrl: "img/base-image-14.png"
+    	},
+    	base4: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2014_CIR/ImageServer",
+    		title: "2014 Imagery (CA NAIP) Color Infrared",
+    		thumbnailUrl: "img/base-infra.png"
+    	},
+    	base5: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2012/ImageServer",
+    		title: "2012 Imagery (CA NAIP)",
+    		thumbnailUrl: "img/base-image-12.png"
+    	},
+    	base6: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2010/ImageServer",
+    		title: "2010 Imagery (CA NAIP)",
+    		thumbnailUrl: "img/base-image-10.png"
+    	},
+    	base7: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2009/ImageServer",
+    		title: "2009 Imagery (CA NAIP)",
+    		thumbnailUrl: "img/base-image-09.png"
+    	},
+    	base8: {
+    		numberOfLayers: 1,
+	    	url: "https://map.dfg.ca.gov/arcgis/rest/services/Base_Remote_Sensing/NAIP_2005/ImageServer",
+    		title: "2005 Imagery (CA NAIP)",
+    		thumbnailUrl: "img/base-image-05.png"
+    	}
+	}
 	
 	};
