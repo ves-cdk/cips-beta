@@ -23,7 +23,7 @@ appWebMap = {
   },
   "itemData": {
     "operationalLayers": [
-      {
+      /*{
         "id": "World_Hillshade_7117",
         "layerType": "ArcGISTiledMapServiceLayer",
         "url": "http://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer",
@@ -1545,7 +1545,7 @@ appWebMap = {
         "opacity": 1,
         "title": "USA Geology Units",
         "itemId": "65f1f4f412d94f55920e376db410f3fd"
-      },
+      },*/
       {
         "id": "CIPS_Base_7770",
         "layerType": "ArcGISFeatureLayer",
@@ -2149,7 +2149,7 @@ appWebMap = {
         "id": "CIPS_Base_4449",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/1",
-        "visibility": true,
+        "visibility": false,
         "opacity": 1,
         "mode": 1,
         "title": "Watershed Boundaries (HUC12)",
@@ -2981,7 +2981,7 @@ appWebMap = {
               }
             }
           },
-          "minScale": 70000,
+          "minScale": 73000,
           "maxScale": 37000
         },
         "popupInfo": {

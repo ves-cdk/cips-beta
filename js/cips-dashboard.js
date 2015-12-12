@@ -1821,23 +1821,27 @@ function(
 	};
 	
 	app.loadModelHeatMap = function(defExpr) {
-		var params = new ImageServiceParameters();
-        params.noData = 0;
-        
-        var imageServiceLayer = new ArcGISImageServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_PrtizModel_HeatMap/ImageServer", {
-          imageServiceParameters: params,
-          opacity: 0.75
-        });
-        
-        map.addLayer(imageServiceLayer);
-        modelHeatMapLayer = imageServiceLayer;
-        
-        map.addLayers([imageServiceLayer]);
-		toc.layerInfos.push({
-			"layer" : imageServiceLayer,
-			"title" : "Prioritization Model Heat Map"
-		});
-		toc.refresh();
+		
+		if (!(imageServiceLayer)) {
+			var params = new ImageServiceParameters();
+	        params.noData = 0;
+	        
+	        var imageServiceLayer = new ArcGISImageServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_PrtizModel_HeatMap/ImageServer", {
+	          imageServiceParameters: params,
+	          opacity: 0.75
+	        });
+	        
+	        map.addLayer(imageServiceLayer);
+	        modelHeatMapLayer = imageServiceLayer;
+	        
+	        map.addLayers([imageServiceLayer]);
+			toc.layerInfos.push({
+				"layer" : imageServiceLayer,
+				"title" : "Prioritization Model Heat Map"
+			});
+			toc.refresh();
+		}
+		
         
         if (defExpr) {
         	imageServiceLayer.setDefinitionExpression(defExpr);
