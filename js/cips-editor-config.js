@@ -22,20 +22,34 @@ appConfig = {
     URL_REGION: urlRoot + "CIPS_Base/FeatureServer/0",
 	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/1",
     
-    URL_GROW_POLYS: urlRoot + "CIPS_Operational/FeatureServer/2",
-    URL_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
+    URL_GROW_POLYS: urlRoot + "CIPS_Operational_rev1/FeatureServer/2",
+    URL_GROW_POINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/1",
     GROW_POINTS_NAME: "Grow Locations (Grouped)", // name used for clustered point layer
     GROW_POINTS_SCALE: 73000, // minimum scale the clustered point layer will be displayed at.
 
-	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7",
-	URL_GROW_NUM: urlRoot + "CIPS_Operational/FeatureServer/8",
-	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational/FeatureServer/19",
-    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/11", //urlRoot + "CIPS_20151015/FeatureServer/11",
-    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational/FeatureServer/0",
-    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Operational/FeatureServer/3",
-    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational/FeatureServer/4",
-    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
-    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational/FeatureServer/2",
+	URL_INTERP_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/7",
+	URL_GROW_NUM: urlRoot + "CIPS_Operational_rev1/FeatureServer/10",
+	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational_rev1/FeatureServer/21",
+    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/13", //urlRoot + "CIPS_20151015/FeatureServer/11",
+    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational_rev1/FeatureServer/0",
+    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Operational_rev1/FeatureServer/3",
+    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/4",
+    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/1",
+    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/2",
+    
+    // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
+    //LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
+    LAYER_NAME_INTERP: "Interpretation Areas",
+    //LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
+    LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
+    
+    LAYER_NAME_GROW_FOOTPRINTS: "Grow Footprints",
+    //LAYER_NAME_GROW_LOCATIONS: "Grow Locations",
+    LAYER_NAME_DISTURBED_AREAS: "Disturbed Areas",
+    LAYER_NAME_WATER_TANKS: "Water Tanks",
+    LAYER_NAME_RESERVOIRS: "Reservoirs",
+    LAYER_NAME_SITES: "Grow Sites",
+    LAYER_NAME_SITES_PARCELS: "Grow Site Parcels",
     
     BASEMAPS: {
 		// Add as many basemaps as desired below using the same structure.

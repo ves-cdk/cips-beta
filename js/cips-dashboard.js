@@ -138,10 +138,11 @@ function(
     esriConfig.defaults.io.corsEnabledServers.push("mapserver2.vestra.com");
     esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");    
     esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");
+    esriConfig.defaults.io.corsEnabledServers.push("utility.arcgisonline.com");
     //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com");
-    //esriConfig.defaults.io.corsEnabledServers.push("localhost");  
-    //esriConfig.defaults.io.timeout = 120000;   
-    //esriConfig.defaults.io.proxyUrl = "http://localhost/apps/cipsproxy/DotNet/proxy.ashx";
+    esriConfig.defaults.io.corsEnabledServers.push("localhost");  
+    esriConfig.defaults.io.timeout = 120000;   
+    //esriConfig.defaults.io.proxyUrl = appConfig.PROXY_PAGE;
     
     urlUtils.addProxyRule({
 	  urlPrefix: "tasks.arcgisonline.com",
@@ -1013,7 +1014,7 @@ function(
 			map: map,
 			url: appConfig.PRINT_SERVICE,
 			templates: [{
-				format: "jpg",
+				format: "PDF",
 				layout: "A3 Landscape",
 				layoutOptions: {
 					titleText: "CIPS"
@@ -1021,7 +1022,46 @@ function(
 			}]
 		}, dom.byId("printButton"));
 		printer.startup();
+		
+		printer.on('print-complete',function(){
+	  console.log('print complete.');
+	  });
+	  
+	  printer.on('error',function(err){
+		  console.log('print error', err);
+	  });
+		
 	};
+	
+	app.createPrint = function (){
+        //Set up print stuff
+        var printUrl = "http://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task";
+        var printTask = new esri.tasks.PrintTask(printUrl, {async: true});
+        var params = new esri.tasks.PrintParameters();
+        var template = new esri.tasks.PrintTemplate();
+
+        params.map = map;
+        template.exportOptions = {
+            width: 595,
+            height: 842,
+            dpi: 96
+        };
+        template.layout = "MAP_ONLY";
+        template.preserveScale = false;
+
+        params.template = template;
+
+        //dojo.connect(map, "onLoad", function() {//Fire the print task
+        //printTask.execute(params, printResult, printError);
+        setTimeout(function(){printTask.execute(params, printResult, printError);},2500);
+    };
+
+    function printResult(result){
+        console.log(result.url)
+    }
+    function printError(result){
+        console.log(result);
+    }
 	
 	app.buildMeasure = function () {
 		measurement = new Measurement({

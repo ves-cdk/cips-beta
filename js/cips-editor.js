@@ -11,7 +11,8 @@ var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo; // editing variables
 var shapeEditLayer, shapeEditStatus, shapeEditBackup; // editing variables
-var interpLyrIndex, regionLyrIndex; // used for getting onClick results from specific layers
+var interpLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, disturbedLyrIndex, waterTankLyrIndex, reservoirLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex; // used for getting onClick results from specific layers
+var mergeSites = []; // object used for merging multiple sites into a single site
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
 
@@ -233,11 +234,32 @@ function(
             	if (i > 0) {
             		lyr.layer.advancedQueryCapabilities.supportsPagination = true;
             	}
-            	if (lyr.title === "Interpretation Areas") {
+            	if (lyr.title === appConfig.LAYER_NAME_INTERP) {
             		interpLyrIndex = i;
             	}
-            	if (lyr.title === "SWRCB Regions") {
+            	if (lyr.title === appConfig.LAYER_NAME_SWRCB_REGIONS) {
             		regionLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_GROW_FOOTPRINTS) {
+            		growLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_GROW_LOCATIONS) {
+            		growLocLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_DISTURBED_AREAS) {
+            		disturbedLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_WATER_TANKS) {
+            		waterTankLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_RESERVOIRS) {
+            		reservoirLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_SITES) {
+            		growSiteLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_SITES_PARCELS) {
+            		growSiteParcLyrIndex = i;
             	}
             });
  
@@ -288,8 +310,10 @@ function(
         var popup = map.infoWindow;
         
         on(popup, "SetFeatures", function() {
+        	console.log("onSetFeatures");
+        	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7"];
+        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -339,6 +363,32 @@ function(
             		}
         		break;
         		case "optionsRadios7": 
+        		// Merge sites
+        			console.log("onSetFeatures optionsRadios7");
+        			//esri.hide(loading);
+        			$(".esriPopupWrapper").css("display","none");
+        			if (!(mergeSites[0])) {
+        				var editFtr = popup.getSelectedFeature();
+            			bootbox.confirm("The selected Grow Site will be used to merge other sites into. Click OK to proceed.", function(result) {
+            				if (result) {
+            					$("#editInstructions").html("Continue to select Grow Sites to merge into Grow Site <b>" + editFtr.attributes.GrowSiteKey + "</b>.<br/><br/>When finished, click Save to proceed, or Cancel to start over.");
+            					mergeSites.push(editFtr);
+            				} else {
+            					popup.clearFeatures();
+            				}
+            			});
+        			} else {
+        				var editFtr = popup.getSelectedFeature();
+            			bootbox.confirm("The selected Grow Site will be removed, and any associated Grows will be associated with Grow Site <b>" + mergeSites[0].attributes.GrowSiteKey + "</b>. Click OK to proceed.", function(result) {
+            				if (result) {
+            					mergeSites.push(editFtr);
+            				} else {
+            					popup.clearFeatures();
+            				}
+            			});
+        			}
+        		break;
+        		case "optionsRadios8": 
         		// Delete a feature
         			esri.show(loading);
             		$(".esriPopupWrapper").css("display","none");
@@ -692,6 +742,7 @@ function(
 		attInspector = new AttributeInspector({
 			layerInfos : layerInfo
 		}, "attributesDiv");
+		$("#attributesDiv").hide();
 		$(".atiLayerName").hide();
 		dojo.connect(attInspector, "onAttributeChange", function(feature, fieldName, newFieldValue) {
 			feature.attributes[fieldName] = newFieldValue;
@@ -1010,6 +1061,7 @@ function(
 		$("#editRadios5").hide();
 		$("#editRadios6").hide();
 		$("#editRadios7").hide();
+		$("#editRadios8").hide();
 		$("#editLabelEdit").hide();
 		$("#editLabelDelete").hide();
 		$("#stopEdit").show();
@@ -1068,6 +1120,7 @@ function(
 		$("#editRadios4").hide();
 		$("#editRadios5").hide();
 		$("#editRadios6").hide();
+		$("#editRadios7").hide();
 		$("#editLabelEdit").hide();
 		$("#editLabelAdd").hide();
 		$("#stopEdit").show();
@@ -1121,6 +1174,7 @@ function(
 				$("#editRadios4").hide();
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
+				$("#editRadios8").hide();
 				$("#stopEdit").show();
 				$("#editLabelAdd").hide();
 				$("#editLabelDelete").hide();
@@ -1137,6 +1191,7 @@ function(
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios7").hide();
+				$("#editRadios8").hide();
 				$("#editLabelAdd").hide();
 				$("#editLabelDelete").hide();
 				$("#saveEdits").show();
@@ -1150,9 +1205,34 @@ function(
 					+ "Double click on the feature you want to modify.<br/>"
 					+ "Your cursor should change to a hand when hovering over the point.<br/>"
 					+ "Click and drag to move the point to a new location.<br/>"
-					+ "When done, click Save to record the edits.s.");
+					+ "When done, click Save to record the edits.");
 				$("#editButtons").show();
 			break;
+			case "merge":
+				// Merging auto-created Grow Site points into a single point
+				app.isolatePopup("Grow Sites");
+				if (!(layers[growSiteLyrIndex].layer.visible)) {
+					layers[growSiteLyrIndex].layer.setVisibility(true);
+				}
+				if (!(layers[growSiteParcLyrIndex].layer.visible)) {
+					layers[growSiteParcLyrIndex].layer.setVisibility(true);
+				}
+				$("#attributesDiv").hide();
+				$("#editRadios1").hide();
+				$("#editRadios2").hide();
+				$("#editRadios3").hide();
+				$("#editRadios4").hide();
+				$("#editRadios5").hide();
+				$("#editRadios6").hide();
+				$("#editRadios8").hide();
+				$("#editLabelAdd").hide();
+				$("#editLabelDelete").hide();
+				$("#saveEdits").show();
+				$("#stopEdit").show();
+				$("#editInstructions").html("Single click on the Grow Site (point feature) you want to merge other sites into.<br/>"
+					+ "Additional instructions will appear after selection.");
+				$("#editButtons").show();
+				
 		}
 	};
 	
@@ -1211,7 +1291,7 @@ function(
 										var objId = callback.features[0].attributes.OBJECTID;
 										lastRegNum += 1;
 										$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, function(callback) {
-											$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, function(callback) {
+											$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback) {
 												esri.hide(loading);
 											}));
 										}));
@@ -1436,10 +1516,12 @@ function(
 		}
 	};
 	
-	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, callback) {
+	app.updateAttributes = function(ftrUrl, objId, updateField, updateValue, updFeature, callback) {
 		//app.updateAttributes(appConfig.URL_PRIOR_MODEL_NUMBER, 1, "Reg1LastModelNumAssigned", 0, null);
 		
-		var updFeature = '[{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}]';	
+		if (!(updFeature)) {
+			var updFeature = '[{"attributes": { "OBJECTID": ' + objId + ', "' + updateField + '": ' + updateValue + '}}]';	
+		};
 		//console.log(updateAttributes);			
 
 		var url = ftrUrl + "/updateFeatures";
@@ -1473,7 +1555,7 @@ function(
 		// Used for cancelling an edit, and for resetting the edit menu back to default state
 		
 		// If editing shape, discard the edits because the user clicked the cancel button
-		if ($("#optionsRadios6:checked").prop("checked")) {
+		if ($("#optionsRadios:checked").prop("checked")) {
 			if (shapeEditStatus) {
 				//console.log("shape edits discarded");
 				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
@@ -1503,6 +1585,7 @@ function(
 		$("#editRadios5").show();
 		$("#editRadios6").show();
 		$("#editRadios7").show();
+		$("#editRadios8").show();
 		$("#editLabelAdd").show();
 		$("#editLabelEdit").show();
 		$("#editLabelDelete").show();
@@ -1517,12 +1600,15 @@ function(
 		$("#optionsRadios5:checked").prop("checked",false);
 		$("#optionsRadios6:checked").prop("checked",false);
 		$("#optionsRadios7:checked").prop("checked",false);
+		$("#optionsRadios8:checked").prop("checked",false);
     	$("#editInstructions").html("Select an editing option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
 		};
 		$("#attributesDiv").hide();
 		$("#editButtons").hide();
+		app.resetPopup();
+		mergeSites = [];
 		
 	};
 	
@@ -1535,7 +1621,42 @@ function(
 
 		// All other edits are already recorded, just reset the menu
 		} else {
-			app.stopEdit();
+			if ($("#optionsRadios7:checked").prop("checked")) {
+				// Merging multiple Grow Sites into a single one
+				if (mergeSites.length < 2) {
+					bootbox.alert("Only one Grow Site was specified. No merge will occur. Resetting.");
+					app.stopEdit();
+				} else {
+					// There is at least one site that will be merged into another.
+					$.each(mergeSites, function(i) {
+						if (i > 0) {
+							console.log("merging "+ mergeSites[i].attributes.GrowSiteKey + "with " +  mergeSites[0].attributes.GrowSiteKey);
+							// Query the grow footprints to get any grows associated with the Grow Site to be deletet
+							$.when(app.runQuery(appConfig.URL_EDIT_GROW_FOOTPRINTS, "GrowSiteKey= + '" + mergeSites[i].attributes.GrowSiteKey + "'", function(callback) {
+								if (callback) {
+									console.log(callback);
+									$.each(callback.features, function(ii) {
+										var updObjectId = callback.features[ii].attributes.OBJECTID;
+										console.log("Grow Footprint to be updated: ", updObjectId);
+										var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + mergeSites[0].attributes.GrowSiteKey + "', 'GrowSiteID': " + mergeSites[0].attributes.GrowSiteID + "}}]";
+										console.log("Grow Footprint update params:", updFeature);	
+										//$.when(app.updateAttributes(appConfig.URL_EDIT_GROW_FOOTPRINTS, updObjectId, i, lastRegNum, updFeature, function(updCallback) {
+										//	console.log("updated:", updCallback);
+										//}));
+									});
+								}
+								
+							}));
+							
+							console.log("delete " + mergeSites[i].attributes.OBJECTID);
+							//app.deleteFeature(mergeSites[i];
+						}
+					});
+				}
+			} else {
+				app.stopEdit();
+			}
+			
 		}		
 	};
 	

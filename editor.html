@@ -277,22 +277,26 @@
 													<label>
 														<input type="radio" name="optionsRadios" id="optionsRadios4" value="option4" onclick="app.startDraw('blue', 'reservoir');"> Reservoir</label>
 												</div>
-												<p class="bg-info" id="editLabelEdit">Edit a Feature's:</p>
+												<p class="bg-info" id="editLabelEdit">Edit:</p>
 												<div class="radio" id="editRadios5">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit('attribute');"> Attributes</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios5" value="option5" onclick="app.startEdit('attribute');"> A Feature's Attributes</label>
 												</div>
 												<div class="radio" id="editRadios6">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios6" value="option6" onclick="app.startEdit('shape')"> Shape</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios6" value="option6" onclick="app.startEdit('shape')"> A Feature's Shape</label>
 												</div>
-												<p class="bg-info" id="editLabelDelete">Delete:</p>
 												<div class="radio" id="editRadios7">
 													<label>
-														<input type="radio" name="optionsRadios" id="optionsRadios7" value="option7" onclick="app.startDelete();"> Delete a Feature</label>
+														<input type="radio" name="optionsRadios" id="optionsRadios7" value="option7" onclick="app.startEdit('merge')"> Merge Grow Sites</label>
+												</div>
+												<p class="bg-info" id="editLabelDelete">Delete:</p>
+												<div class="radio" id="editRadios8">
+													<label>
+														<input type="radio" name="optionsRadios" id="optionsRadios8" value="option8" onclick="app.startDelete();"> Delete a Feature</label>
 												</div>
 												<div id="editorDiv"></div>
-												<div id="attributesDiv"></div>
+												<div id="attributesDiv" style="display:none;"></div>
 												
 											</div>
 										</div>
