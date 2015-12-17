@@ -3049,6 +3049,7 @@ function(
 			$("#appInit").hide();
 			$("#sign-out").show();
 			$("#about-cips").show();
+			$("#open-editor").show();
 			$("#cips-dashboard").show();
 			app.buildMap();
 		}).otherwise(function() {

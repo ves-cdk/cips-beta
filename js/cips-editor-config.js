@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Editor",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.3",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.4",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
@@ -36,20 +36,22 @@ appConfig = {
     URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/4",
     URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/1",
     URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/2",
+    URL_EDIT_GROW_SITES: urlRoot + "CIPS_Operational_rev1/FeatureServer/8",
+    URL_EDIT_GROW_SITE_PARCELS: urlRoot + "CIPS_Operational_rev1/FeatureServer/9",
     
     // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
     //LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
     LAYER_NAME_INTERP: "Interpretation Areas",
     //LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
     LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
-    
     LAYER_NAME_GROW_FOOTPRINTS: "Grow Footprints",
-    //LAYER_NAME_GROW_LOCATIONS: "Grow Locations",
+    LAYER_NAME_GROW_LOCATIONS: "Grow Locations",
     LAYER_NAME_DISTURBED_AREAS: "Disturbed Areas",
     LAYER_NAME_WATER_TANKS: "Water Tanks",
     LAYER_NAME_RESERVOIRS: "Reservoirs",
     LAYER_NAME_SITES: "Grow Sites",
     LAYER_NAME_SITES_PARCELS: "Grow Site Parcels",
+    LAYER_NAME_PARCELS: "Parcels",
     
     BASEMAPS: {
 		// Add as many basemaps as desired below using the same structure.

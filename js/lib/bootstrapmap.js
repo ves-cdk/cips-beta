@@ -179,7 +179,10 @@ define([
                                 obj._popupBlocked = true;
                                 // Delay the map re-center
                                 window.setTimeout(function () {
-                                    obj._repositionMapForInfoWin(pt);
+                                	//obj._repositionMapForInfoWin(pt);
+                                	if (clickHandler) { // VESTRA added this to avoid inadvertant map pan when editing
+                                		obj._repositionMapForInfoWin(pt);
+                                	};
                                     obj._popupBlocked = false;
                                 }, obj._popupRecenterDelayer);
                             }

@@ -12,12 +12,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -126.5006,
-        38.6877
+        -125.2646,
+        38.3115
       ],
       [
-        -118.7332,
-        41.9861
+        -119.6726,
+        41.5662
       ]
     ]
   },
@@ -411,6 +411,112 @@ appWebMap = {
             {
               "fieldName": "Shape.STLength()",
               "label": "Shape.STLength()",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_Parcels_5423",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Parcels/MapServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Parcels",
+        "layerDefinition": {
+          "drawingInfo": {
+            "renderer": {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": null,
+                "outline": {
+                  "color": [
+                    115,
+                    38,
+                    0,
+                    255
+                  ],
+                  "width": 0.75,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                },
+                "type": "esriSFS",
+                "style": "esriSFSSolid"
+              }
+            }
+          }
+        },
+        "popupInfo": {
+          "title": "CIPS_Parcels: {CountyName}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE",
+              "label": "SHAPE",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "CountyName",
+              "label": "CountyName",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "APN",
+              "label": "APN",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateCoDataAcquired",
+              "label": "DateAcquired",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE_Length",
+              "label": "SHAPE_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE_Area",
+              "label": "SHAPE_Area",
               "tooltip": "",
               "visible": false,
               "format": {
@@ -1475,7 +1581,7 @@ appWebMap = {
               }
             }
           },
-          "minScale": 72500,
+          "minScale": 73000,
           "maxScale": 0
         },
         "popupInfo": {
@@ -1670,7 +1776,7 @@ appWebMap = {
               ]
             }
           },
-          "minScale": 72500,
+          "minScale": 73000,
           "maxScale": 37000
         },
         "popupInfo": {

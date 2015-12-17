@@ -3149,6 +3149,7 @@ function(
 					$("#sign-out").show();
 					$("#about-cips").show();
 					$("#open-editor").show();
+					$("#open-modeler").show();
 					app.initStats();
 			    	app.buildMap();
 				 }
