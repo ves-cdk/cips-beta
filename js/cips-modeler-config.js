@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Modeler",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Modeler</br></br>Version: Beta 1.4",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Modeler</br></br>Version: Beta 1.5",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     //GEOMETRY_SERVICE: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer", 
@@ -23,24 +23,25 @@ appConfig = {
     WEBMAP_ID: "", // Use "" if cips-modeler-webmap.js file. If an ID is used, the WEBMAP_JSON content below will be ignored.
   
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7", //"CIPS_Operational/FeatureServer/2",
-	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
+	URL_INTERP_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/12",
 	
 	URL_PRIOR_AREA: urlRoot + "CIPS_Operational/FeatureServer/6", //"CIPS_20151123/FeatureServer/5", //  "CIPS_20151015/FeatureServer/3",
-	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/14", //"CIPS_Operational/FeatureServer/9",
-	URL_PRIOR_MODELS: urlRoot + "CIPS_Operational/FeatureServer/16", //"CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
-	URL_PRIOR_MODELS_SUMMARY: urlRoot + "CIPS_Operational/FeatureServer/18", //"CIPS_20151123/FeatureServer/8",
+	URL_PRIOR_AREA_NUM: urlRoot + "CIPS_Operational/FeatureServer/16", //"CIPS_Operational/FeatureServer/9",
+	URL_PRIOR_MODELS: urlRoot + "CIPS_Operational/FeatureServer/18", //"CIPS_20151123/FeatureServer/10", //"CIPS_20151015/FeatureServer/18",
+	URL_PRIOR_MODELS_SUMMARY: urlRoot + "CIPS_Operational/FeatureServer/20", //"CIPS_20151123/FeatureServer/8",
 	
 	URL_PRIOR_MODELS_RESULTS: urlRoot + "CIPS_Operational/FeatureServer/5", //"CIPS_20151123/FeatureServer/4", // Prioritization Grows (polygons) 
-	URL_PRIOR_MODELS_RESULTS_RELATE: urlRoot + "CIPS_Operational/FeatureServer/15", //"CIPS_20151123/FeatureServer/11", // Prioritization Model results related table 
+	URL_PRIOR_MODELS_RESULTS_RELATE: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/11", // Prioritization Model results related table 
 	
-	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/13", //"CIPS_20151123/FeatureServer/13",
-	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/17", //"CIPS_20151123/FeatureServer/9",
+	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/15", //"CIPS_20151123/FeatureServer/13",
+	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/19", //"CIPS_20151123/FeatureServer/9",
 	
 	URL_GP_MODEL_PRIOR_GROWS: urlRoot + "ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
+	URL_PRIOR_MODELS_HEATMAP: urlRoot + "CIPS_PrtizModel_HeatMap/ImageServer",
 	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
 	
-	URL_REGION: urlRoot + "CIPS_Base/FeatureServer/0", //1
-	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/1", //0 //urlRoot + "CIPS_20151015/FeatureServer/20",
+	URL_REGION: urlRoot + "CIPS_Base/MapServer/0", //1
+	URL_WATERSHED: urlRoot + "CIPS_Base/MapServer/1", //0 //urlRoot + "CIPS_20151015/FeatureServer/20",
   
     // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file
     LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",

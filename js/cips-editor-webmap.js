@@ -4,11 +4,12 @@ var appWebMap = dojo.getObject('appWebMap', true);
 
 appWebMap = {
     WEBMAP_JSON: 
-    // **** Copy  webmap2Json output into this section - Start **** 
+    // **** Copy  webmap2Json output into the section below ****
+    // **** Start section ---------------------------------------------------------------------------------------------------------- **** 
 
 {
   "item": {
-    "title": "CIPS_Editor_AGS",
+    "title": "CIPS_Editor",
     "snippet": "CIPS",
     "extent": [
       [
@@ -26,7 +27,7 @@ appWebMap = {
       {
         "id": "CIPS_Base_7048",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/0",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -193,7 +194,7 @@ appWebMap = {
       {
         "id": "CIPS_Base_4449",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/1",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/1",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -428,7 +429,7 @@ appWebMap = {
       {
         "id": "CIPS_Parcels_5423",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Parcels/MapServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/4",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -534,7 +535,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_7838",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/6",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/6",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -647,7 +648,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_1675",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/7",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/7",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -901,7 +902,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_5949",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/9",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/9",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -1027,7 +1028,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_2317",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/3",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/3",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -1126,7 +1127,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_5509",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/4",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/4",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -1225,7 +1226,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_3220",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/2",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/2",
         "visibility": true,
         "opacity": 0.8,
         "mode": 1,
@@ -1453,7 +1454,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_6908",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/0",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -1557,7 +1558,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_4974",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/8",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/8",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -1717,7 +1718,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_4098",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/1",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/1",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -1968,5 +1969,6 @@ appWebMap = {
   }
 }
 
-    // **** Copy webmap2Json output into this section - end **** 
+	// **** End section ---------------------------------------------------------------------------------------------------------- **** 
+    // **** Copy  webmap2Json output into the section above ****
 };

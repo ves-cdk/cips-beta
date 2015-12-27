@@ -4,11 +4,12 @@ var appWebMap = dojo.getObject('appWebMap', true);
 
 appWebMap = {
     WEBMAP_JSON: 
-    // **** Copy  webmap2Json output into this section - Start **** 
+    // **** Copy  webmap2Json output into the section below ****
+    // **** Start section ---------------------------------------------------------------------------------------------------------- **** 
 
 {
   "item": {
-    "title": "CIPS_Modeler_AGS",
+    "title": "CIPS_Modeler",
     "snippet": null,
     "extent": [
       [
@@ -26,7 +27,7 @@ appWebMap = {
       {
         "id": "CIPS_Base_6401",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/0",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -382,7 +383,7 @@ appWebMap = {
       {
         "id": "CIPS_Base_398",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/FeatureServer/1",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/1",
         "visibility": true,
         "opacity": 1,
         "mode": 1,
@@ -977,7 +978,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_1529",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/9",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/9",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -1102,7 +1103,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_9842",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/8",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/8",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -1496,10 +1497,18 @@ appWebMap = {
         },
         "measure": {
           "enabled": true
+        },
+        "search": {
+          "enabled": true,
+          "disablePlaceFinder": false,
+          "hintText": "Place or Address",
+          "layers": []
         }
       }
     }
   }
 }
-    // **** Copy webmap2Json output into this section - end **** 
+
+	// **** End section ---------------------------------------------------------------------------------------------------------- **** 
+    // **** Copy  webmap2Json output into the section above ****
 };

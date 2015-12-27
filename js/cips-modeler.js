@@ -15,6 +15,7 @@ var priorAreaRecs; // stored records for Priortization Areas, used for loading m
 var modelNewOrEdit; // used for messaging when a Prioritization model is created
 var lastModelNum, newModelNum, modelNumObjectId, regionNum;
 var loadedModelResults; // records for a loaded model, used for summary display
+var modelHeatMapLayer, imageServiceLayer; // image layer for prioritization model heat map
 var geometryService, gp;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
@@ -69,6 +70,8 @@ require([
     //"esri/dijit/editing/Editor",
     "esri/toolbars/edit",
     "esri/dijit/AttributeInspector",
+    "esri/layers/ArcGISImageServiceLayer", 
+    "esri/layers/ImageServiceParameters",
     //"./js/ClusterLayer.js", 
     //"./js/clusterfeaturelayer.js",
     "./js/lib/ClusterFeatureLayer.js",
@@ -125,6 +128,8 @@ function(
     //Editor,
     Edit,
     AttributeInspector,
+    ArcGISImageServiceLayer, 
+    ImageServiceParameters,
     //ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
@@ -192,12 +197,17 @@ function(
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
 		
-		// getting extent from previous page (if exists). Only has to be done for first map, the rest are based on extent of this map after load
+		// Get the map extent from previous session or page.
+		// If it exists, we replace the web map JSON content with the new extent, so that it is set before the map is created.
 		if (localStorage.extent) {
 			var ext = $.parseJSON(localStorage.extent);
 			var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
 				new esri.SpatialReference({wkid:102100}));
+			var convExt = esri.geometry.webMercatorToGeographic(startExtent);
+			appWebMap.WEBMAP_JSON.item.extent = [[convExt.xmin, convExt.ymin],[convExt.xmax,convExt.ymax]];
+			//console.log(convExt, appWebMap.WEBMAP_JSON.item.extent);
 		}
+		
 	
         var webMapIDorJson, urlObj = urlUtils.urlToObject(document.location.href);
 
@@ -230,9 +240,9 @@ function(
 
         mapDeferred.then(function(response) {
             
-            if (startExtent) {
-            	response.map.setExtent(startExtent);
-            }
+            //if (startExtent) {
+            //	response.map.setExtent(startExtent);
+            //}
             
             mapResponse = response;
             map = response.map;
@@ -712,6 +722,10 @@ function(
 			//}));
 		//}));
 		editFillSymbol = new SimpleFillSymbol();
+		
+		var subHeight = $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		$('.tab-pane').css("max-height", (($(window).height()) - subHeight));
+		
     };
 
     app.buildMapElements = function (layers) {
@@ -2422,6 +2436,7 @@ function(
 		$("#optionsRadios11:checked").prop("checked",false);
 		$("#selectLoadPrModel").prop('disabled', true);
 		$("#modelResultsSummary").html("Summary");
+		$("#modelResultsSumTotals").html("Totals");
 		$("#modelResults").hide();
 		$("#loadModelStatus").html("");
 		$("#modelResultsIndividual").html("");
@@ -2435,6 +2450,22 @@ function(
 			}));
 		}));
 		}
+		
+		if (imageServiceLayer) {
+			map.removeLayer(imageServiceLayer);
+			imageServiceLayer = null;
+			var tocIndex = 0;
+			toc.layerInfos.forEach(function(i) {
+				if(i.title === appConfig.LAYER_NAME_PRIORITIZ_HEATMAPS) { 
+					toc.layerInfos.splice(tocIndex,1);
+					toc.refresh();
+					//callback("complete");
+				} else {
+					tocIndex += 1;
+				}
+			});
+		}
+		
 		ftrLayer = null;
 		pointFtrLayer = null;
 		map.graphics.clear();
@@ -2523,9 +2554,12 @@ function(
 			$("#modelDisplayBy").html(inputList);
 			
 			// Generate short summary of model results
-			var shortSummary = ""
+			var modelSummary = ""
 				+ "Prioritization Area: <b> " + modelFtrName + "</b><br/>"
-				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>"
+				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>";
+			$("#modelResultsSummary").html(modelSummary);
+			
+			var totalsSummary = ""
 				+ "Totals:"
 				+ "<dl class='dl-horizontal'>"
 				+ "<dt>Total Grow Count</dt><dd>" + sumAttr.NumGrows + "</dd>"
@@ -2533,11 +2567,7 @@ function(
 				+ "<dt>Greenhouse Grows</dt><dd>" + sumAttr.NumGreenHouseGrows + "</dd>"
 				+ "<dt>Total Grow Acreage</dt><dd>" + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</dd>"
 				+ "</dl>";
-				//+ "Number of Grows: <span class='badge-sum badge-4'>" + sumAttr.NumGrows + "</span><br/>"
-				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumOutdoorGrows + "</span> Outdoor<br/>"
-				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumGreenHouseGrows + "</span> Greenhouse<br/>"
-				//+ "Total Acreage of Grows:<span class='badge-sum badge-3'> " + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</span><br/>";
-			$("#modelResultsSummary").html(shortSummary);
+			$("#modelResultsSumTotals").html(totalsSummary);
 
 			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
 				
@@ -2553,15 +2583,76 @@ function(
 					$("#modelInstructions").show();
 					$("#modelInstructions").html("Prioritization Model Loaded.<br/>Click Reset to remove and start over.");
 					app.resetPopup();
-					app.zoomToLayerExtent(selectModelName);
+					//app.zoomToLayerExtent(selectModelName);
 					esri.hide(loading);
 					//layers[growLyrIndex].layer.setVisibility(false);
-					layers[growLocLyrIndex].layer.setVisibility(false);
+					//layers[growLocLyrIndex].layer.setVisibility(false);
 					map.graphics.clear();
+					
+					app.loadModelHeatMap("Name = 'CIPS_PrioritizModel_"+ sumAttr.ModelRunKey + "'");
+					
 				}));
 			}));
 		}
 	};
+	
+	app.loadModelHeatMap = function(defExpr) {
+	// Loading a prioritization model - add the Heat Map for this model
+		
+		// check to make sure an existing heat map layer isn't loaded. If it is, remove it.
+		if (imageServiceLayer) {
+			map.removeLayer(imageServiceLayer);
+			imageServiceLayer = null;
+			var tocIndex = 0;
+			toc.layerInfos.forEach(function(i) {
+				if(i.title === appConfig.LAYER_NAME_PRIORITIZ_HEATMAPS) { 
+					toc.layerInfos.splice(tocIndex,1);
+					toc.refresh();
+					//callback("complete");
+				} else {
+					tocIndex += 1;
+				}
+			});
+		}
+		
+		var params = new ImageServiceParameters();
+        params.noData = 0;
+        
+        imageServiceLayer = new ArcGISImageServiceLayer(appConfig.URL_PRIOR_MODELS_HEATMAP, {
+          imageServiceParameters: params,
+          opacity: 0.75
+        });
+        
+        console.log(imageServiceLayer);
+        
+        map.addLayer(imageServiceLayer);
+        modelHeatMapLayer = imageServiceLayer;
+        
+        map.addLayers([imageServiceLayer]);
+		/*toc.layerInfos.push({
+			"layer" : imageServiceLayer,
+			"title" : "Prioritization Model Heat Map"
+		});
+		toc.refresh();*/
+		
+		// Use the definition expression to identify the unique heat map for the Prior Model.
+        if (defExpr) {
+        	imageServiceLayer.setDefinitionExpression(defExpr);
+        }
+	};
+	
+	app.togglePrFactor = function(option) {
+		// Show or hide individual prioritization model factor source layers
+		switch(option) {
+			case true:
+				console.log("true", $("#modelDisplayBy option:selected").html());
+			break;
+			case false:
+				console.log("false", $("#modelDisplayBy option:selected").html());
+			break;
+		}
+	};
+	
 	
 	app.updateModelSummary = function() {
 		var selFactor = $('#modelDisplayBy').val();
@@ -3159,6 +3250,12 @@ function(
 		// Page has loaded, set on- events	
 	
 		$.unblockUI();
+		
+		// resize the max height of the map toolbar contents
+		$(window).resize(function () {
+			var subHeight = $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		    $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
+		});
 
         $('#mapNavPrev').on('click', function() {
             mapNav.zoomToPrevExtent();
@@ -3175,6 +3272,19 @@ function(
         });
         $("#sumWshd-toggle").change(function() {
 	    	app.summarizeWshd($(this).prop("checked"));
+	    });
+	    
+	    // show or hide a loaded prioritization model heat map
+	    $("#heatmap-toggle").change(function() {
+	    	if ($("#heatmap-toggle").prop('checked')) {
+	    		imageServiceLayer.setVisibility(true);
+	    	} else {
+	    		imageServiceLayer.setVisibility(false);
+	    	}
+	    });
+	    
+	    $("#factor-toggle").change(function() {
+	    	app.togglePrFactor($("#factor-toggle").prop('checked'));
 	    });
 
     });

@@ -292,6 +292,7 @@
 								</div>
 
 							</div>
+							
 							<!-- Load Prioritization Model -->
 							<div id="menu7" class="tab-pane ribbon-bar-tab">
 								<div class="panel-group" id="accordion7" role="tablist" aria-multiselectable="true">
@@ -315,7 +316,7 @@
 										      		<select class="form-control" id="selectLoadPrRegion" onchange="app.initLoadModelList()">
 										      			<option></option>
 													</select><br/>
-													Prioritization Model<br/>
+													Prioritization Area<br/>
 										      		<select class="form-control" id="selectLoadPrModel" disabled onchange="app.loadModel($('#selectLoadPrModel').val(), $('#selectLoadPrModel option:selected').text())">
 										      			<option></option>
 													</select>	
@@ -330,13 +331,23 @@
 										</div>
 										<div id="menu7collapse4" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu7panel4">
 											<div class="panel-body">
+												<div id="modelResultsSummary">Summary</div>
 												<div id="modelResultsDisplay">
 													Display Grows by:<br/>
 										      		<select class="form-control" id="modelDisplayBy" onchange="app.updateRenderer()">
 										      			<option></option>
 													</select>
 												</div><br/>
-												<div id="modelResultsSummary">Summary</div>
+												<label class="checkbox-inline">
+													<input id="heatmap-toggle" checked type="checkbox" data-toggle="toggle" data-size="small">
+													Show/Hide Model Heat Map
+												</label><br/>
+												<!--<label class="checkbox-inline">
+													<input id="factor-toggle" disabled type="checkbox" data-toggle="toggle" data-size="small">
+													Show/Hide Displayed Source Layer
+												</label><br/>-->
+												
+												<div id="modelResultsSumTotals">Totals</div>
 												<div id="modelResultsIndividual"></div>
 											</div>
 										</div>

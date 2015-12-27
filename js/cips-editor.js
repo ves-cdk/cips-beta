@@ -180,11 +180,15 @@ function(
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
 		
-		// getting extent from previous page (if exists). Only has to be done for first map, the rest are based on extent of this map after load
+		// Get the map extent from previous session or page.
+		// If it exists, we replace the web map JSON content with the new extent, so that it is set before the map is created.
 		if (localStorage.extent) {
 			var ext = $.parseJSON(localStorage.extent);
 			var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
 				new esri.SpatialReference({wkid:102100}));
+			var convExt = esri.geometry.webMercatorToGeographic(startExtent);
+			appWebMap.WEBMAP_JSON.item.extent = [[convExt.xmin, convExt.ymin],[convExt.xmax,convExt.ymax]];
+			//console.log(convExt, appWebMap.WEBMAP_JSON.item.extent);
 		}
 	
         var webMapIDorJson, urlObj = urlUtils.urlToObject(document.location.href);
@@ -218,9 +222,9 @@ function(
 
         mapDeferred.then(function(response) {
             
-            if (startExtent) {
-            	response.map.setExtent(startExtent);
-            }
+            //if (startExtent) {
+            //	response.map.setExtent(startExtent);
+            //}
             
             mapResponse = response;
             map = response.map;
@@ -479,6 +483,9 @@ function(
 			$.when(app.buildEditor(function(buildCallback) {
 			}));
 		}));
+		
+		var subHeight = $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		$('.tab-pane').css("max-height", (($(window).height()) - subHeight));
     };
 
     app.buildMapElements = function (layers) {
@@ -2026,6 +2033,12 @@ function(
 		// Page has loaded, set on- events	
 	
 		$.unblockUI();
+		
+		// resize the max height of the map toolbar contents
+		$(window).resize(function () {
+			var subHeight = $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		    $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
+		});
 
         $('#mapNavPrev').on('click', function() {
             mapNav.zoomToPrevExtent();

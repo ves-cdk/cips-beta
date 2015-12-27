@@ -4,20 +4,21 @@ var appWebMap = dojo.getObject('appWebMap', true);
 
 appWebMap = {
     WEBMAP_JSON: 
-    // **** Copy  webmap2Json output into this section - Start **** 
+    // **** Copy  webmap2Json output into the section below ****
+    // **** Start section ---------------------------------------------------------------------------------------------------------- **** 
 
 {
   "item": {
-    "title": "CIPS_Dashboard_AGS",
+    "title": "CIPS_Dashboard",
     "snippet": "CIPS",
     "extent": [
       [
-        -125.4129,
-        38.7392
+        -126.2973,
+        38.9189
       ],
       [
-        -119.8209,
-        41.9371
+        -118.9365,
+        42.0188
       ]
     ]
   },
@@ -1547,9 +1548,851 @@ appWebMap = {
         "itemId": "65f1f4f412d94f55920e376db410f3fd"
       },
       {
+        "id": "CIPS_HeatMaps_7008",
+        "layerType": "ArcGISMapServiceLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_HeatMaps/MapServer",
+        "visibility": true,
+        "opacity": 1,
+        "title": "Grow Site Heat Maps"
+      },
+      {
+        "id": "CIPS_ModelSource_Raster_LSFactor_8620",
+        "layerType": "ArcGISMapServiceLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Raster_LSFactor/MapServer",
+        "visibility": false,
+        "visibleLayers": [
+          0,
+          3
+        ],
+        "opacity": 1,
+        "title": "Model Source - LSFactor"
+      },
+      {
+        "id": "CIPS_ModelSource_Raster_Slope_2134",
+        "layerType": "ArcGISMapServiceLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Raster_Slope/MapServer",
+        "visibility": false,
+        "visibleLayers": [
+          0,
+          3
+        ],
+        "opacity": 1,
+        "title": "Model Source - Percent Slope"
+      },
+      {
+        "id": "CIPS_ModelSource_Vector_6820",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Vector/MapServer/3",
+        "visibility": false,
+        "opacity": 0.75,
+        "mode": 1,
+        "title": "Model Source - CNDDB",
+        "popupInfo": {
+          "title": "Model Source - CNDDB: {SNAME}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SNAME",
+              "label": "SNAME",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "CNAME",
+              "label": "CNAME",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ELMCODE",
+              "label": "ELMCODE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "OCCNUMBER",
+              "label": "OCCNUMBER",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "MAPNDX",
+              "label": "MAPNDX",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "EONDX",
+              "label": "EONDX",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "KEYQUAD",
+              "label": "KEYQUAD",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "KQUADNAME",
+              "label": "KQUADNAME",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "KEYCOUNTY",
+              "label": "KEYCOUNTY",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PARTS",
+              "label": "PARTS",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ELMTYPE",
+              "label": "ELMTYPE",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "EOCOUNT",
+              "label": "EOCOUNT",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ACCURACY",
+              "label": "ACCURACY",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PRESENCE",
+              "label": "PRESENCE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "OCCTYPE",
+              "label": "OCCTYPE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "OCCRANK",
+              "label": "OCCRANK",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SENSITIVE",
+              "label": "SENSITIVE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SITEDATE",
+              "label": "SITEDATE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ELMDATE",
+              "label": "ELMDATE",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "OWNERMGT",
+              "label": "OWNERMGT",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FEDLIST",
+              "label": "FEDLIST",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "CALLIST",
+              "label": "CALLIST",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GRANK",
+              "label": "GRANK",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SRANK",
+              "label": "SRANK",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "RPLANTRANK",
+              "label": "RPLANTRANK",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "LOCATION",
+              "label": "LOCATION",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "LOCDETAILS",
+              "label": "LOCDETAILS",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ECOLOGICAL",
+              "label": "ECOLOGICAL",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "THREAT",
+              "label": "THREAT",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GENERAL",
+              "label": "GENERAL",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "AREA",
+              "label": "AREA",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PERIMETER",
+              "label": "PERIMETER",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "AVLCODE",
+              "label": "AVLCODE",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Symbology",
+              "label": "Symbology",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_ModelSource_Vector_3782",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Vector/MapServer/2",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Model Source - Surface Water (Flowline)",
+        "popupInfo": {
+          "title": "Model Source - Surface Water (Flowline): {GNIS_Name}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Permanent_Identifier",
+              "label": "Permanent_Identifier",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FDate",
+              "label": "FDate",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Resolution",
+              "label": "Resolution",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_ID",
+              "label": "GNIS_ID",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_Name",
+              "label": "GNIS_Name",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "LengthKM",
+              "label": "LengthKM",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ReachCode",
+              "label": "ReachCode",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FlowDir",
+              "label": "FlowDir",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "WBArea_Permanent_Identifier",
+              "label": "WBArea_Permanent_Identifier",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FType",
+              "label": "FType",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FCode",
+              "label": "FCode",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Enabled",
+              "label": "Enabled",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_ModelSource_Vector_3903",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Vector/MapServer/1",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Model Source - Surface Water (Area)",
+        "popupInfo": {
+          "title": "Model Source - Surface Water (Area): {GNIS_Name}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Permanent_Identifier",
+              "label": "Permanent_Identifier",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FDate",
+              "label": "FDate",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Resolution",
+              "label": "Resolution",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_ID",
+              "label": "GNIS_ID",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_Name",
+              "label": "GNIS_Name",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "AreaSqKm",
+              "label": "AreaSqKm",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Elevation",
+              "label": "Elevation",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FType",
+              "label": "FType",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FCode",
+              "label": "FCode",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_ModelSource_Vector_6795",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_ModelSource_Vector/MapServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Model Source - Surface Water (Waterbody)",
+        "popupInfo": {
+          "title": "Model Source - Surface Water (Waterbody): {GNIS_Name}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Permanent_Identifier",
+              "label": "Permanent_Identifier",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FDate",
+              "label": "FDate",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Resolution",
+              "label": "Resolution",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_ID",
+              "label": "GNIS_ID",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "GNIS_Name",
+              "label": "GNIS_Name",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "AreaSqKm",
+              "label": "AreaSqKm",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Elevation",
+              "label": "Elevation",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "ReachCode",
+              "label": "ReachCode",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FType",
+              "label": "FType",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "FCode",
+              "label": "FCode",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
         "id": "CIPS_Parcels_3834",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Parcels/MapServer/0",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/4",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -1655,7 +2498,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_6517",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/9",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/MapServer/9",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -2198,7 +3041,7 @@ appWebMap = {
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/MapServer/2",
         "visibility": true,
-        "opacity": 0.8,
+        "opacity": 1,
         "mode": 1,
         "title": "Grow Footprints",
         "layerDefinition": {
@@ -2425,7 +3268,7 @@ appWebMap = {
         "id": "CIPS_Base_4449",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/1",
-        "visibility": true,
+        "visibility": false,
         "opacity": 1,
         "mode": 1,
         "title": "Watershed Boundaries (HUC12)",
@@ -3233,7 +4076,7 @@ appWebMap = {
       {
         "id": "CIPS_Operational_rev1_1917",
         "layerType": "ArcGISFeatureLayer",
-        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational_rev1/FeatureServer/8",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/MapServer/8",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
@@ -3452,7 +4295,7 @@ appWebMap = {
               ]
             }
           },
-          "minScale": 70000,
+          "minScale": 73000,
           "maxScale": 37000
         },
         "popupInfo": {
@@ -3637,11 +4480,19 @@ appWebMap = {
         },
         "measure": {
           "enabled": true
+        },
+        "search": {
+          "enabled": true,
+          "disablePlaceFinder": false,
+          "hintText": "Place or Address",
+          "layers": []
         }
       }
     }
   }
 }
 
-    // **** Copy webmap2Json output into this section - end **** 
+	// **** End section ---------------------------------------------------------------------------------------------------------- **** 
+    // **** Copy  webmap2Json output into the section above ****
+    
 };

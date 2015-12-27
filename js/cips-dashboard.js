@@ -10,10 +10,10 @@ var statsLoaded = [null,true,false,false,false,false,false,false,false,false,fal
 var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
 var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
-var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex; // used for getting onClick results from specific layers
+var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, heatmapLyrIndex; // used for getting onClick results from specific layers
 var myFeatureLayer;
 var loadedModelResults; // records for a loaded model, used for summary display
-var modelHeatMapLayer; // image layer for prioritization model heat map
+var modelHeatMapLayer, imageServiceLayer; // image layer for prioritization model heat map
 var testvar; //generic variable for testing
 
 // -- Section 2: Requires -------------------------------------------------------------
@@ -221,7 +221,7 @@ function(
         var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
         //var regInterpAreas = "", regInterpWatersheds = "", regInterpAcreage = "";
         var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
-        var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
+        var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0, totalGrowSiteParcels = 0, totalGrowSites = 0, totalGrowPotential = 0;
         
         $.when(app.runQuery(appConfig.URL_SUMMARY_REGION, queryParams, false, function(qryResultsRegion) {
             sumDataRegion = qryResultsRegion;
@@ -250,13 +250,19 @@ function(
                     totalLevel1 += sumRegion[i].NumCultAreaScore1Grows;
                     totalLevel2 += sumRegion[i].NumCultAreaScore2Grows;
                     totalLevel3 += sumRegion[i].NumCultAreaScore3Grows;
+                    totalGrowSiteParcels += sumRegion[i].NumGrowSiteParcels;
+                    totalGrowSites += sumRegion[i].NumGrowSites;
                 });
+                
+                totalGrowPotential = totalNumGrows - totalGrowOutdoor - totalGrowGreenhouse;
                 // set the values on the page
                 dojo.byId('quickStatInterpArea').innerHTML = totalInterpAreas;
                 dojo.byId('quickStatWatersheds').innerHTML = app.numberWithCommas(totalInterpWatersheds);
                 dojo.byId('quickStatTotalAcreage').innerHTML = app.numberWithCommas(totalInterpAcreage);
                 dojo.byId('quickStatGrows').innerHTML = app.numberWithCommas(totalNumGrows);
                 dojo.byId('quickStatGrowAcreage').innerHTML = app.numberWithCommas(totalGrowAcreage);
+                dojo.byId('quickStatGrowSiteParcels').innerHTML = app.numberWithCommas(totalGrowSiteParcels);
+                //dojo.byId('quickStatGrowSites').innerHTML = app.numberWithCommas(totalGrowAcreage);
                 
                 // build pie chart1
                 var chart1Data = [
@@ -271,6 +277,12 @@ function(
                         color: "#e1b474",
                         highlight: "#f8c884",
                         label: "Outdoor"
+                    },
+                    {
+                        value: totalGrowPotential,
+                        color: "#727272",
+                        highlight: "#949494",
+                        label: "Potential"
                     }
                 ];
                 dojo.byId('titleChart1S').innerHTML = "Outdoor vs Greenhouse";
@@ -462,11 +474,15 @@ function(
 		esri.show(loading);
 		
 		// Get the map extent from previous session or page.
-		/*if (localStorage.extent) {
+		// If it exists, we replace the web map JSON content with the new extent, so that it is set before the map is created.
+		if (localStorage.extent) {
 			var ext = $.parseJSON(localStorage.extent);
 			var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
 				new esri.SpatialReference({wkid:102100}));
-		}*/
+			var convExt = esri.geometry.webMercatorToGeographic(startExtent);
+			appWebMap.WEBMAP_JSON.item.extent = [[convExt.xmin, convExt.ymin],[convExt.xmax,convExt.ymax]];
+			//console.log(convExt, appWebMap.WEBMAP_JSON.item.extent);
+		}
 		
 	
         var webMapIDorJson, urlObj = urlUtils.urlToObject(document.location.href);
@@ -496,15 +512,16 @@ function(
               nav: false,
               logo : false,
               sliderPosition : 'top-right',
-              scrollWheelZoom: true,            
+              scrollWheelZoom: true,
+              //extent: startExtent,            
               smartNavigation: false
           });
 
         mapDeferred.then(function(response) {
             
-            //if (startExtent) {
-            //	response.map.setExtent(startExtent);
-            //}
+            /*if (startExtent) {
+            	response.map.setExtent(startExtent);
+            }*/
             
             mapResponse = response;
             map = response.map;
@@ -531,6 +548,9 @@ function(
             	}
             	if (lyr.title === appConfig.LAYER_NAME_GROW_LOCATIONS) {
             		growLocLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_MAIN_HEATMAPS) {
+            		heatmapLyrIndex = i;
             	}
             });
  
@@ -573,6 +593,8 @@ function(
         }, function(error) {
             alert("An error occurred loading the map. Refresh the page and try again.");
         });
+        
+        
     };
     
     app.buildMapItems = function (response) {
@@ -584,18 +606,22 @@ function(
     	app.buildSearchWatershed();
     	//app.buildPrint();
     	app.buildMeasure();
+    	
     	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.URL_GROW_POINTS, appConfig.GROW_POINTS_SCALE, null, function(callback) {
-    		//console.log("buildCluster done");
+    		console.log("buildCluster done");
     		// Get the map extent from previous session or page.
-			if (localStorage.extent) {
+			/*if (localStorage.extent) {
 				var ext = $.parseJSON(localStorage.extent);
 				var startExtent = new esri.geometry.Extent(ext.xmin, ext.ymin, ext.xmax, ext.ymax, 
 					new esri.SpatialReference({wkid:102100}));
 					map.setExtent(startExtent);
 					//esri.hide(loading);
-			}
+			}*/
 			//$.unblockUI();
 		}));
+		
+		var subHeight = $("#summary-container").height() + $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		    $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
     };
 
     app.buildMapElements = function (layers) {
@@ -1407,6 +1433,8 @@ function(
 		if (minScale) {
 			clusterLayer.setMinScale(minScale);
 		}
+		//clusterLayer.setVisibility(false);
+		
 		map.addLayers([clusterLayer]);
 		toc.layerInfos.push({
 			"layer" : clusterLayer,
@@ -1540,6 +1568,7 @@ function(
             	if (subHeight)
 	            $('#mapDiv').height(($(window).height()) - subHeight);
 			    map.resize();
+			    $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
 		    }
         } else {
        		$("#" + item).show();
@@ -1548,6 +1577,7 @@ function(
        			var subHeight = $("#summary-container").height() + $("#header-container").height() + $("#ribbonTabs").height() + 10;
 	            $('#mapDiv').height(($(window).height()) - subHeight);
 	            map.resize();
+	            $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
 		    }
      	}	
  	};
@@ -1638,8 +1668,6 @@ function(
 		}
 	};
     
-        
-    // -- Section 8: Map Prioritization Model Rendering ----------------------------------------------------
     
     // -- Section 7: Load Prioritization Model Results  ----------------------------------------------------
 	
@@ -1714,6 +1742,7 @@ function(
 		$("#optionsRadios11:checked").prop("checked",false);
 		$("#selectLoadPrModel").prop('disabled', true);
 		$("#modelResultsSummary").html("Summary");
+		$("#modelResultsSumTotals").html("Totals");
 		$("#modelResults").hide();
 		$("#loadModelStatus").html("");
 		$("#modelResultsIndividual").html("");
@@ -1727,6 +1756,22 @@ function(
 			}));
 		}));
 		}
+		
+		if (imageServiceLayer) {
+			map.removeLayer(imageServiceLayer);
+			imageServiceLayer = null;
+			var tocIndex = 0;
+			toc.layerInfos.forEach(function(i) {
+				if(i.title === appConfig.LAYER_NAME_PRIORITIZ_HEATMAPS) { 
+					toc.layerInfos.splice(tocIndex,1);
+					toc.refresh();
+					//callback("complete");
+				} else {
+					tocIndex += 1;
+				}
+			});
+		}
+		
 		ftrLayer = null;
 		pointFtrLayer = null;
 		map.graphics.clear();
@@ -1736,6 +1781,9 @@ function(
 		// Load prioritization area model. Called after the prioritization area and model name have been identified.
 		if (clusterLayer) {
 			clusterLayer.setVisibility(false); // automatically turn off clustered point layer
+		}
+		if (heatmapLyrIndex) {
+			layers[heatmapLyrIndex].layer.setVisibility(false);
 		}
 		
 		/*if ($("#optionsRadios5:checked").prop("checked") || $("#optionsRadios4:checked").prop("checked")) {
@@ -1820,9 +1868,12 @@ function(
 			$("#modelDisplayBy").html(inputList);
 			
 			// Generate short summary of model results
-			var shortSummary = ""
+			var modelSummary = ""
 				+ "Prioritization Area: <b> " + modelFtrName + "</b><br/>"
-				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>"
+				+ "Model Name: <b> " + selectModelName + "</b><br/><br/>";
+			$("#modelResultsSummary").html(modelSummary);
+			
+			var totalsSummary = ""
 				+ "Totals:"
 				+ "<dl class='dl-horizontal'>"
 				+ "<dt>Total Grow Count</dt><dd>" + sumAttr.NumGrows + "</dd>"
@@ -1830,11 +1881,7 @@ function(
 				+ "<dt>Greenhouse Grows</dt><dd>" + sumAttr.NumGreenHouseGrows + "</dd>"
 				+ "<dt>Total Grow Acreage</dt><dd>" + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</dd>"
 				+ "</dl>";
-				//+ "Number of Grows: <span class='badge-sum badge-4'>" + sumAttr.NumGrows + "</span><br/>"
-				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumOutdoorGrows + "</span> Outdoor<br/>"
-				//+ "&nbsp;&nbsp;<span class='badge-sum badge-4'>" + sumAttr.NumGreenHouseGrows + "</span> Greenhouse<br/>"
-				//+ "Total Acreage of Grows:<span class='badge-sum badge-3'> " + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</span><br/>";
-			$("#modelResultsSummary").html(shortSummary);
+			$("#modelResultsSumTotals").html(totalsSummary);
 
 			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
 				
@@ -1850,46 +1897,78 @@ function(
 					$("#modelInstructions").show();
 					$("#modelInstructions").html("Prioritization Model Loaded.<br/>Click Reset to remove and start over.");
 					app.resetPopup();
-					app.zoomToLayerExtent(selectModelName);
+					//app.zoomToLayerExtent(selectModelName);
 					esri.hide(loading);
 					//layers[growLyrIndex].layer.setVisibility(false);
 					//layers[growLocLyrIndex].layer.setVisibility(false);
 					map.graphics.clear();
+					
+					app.loadModelHeatMap("Name = 'CIPS_PrioritizModel_"+ sumAttr.ModelRunKey + "'");
+					
 				}));
 			}));
 		}
 	};
 	
 	app.loadModelHeatMap = function(defExpr) {
+	// Loading a prioritization model - add the Heat Map for this model
 		
-		if (!(imageServiceLayer)) {
-			var params = new ImageServiceParameters();
-	        params.noData = 0;
-	        
-	        var imageServiceLayer = new ArcGISImageServiceLayer("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_PrtizModel_HeatMap/ImageServer", {
-	          imageServiceParameters: params,
-	          opacity: 0.75
-	        });
-	        
-	        map.addLayer(imageServiceLayer);
-	        modelHeatMapLayer = imageServiceLayer;
-	        
-	        map.addLayers([imageServiceLayer]);
-			toc.layerInfos.push({
-				"layer" : imageServiceLayer,
-				"title" : "Prioritization Model Heat Map"
+		// check to make sure an existing heat map layer isn't loaded. If it is, remove it.
+		if (imageServiceLayer) {
+			map.removeLayer(imageServiceLayer);
+			imageServiceLayer = null;
+			var tocIndex = 0;
+			toc.layerInfos.forEach(function(i) {
+				if(i.title === appConfig.LAYER_NAME_PRIORITIZ_HEATMAPS) { 
+					toc.layerInfos.splice(tocIndex,1);
+					toc.refresh();
+					//callback("complete");
+				} else {
+					tocIndex += 1;
+				}
 			});
-			toc.refresh();
 		}
 		
+		var params = new ImageServiceParameters();
+        params.noData = 0;
         
+        imageServiceLayer = new ArcGISImageServiceLayer(appConfig.URL_PRIOR_MODELS_HEATMAP, {
+          imageServiceParameters: params,
+          opacity: 0.75
+        });
+        
+        console.log(imageServiceLayer);
+        
+        map.addLayer(imageServiceLayer);
+        modelHeatMapLayer = imageServiceLayer;
+        
+        map.addLayers([imageServiceLayer]);
+		/*toc.layerInfos.push({
+			"layer" : imageServiceLayer,
+			"title" : "Prioritization Model Heat Map"
+		});
+		toc.refresh();*/
+		
+		// Use the definition expression to identify the unique heat map for the Prior Model.
         if (defExpr) {
         	imageServiceLayer.setDefinitionExpression(defExpr);
         }
 	};
 	
+	app.togglePrFactor = function(option) {
+		// Show or hide individual prioritization model factor source layers
+		switch(option) {
+			case true:
+				console.log("true", $("#modelDisplayBy option:selected").html());
+			break;
+			case false:
+				console.log("false", $("#modelDisplayBy option:selected").html());
+			break;
+		}
+	};
+	
 	app.updateModelSummary = function() {
-		var selFactor = $('#modelDisplayBy').val();
+		var selFactor = $("#modelDisplayBy").val();
 		
 		//if (selFactor === "0") {
 		//	$("#modelResultsIndividual").html("");
@@ -2063,9 +2142,16 @@ function(
 	};
 	
 	app.updateRenderer = function() {
-		app.classBreakRendererPoly('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoly);
-		app.classBreakRendererPoint('Input' + $('#modelDisplayBy').val() + 'PreProcScore', prModelPoint);
+		app.classBreakRendererPoly("Input" + $("#modelDisplayBy").val() + "PreProcScore", prModelPoly);
+		app.classBreakRendererPoint("Input" + $("#modelDisplayBy").val() + "PreProcScore", prModelPoint);
 		app.updateModelSummary();
+		if ($("#modelDisplayBy").val() === "0") {
+			$("#factor-toggle").bootstrapToggle("off");
+			$("#factor-toggle").prop("disabled", true).change();
+		} else {
+			$("#factor-toggle").bootstrapToggle("off");
+			$("#factor-toggle").prop("disabled", false).change();
+		}
 	};
 	
 	app.classBreakRendererPoly = function(renderField, renderLayer) {
@@ -3278,6 +3364,12 @@ function(
     $(document).ready(function() {
 
 		$.unblockUI();
+		
+		// resize the max height of the map toolbar contents
+		$(window).resize(function () {
+			var subHeight = $("#summary-container").height() + $("#header-container").height() + $("#ribbonTabs").height() + 10;
+		    $('.tab-pane').css("max-height", (($(window).height()) - subHeight));
+		});
 
         $('#mapNavPrev').on('click', function() {
             mapNav.zoomToPrevExtent();
@@ -3293,6 +3385,19 @@ function(
         });
         $("#sumWshd-toggle").change(function() {
 	    	app.summarizeWshd($("#sumWshd-toggle").prop('checked'));
+	    });
+	    
+	    // show or hide a loaded prioritization model heat map
+	    $("#heatmap-toggle").change(function() {
+	    	if ($("#heatmap-toggle").prop('checked')) {
+	    		imageServiceLayer.setVisibility(true);
+	    	} else {
+	    		imageServiceLayer.setVisibility(false);
+	    	}
+	    });
+	    
+	    $("#factor-toggle").change(function() {
+	    	app.togglePrFactor($("#factor-toggle").prop('checked'));
 	    });
 
     });

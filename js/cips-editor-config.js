@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Editor",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.4",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.5",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
@@ -19,25 +19,25 @@ appConfig = {
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
     
-    URL_REGION: urlRoot + "CIPS_Base/FeatureServer/0",
-	URL_WATERSHED: urlRoot + "CIPS_Base/FeatureServer/1",
+    URL_REGION: urlRoot + "CIPS_Base/MapServer/0",
+	URL_WATERSHED: urlRoot + "CIPS_Base/MapServer/1",
     
-    URL_GROW_POLYS: urlRoot + "CIPS_Operational_rev1/FeatureServer/2",
-    URL_GROW_POINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/1",
+    URL_GROW_POLYS: urlRoot + "CIPS_Operational/FeatureServer/2",
+    URL_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
     GROW_POINTS_NAME: "Grow Locations (Grouped)", // name used for clustered point layer
     GROW_POINTS_SCALE: 73000, // minimum scale the clustered point layer will be displayed at.
 
-	URL_INTERP_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/7",
-	URL_GROW_NUM: urlRoot + "CIPS_Operational_rev1/FeatureServer/10",
-	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational_rev1/FeatureServer/21",
-    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/13", //urlRoot + "CIPS_20151015/FeatureServer/11",
-    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational_rev1/FeatureServer/0",
-    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Operational_rev1/FeatureServer/3",
-    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational_rev1/FeatureServer/4",
-    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/1",
-    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational_rev1/FeatureServer/2",
-    URL_EDIT_GROW_SITES: urlRoot + "CIPS_Operational_rev1/FeatureServer/8",
-    URL_EDIT_GROW_SITE_PARCELS: urlRoot + "CIPS_Operational_rev1/FeatureServer/9",
+	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7",
+	URL_GROW_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
+	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational/FeatureServer/21",
+    URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/13", //urlRoot + "CIPS_20151015/FeatureServer/11",
+    URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational/FeatureServer/0",
+    URL_EDIT_RESERVOIR: urlRoot + "CIPS_Operational/FeatureServer/3",
+    URL_EDIT_DISTURBED_AREA: urlRoot + "CIPS_Operational/FeatureServer/4",
+    URL_EDIT_GROW_POINTS: urlRoot + "CIPS_Operational/FeatureServer/1",
+    URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational/FeatureServer/2",
+    URL_EDIT_GROW_SITES: urlRoot + "CIPS_Operational/FeatureServer/8",
+    URL_EDIT_GROW_SITE_PARCELS: urlRoot + "CIPS_Operational/FeatureServer/9",
     
     // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
     //LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",

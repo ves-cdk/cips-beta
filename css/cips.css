@@ -335,6 +335,9 @@ a:focus {
     opacity: 1;
 	background-color: #eee;
 }
+.tab-content > .active {
+	overflow-y: scroll;
+}
 .tabItems {
 	padding-top: 10px !important;
 	padding-bottom: 10px !important;
