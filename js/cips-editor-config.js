@@ -52,6 +52,7 @@ appConfig = {
     LAYER_NAME_SITES: "Grow Sites",
     LAYER_NAME_SITES_PARCELS: "Grow Site Parcels",
     LAYER_NAME_PARCELS: "Parcels",
+    LAYER_NAME_PARCELS_ALT: "Parcels (OCIO Statewide)", // this is an alternate source for parcel boundaries, using State CIO map service.
     
     BASEMAPS: {
 		// Add as many basemaps as desired below using the same structure.

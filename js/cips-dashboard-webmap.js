@@ -13,11 +13,11 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -126.2973,
+        -126.1353,
         38.9189
       ],
       [
-        -118.9365,
+        -119.0985,
         42.0188
       ]
     ]
@@ -2390,13 +2390,76 @@ appWebMap = {
         }
       },
       {
+        "id": "UCD_Parcels_8910",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "https://services.gis.ca.gov/arcgis/rest/services/Boundaries/UCD_Parcels/MapServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Parcels (OCIO Statewide)",
+        "popupInfo": {
+          "title": "OCIO_CAParcels: {PARNO}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PARNO",
+              "label": "PARNO",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
         "id": "CIPS_Parcels_3834",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/4",
         "visibility": false,
         "opacity": 1,
         "mode": 1,
-        "title": "Parcels",
+        "title": "Parcels (CIPS Database)",
         "layerDefinition": {
           "drawingInfo": {
             "renderer": {

@@ -13,12 +13,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.2646,
-        38.3115
+        -125.8826,
+        38.5933
       ],
       [
-        -119.6726,
-        41.5662
+        -118.8459,
+        41.7078
       ]
     ]
   },
@@ -67,51 +67,6 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Vector103.GIS.CIPS_BASE_SWRCB_Regions.AREA",
-              "label": "AREA",
-              "tooltip": "",
-              "visible": true,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "PERIMETER",
-              "label": "PERIMETER",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "RWQCBNDA_",
-              "label": "RWQCBNDA_",
-              "tooltip": "",
-              "visible": true,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "RWQCBNDA_I",
-              "label": "RWQCBNDA_I",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
               "stringFieldOption": "textbox"
             },
             {
@@ -130,29 +85,6 @@ appWebMap = {
               "label": "RBNAME",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "MaxSimpTol",
-              "label": "MaxSimpTol",
-              "tooltip": "",
-              "visible": true,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "MinSimpTol",
-              "label": "MinSimpTol",
-              "tooltip": "",
-              "visible": true,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
               "stringFieldOption": "textbox"
             },
             {
@@ -160,29 +92,6 @@ appWebMap = {
               "label": "Shape",
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape.STArea()",
-              "label": "Shape.STArea()",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape.STLength()",
-              "label": "Shape.STLength()",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
               "stringFieldOption": "textbox"
             }
           ],
@@ -234,47 +143,41 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "TNMID",
               "label": "TNMID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "MetaSourceID",
               "label": "MetaSourceID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "SourceDataDesc",
               "label": "SourceDataDesc",
               "tooltip": "",
-              "visible": true,
-              "format": null,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "SourceOriginator",
               "label": "SourceOriginator",
               "tooltip": "",
-              "visible": true,
-              "format": null,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "SourceFeatureID",
               "label": "SourceFeatureID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
@@ -291,7 +194,7 @@ appWebMap = {
               "fieldName": "GNIS_ID",
               "label": "GNIS_ID",
               "tooltip": "",
-              "visible": true,
+              "visible": false,
               "format": {
                 "places": 0,
                 "digitSeparator": true
@@ -325,7 +228,6 @@ appWebMap = {
               "label": "States",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -333,7 +235,6 @@ appWebMap = {
               "label": "HUC12",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -341,7 +242,6 @@ appWebMap = {
               "label": "Name",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -349,7 +249,6 @@ appWebMap = {
               "label": "HUType",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -357,7 +256,6 @@ appWebMap = {
               "label": "HUMod",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -365,14 +263,13 @@ appWebMap = {
               "label": "ToHUC",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
               "fieldName": "NonContributingAcres",
               "label": "NonContributingAcres",
               "tooltip": "",
-              "visible": true,
+              "visible": false,
               "format": {
                 "places": 2,
                 "digitSeparator": true
@@ -383,7 +280,7 @@ appWebMap = {
               "fieldName": "NonContributingSqKm",
               "label": "NonContributingSqKm",
               "tooltip": "",
-              "visible": true,
+              "visible": false,
               "format": {
                 "places": 2,
                 "digitSeparator": true
@@ -395,7 +292,6 @@ appWebMap = {
               "label": "Shape",
               "tooltip": "",
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -412,6 +308,69 @@ appWebMap = {
             {
               "fieldName": "Shape.STLength()",
               "label": "Shape.STLength()",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "UCD_Parcels_7968",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "https://services.gis.ca.gov/arcgis/rest/services/Boundaries/UCD_Parcels/MapServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Parcels (OCIO Statewide)",
+        "popupInfo": {
+          "title": "OCIO_CAParcels: {PARNO}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PARNO",
+              "label": "PARNO",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
               "tooltip": "",
               "visible": false,
               "format": {
@@ -467,7 +426,6 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -475,7 +433,6 @@ appWebMap = {
               "label": "SHAPE",
               "tooltip": "",
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -483,7 +440,6 @@ appWebMap = {
               "label": "CountyName",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -491,7 +447,6 @@ appWebMap = {
               "label": "APN",
               "tooltip": "",
               "visible": true,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
@@ -553,8 +508,8 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "PrioritizAreaKey",
@@ -562,26 +517,26 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PrioritizAreaID",
               "label": "PrioritizAreaID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PrioritizAreaName",
@@ -589,8 +544,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PrioritizAreaSqKm",
@@ -602,7 +557,8 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PrioritizAreaAcres",
@@ -614,7 +570,8 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "DateCreated",
@@ -625,7 +582,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "DateLastPrioritizModelRun",
@@ -636,11 +594,390 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "isEditableOnLayer": false,
+              "visible": false
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/ModelRunKey",
+              "label": "ModelRunKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/PrioritizAreaKey",
+              "label": "PrioritizAreaKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/PrioritizAreaID",
+              "label": "PrioritizAreaID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/ModelRunID",
+              "label": "ModelRunID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/ModelRunName",
+              "label": "ModelRunName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/ModelRunCompleted",
+              "label": "ModelRunCompleted",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input1DataSourceName",
+              "label": "Input1DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input1PreProcLevelCombo",
+              "label": "Input1PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input1Weight",
+              "label": "Input1Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input2DataSourceName",
+              "label": "Input2DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input2PreProcLevelCombo",
+              "label": "Input2PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input2Weight",
+              "label": "Input2Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input10Weight",
+              "label": "Input10Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input3PreProcLevelCombo",
+              "label": "Input3PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input3Weight",
+              "label": "Input3Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input4DataSourceName",
+              "label": "Input4DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input4PreProcLevelCombo",
+              "label": "Input4PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input4Weight",
+              "label": "Input4Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input5DataSourceName",
+              "label": "Input5DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input5PreProcLevelCombo",
+              "label": "Input5PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input5Weight",
+              "label": "Input5Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input6DataSourceName",
+              "label": "Input6DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input6PreProcLevelCombo",
+              "label": "Input6PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input6Weight",
+              "label": "Input6Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input7DataSourceName",
+              "label": "Input7DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input7PreProcLevelCombo",
+              "label": "Input7PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input7Weight",
+              "label": "Input7Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input8DataSourceName",
+              "label": "Input8DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input8PreProcLevelCombo",
+              "label": "Input8PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input8Weight",
+              "label": "Input8Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input9DataSourceName",
+              "label": "Input9DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input9PreProcLevelCombo",
+              "label": "Input9PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input9Weight",
+              "label": "Input9Weight",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input10DataSourceName",
+              "label": "Input10DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input10PreProcLevelCombo",
+              "label": "Input10PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/3/Input3DataSourceName",
+              "label": "Input3DataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
               "stringFieldOption": "textbox"
             }
           ],
           "description": null,
           "showAttachments": true,
+          "relatedRecordsInfo": {
+            "showRelatedRecords": false,
+            "orderByFields": null
+          },
           "mediaInfos": []
         },
         "capabilities": "Query"
@@ -738,40 +1075,45 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "InterpAreaKey",
               "label": "InterpAreaKey",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpAreaID",
               "label": "InterpAreaID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpAreaName",
               "label": "InterpAreaName",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpAreaSqKm",
@@ -782,7 +1124,9 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpAreaAcres",
@@ -793,7 +1137,9 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowYear",
@@ -804,15 +1150,18 @@ appWebMap = {
                 "places": 0,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "StatusInterpArea",
               "label": "StatusInterpArea",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "DateAerialInterpCompleted",
@@ -822,23 +1171,27 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
               "label": "InterpMethod",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpImageryNamesDates",
               "label": "InterpImageryNamesDates",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "TotalNumberGrowsIdentified",
@@ -849,7 +1202,9 @@ appWebMap = {
                 "places": 0,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "NumberIdentifiedGrowsPerSqKm",
@@ -860,37 +1215,9 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape",
-              "label": "Shape",
-              "tooltip": "",
-              "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape.STArea()",
-              "label": "Shape.STArea()",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape.STLength()",
-              "label": "Shape.STLength()",
-              "tooltip": "",
-              "visible": false,
-              "format": {
-                "places": 2,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -948,8 +1275,8 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "GrowSiteKey",
@@ -957,26 +1284,26 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSiteID",
               "label": "GrowSiteID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "CountyName",
@@ -984,8 +1311,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "APN",
@@ -993,8 +1320,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "DateCoDataAcquired",
@@ -1005,7 +1332,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "LastUpdate",
@@ -1016,7 +1344,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -1074,17 +1403,17 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "ReserviorAcres",
@@ -1096,7 +1425,8 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
@@ -1104,8 +1434,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -1116,7 +1446,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -1173,17 +1504,17 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "DisturbedAreasAcres",
@@ -1195,7 +1526,8 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
@@ -1203,8 +1535,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -1215,7 +1547,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -1311,32 +1644,36 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "GrowKey",
               "label": "GrowKey",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowID",
               "label": "GrowID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowYear",
@@ -1347,15 +1684,18 @@ appWebMap = {
                 "places": 0,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowType",
               "label": "GrowType",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSqFt",
@@ -1366,7 +1706,9 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowAcres",
@@ -1377,15 +1719,18 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
               "label": "InterpMethod",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -1395,15 +1740,18 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PreProcStatus",
               "label": "PreProcStatus",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "LastPreProcDate",
@@ -1413,41 +1761,286 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": true
             },
             {
-              "fieldName": "Shape",
-              "label": "Shape",
-              "tooltip": "",
+              "fieldName": "GrowSiteKey",
+              "label": "GrowSiteKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
             },
             {
-              "fieldName": "Shape.STArea()",
-              "label": "Shape.STArea()",
-              "tooltip": "",
+              "fieldName": "GrowSiteID",
+              "label": "GrowSiteID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "isEditableOnLayer": false,
+              "visible": false
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowKey",
+              "label": "GrowKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowID",
+              "label": "GrowID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowYear",
+              "label": "GrowYear",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcValue2",
+              "label": "PreProcValue2",
+              "isEditable": false,
+              "isEditableOnLayer": true,
               "visible": false,
               "format": {
                 "places": 2,
                 "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
+              }
             },
             {
-              "fieldName": "Shape.STLength()",
-              "label": "Shape.STLength()",
-              "tooltip": "",
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowSqFt",
+              "label": "GrowSqFt",
+              "isEditable": false,
+              "isEditableOnLayer": true,
               "visible": false,
               "format": {
                 "places": 2,
                 "digitSeparator": true
-              },
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowAcres",
+              "label": "GrowAcres",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/InterpMethod",
+              "label": "InterpMethod",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/InterpDate",
+              "label": "InterpDate",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/PreProcStatus",
+              "label": "PreProcStatus",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/LastPreProcDate",
+              "label": "LastPreProcDate",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/ORIG_FID",
+              "label": "ORIG_FID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "isEditableOnLayer": false,
+              "visible": false
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/GrowKey",
+              "label": "GrowKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/GrowID",
+              "label": "GrowID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcDataSourceName",
+              "label": "PreProcDataSourceName",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcLevelCombo",
+              "label": "PreProcLevelCombo",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcDate",
+              "label": "PreProcDate",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcScore",
+              "label": "PreProcScore",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcValue1Desc",
+              "label": "PreProcValue1Desc",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcValue1",
+              "label": "PreProcValue1",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/1/PreProcValue2Desc",
+              "label": "PreProcValue2Desc",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowType",
+              "label": "GrowType",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
               "stringFieldOption": "textbox"
             }
           ],
           "description": null,
           "showAttachments": true,
+          "relatedRecordsInfo": {
+            "showRelatedRecords": false,
+            "orderByFields": null
+          },
           "mediaInfos": []
         }
       },
@@ -1490,17 +2083,17 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "isEditable": true,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "WaterTankType",
@@ -1508,8 +2101,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "EstWaterTankSize",
@@ -1517,8 +2110,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "WaterTankSource",
@@ -1526,8 +2119,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
@@ -1535,8 +2128,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -1547,7 +2140,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -1594,35 +2188,35 @@ appWebMap = {
               "isEditable": false,
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "GrowSiteKey",
               "label": "GrowSiteKey",
-              "isEditable": true,
+              "isEditable": false,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
-              "isEditable": true,
+              "isEditable": false,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSiteID",
               "label": "GrowSiteID",
-              "isEditable": true,
+              "isEditable": false,
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSiteStatus",
@@ -1630,8 +2224,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InspectionDate",
@@ -1642,7 +2236,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "Notes",
@@ -1650,8 +2245,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "Owner",
@@ -1659,8 +2254,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "Grower",
@@ -1668,8 +2263,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PermitStatus",
@@ -1677,8 +2272,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PermitTier",
@@ -1686,8 +2281,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PermitID",
@@ -1695,8 +2290,8 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "LastUpDate",
@@ -1707,7 +2302,8 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditableOnLayer": true
             }
           ],
           "description": null,
@@ -1788,32 +2384,36 @@ appWebMap = {
               "label": "OBJECTID",
               "tooltip": "",
               "visible": false,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": false,
+              "isEditableOnLayer": false
             },
             {
               "fieldName": "GrowKey",
               "label": "GrowKey",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "SWRCBRegID",
               "label": "SWRCBRegID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowID",
               "label": "GrowID",
               "tooltip": "",
-              "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "visible": false,
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowYear",
@@ -1824,15 +2424,18 @@ appWebMap = {
                 "places": 0,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowType",
               "label": "GrowType",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowSqFt",
@@ -1843,7 +2446,9 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "GrowAcres",
@@ -1854,15 +2459,18 @@ appWebMap = {
                 "places": 2,
                 "digitSeparator": true
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpMethod",
               "label": "InterpMethod",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "InterpDate",
@@ -1872,15 +2480,18 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "PreProcStatus",
               "label": "PreProcStatus",
               "tooltip": "",
               "visible": true,
-              "format": null,
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "LastPreProcDate",
@@ -1890,30 +2501,170 @@ appWebMap = {
               "format": {
                 "dateFormat": "longMonthDayYear"
               },
-              "stringFieldOption": "textbox"
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
             },
             {
               "fieldName": "ORIG_FID",
               "label": "ORIG_FID",
               "tooltip": "",
-              "visible": true,
+              "visible": false,
               "format": {
                 "places": 0,
                 "digitSeparator": true
               },
+              "stringFieldOption": "textbox",
+              "isEditable": true,
+              "isEditableOnLayer": true
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowSiteID",
+              "label": "GrowSiteID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
-              "fieldName": "Shape",
-              "label": "Shape",
-              "tooltip": "",
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowKey",
+              "label": "GrowKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
               "visible": false,
-              "format": null,
               "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/SWRCBRegID",
+              "label": "SWRCBRegID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowID",
+              "label": "GrowID",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowYear",
+              "label": "GrowYear",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 0,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowType",
+              "label": "GrowType",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowSqFt",
+              "label": "GrowSqFt",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowAcres",
+              "label": "GrowAcres",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/InterpMethod",
+              "label": "InterpMethod",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/InterpDate",
+              "label": "InterpDate",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/PreProcStatus",
+              "label": "PreProcStatus",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/LastPreProcDate",
+              "label": "LastPreProcDate",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "format": {
+                "dateFormat": "shortDateShortTime",
+                "timezone": "utc"
+              }
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/GrowSiteKey",
+              "label": "GrowSiteKey",
+              "isEditable": false,
+              "isEditableOnLayer": true,
+              "visible": false,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "statisticType": "count",
+              "fieldName": "relationships/0/OBJECTID",
+              "label": "OBJECTID",
+              "isEditable": false,
+              "isEditableOnLayer": false,
+              "visible": false
             }
           ],
           "description": null,
           "showAttachments": true,
+          "relatedRecordsInfo": {
+            "showRelatedRecords": false,
+            "orderByFields": null
+          },
           "mediaInfos": []
         },
         "capabilities": "Query"
@@ -1968,7 +2719,6 @@ appWebMap = {
     }
   }
 }
-
 	// **** End section ---------------------------------------------------------------------------------------------------------- **** 
     // **** Copy  webmap2Json output into the section above ****
 };

@@ -13,12 +13,12 @@ appWebMap = {
     "snippet": null,
     "extent": [
       [
-        -128.0786,
-        36.8913
+        -129.5233,
+        36.9879
       ],
       [
-        -116.8945,
-        43.3039
+        -115.4498,
+        43.2159
       ]
     ]
   },
@@ -158,6 +158,150 @@ appWebMap = {
               "isEditable": true,
               "tooltip": "",
               "visible": true,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "UCD_Parcels_6692",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "https://services.gis.ca.gov/arcgis/rest/services/Boundaries/UCD_Parcels/MapServer/0",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Parcels (OCIO Statewide)",
+        "popupInfo": {
+          "title": "OCIO_CAParcels: {PARNO}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape",
+              "label": "Shape",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "PARNO",
+              "label": "PARNO",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Length",
+              "label": "Shape_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "Shape_Area",
+              "label": "Shape_Area",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            }
+          ],
+          "description": null,
+          "showAttachments": true,
+          "mediaInfos": []
+        }
+      },
+      {
+        "id": "CIPS_Base_9637",
+        "layerType": "ArcGISFeatureLayer",
+        "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/4",
+        "visibility": false,
+        "opacity": 1,
+        "mode": 1,
+        "title": "Parcels",
+        "popupInfo": {
+          "title": "Parcels: {CountyName}",
+          "fieldInfos": [
+            {
+              "fieldName": "OBJECTID",
+              "label": "OBJECTID",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE",
+              "label": "SHAPE",
+              "tooltip": "",
+              "visible": false,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "CountyName",
+              "label": "CountyName",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "APN",
+              "label": "APN",
+              "tooltip": "",
+              "visible": true,
+              "format": null,
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "DateCoDataAcquired",
+              "label": "DateAcquired",
+              "tooltip": "",
+              "visible": true,
+              "format": {
+                "dateFormat": "longMonthDayYear"
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE_Length",
+              "label": "SHAPE_Length",
+              "tooltip": "",
+              "visible": false,
+              "format": {
+                "places": 2,
+                "digitSeparator": true
+              },
+              "stringFieldOption": "textbox"
+            },
+            {
+              "fieldName": "SHAPE_Area",
+              "label": "SHAPE_Area",
+              "tooltip": "",
+              "visible": false,
               "format": {
                 "places": 2,
                 "digitSeparator": true

@@ -11,10 +11,11 @@ var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo; // editing variables
 var shapeEditLayer, shapeEditStatus, shapeEditBackup; // editing variables
-var interpLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, disturbedLyrIndex, waterTankLyrIndex, reservoirLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex, parcelLyrIndex; // used for getting onClick results from specific layers
+var interpLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, disturbedLyrIndex, waterTankLyrIndex, reservoirLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex, parcelLyrIndex, parcelLyrIndexAlt; // used for getting onClick results from specific layers
 var mergeSites = []; // object used for merging multiple sites into a single site
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
+var currentDate = new Date(), day = currentDate.getDate(), month = currentDate.getMonth() + 1, year = currentDate.getFullYear(), dateToday = (month + "/" + day + "/" + year);
 
 // -- Section 2: Requires -------------------------------------------------------------
 require([
@@ -266,6 +267,9 @@ function(
             	if (lyr.title === appConfig.LAYER_NAME_PARCELS) {
             		parcelLyrIndex = i;
             	}
+            	if (lyr.title === appConfig.LAYER_NAME_PARCELS_ALT) {
+            		parcelLyrIndexAlt = i;
+            	}
             });
  
             clickHandler = response.clickEventHandle;
@@ -412,7 +416,33 @@ function(
             		if (editFtr._layer._editable) {
             			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
             				if (result) {
-            					app.deleteFeature(editFtr, true);
+            					
+            					
+            					// If deleting grow polygon, need to also delete any grow site that is related, as long as the grow site isnt used for other Grows
+            					if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
+            						var GrowKey = editFtr.attributes.GrowKey;
+            						var query = new Query();
+									query.where = "GrowSiteKey = '" + GrowKey + "'";
+									//layers[growLyrIndex].layer.queryFeatures(query);
+									layers[growLyrIndex].layer.queryFeatures(query, function(featureset) {
+										console.log(featureset);
+										var resultCount = featureset.features.length;
+										if (resultCount === 1) {
+											// delete associated grow site and grow site parcel
+											layers[growSiteLyrIndex].layer.queryFeatures(query, function(ftrSite) {
+												console.log("delete site:", ftrSite);
+												app.deleteFeature(ftrSite.features[0], false);
+											});
+											layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(ftrSiteParcel) {
+												console.log("delete site parcel:", ftrSiteParcel);
+												app.deleteFeature(ftrSiteParcel.features[0], false);
+											});
+										}
+										app.deleteFeature(editFtr, true);
+									});
+            					} else {
+            						app.deleteFeature(editFtr, true);
+            					};
 
             					// If deleting grow polygon, need to also delete the point feature associated with it:
             					//   NOTE - this is commented out - the relationship class should take care of this.
@@ -481,6 +511,7 @@ function(
     	app.buildMeasure();
     	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.URL_GROW_POINTS, appConfig.GROW_POINTS_SCALE, null, function(callback) {
 			$.when(app.buildEditor(function(buildCallback) {
+				app.buildEditFields();
 			}));
 		}));
 		
@@ -771,6 +802,29 @@ function(
 
 		callback("app.buildEditor complete.");
 	}; 
+	
+	app.buildEditFields = function() {
+		// The AttributeInspector widget does not use the web map settings that define which fields are editable and which are not.
+		// We have to loop through each editable layer and set these, based on the settings in the web map.
+		$.each(layers, function(i) {
+			if (layers[i].layer._editable) {
+				$.each(appWebMap.WEBMAP_JSON.itemData.operationalLayers, function(i2) {
+					if (appWebMap.WEBMAP_JSON.itemData.operationalLayers[i2].title === layers[i].title) {
+						var editField = [], showField = [];
+						$.each(appWebMap.WEBMAP_JSON.itemData.operationalLayers[9].popupInfo.fieldInfos, function(i3) {
+							editField[appWebMap.WEBMAP_JSON.itemData.operationalLayers[9].popupInfo.fieldInfos[i3].fieldName] = appWebMap.WEBMAP_JSON.itemData.operationalLayers[9].popupInfo.fieldInfos[i3].isEditable;
+						});
+						$.each(layers[i].layer.fields, function(ii) {
+							var fieldName = layers[i].layer.fields[ii].name;
+							layers[i].layer.fields[ii].editable = editField[fieldName];
+						});
+					};
+				});
+				
+			}
+			
+		});
+	};
 
 	app.buildGraphicTools = function() {
 		// Graphics are used for editing - when adding new features, graphics are used while drawing, then the graphics are saved to the shape after user saves.
@@ -1342,6 +1396,39 @@ function(
 															// No existing Grow Site Parcel, get one from Parcel input layer
 															layers[parcelLyrIndex].layer.queryFeatures(queryParcel, function(baseParcel) {
 																if (baseParcel.features.length === 0) {
+
+																	// ADDED THIS TO USE STATE CIO PARCEL BOUNDARIES AS AN ALTERNATIVE WHEN AVAILABLE
+																	if (parcelLyrIndexAlt) {
+																		// query alternate Parcel data source (if available)
+																		layers[parcelLyrIndexAlt].layer.queryFeatures(queryParcel, function(baseParcel) {
+																			//console.log(baseParcel);
+																			if (baseParcel.features.length === 0) {
+																				bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
+																				//writeGrowFeature(null, null);
+																				
+																				$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, null, null, function(callback1) {
+																					//console.log(callback1);
+																					$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
+																						//console.log(callback2);
+																						esri.hide(loading);
+																					}));
+																				}));
+																			} else {
+																				$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, lastRegNum, regionId + "_" + lastRegNum, function(callback1) {
+																					//console.log(callback1);
+																					$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
+																						//console.log(callback2);
+																						esri.hide(loading);
+																					}));
+																				}));
+																				
+																				$.when(app.createNewSiteFeature(lastRegNum, regionId, baseParcel, "alternate", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
+																					console.log(callbackSite);
+																				}));
+																			}	
+																		});
+																	} else {
+																	
 																	bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
 																	//writeGrowFeature(null, null);
 																	
@@ -1352,6 +1439,8 @@ function(
 																			esri.hide(loading);
 																		}));
 																	}));
+																	
+																	}
 																	
 																} else {
 																	//writeGrowFeature(lastRegNum, regionId + "_" + lastRegNum);
@@ -1364,7 +1453,7 @@ function(
 																		}));
 																	}));
 																	
-																	$.when(app.createNewSiteFeature(lastRegNum, regionId, baseParcel, lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
+																	$.when(app.createNewSiteFeature(lastRegNum, regionId, baseParcel, "default", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
 																		console.log(callbackSite);
 																	}));
 																}
@@ -1478,8 +1567,9 @@ function(
 				GrowAcres: polyAcre,
 				GrowSiteID: attrGrowSiteID, // Note that we only add GrowSiteID and GrowSiteKey to polygon Grow features, not point features.
 				GrowSiteKey: attrGrowSiteKey,
-				GrowSqFt: polyAcre * 43560//,
-				//InterpDate: new Date()
+				GrowSqFt: polyAcre * 43560,
+				InterpMethod: "Field Observation",
+				InterpDate: dateToday
 			},
 			"geometry": {
 				rings: polygon.rings
@@ -1490,7 +1580,7 @@ function(
 			"attributes": {
 				//InterpAreaName: newFeatureName,
 				PreProcStatus: "Not PreProcessed",
-				InterpMethod: "Aerial Imagery",
+				InterpMethod: "AField Observation",
 				GrowType: growType,
 				//StatusInterpArea: "In Initial Review",
 				GrowYear: 2014, //new Date("1/1/2014"),
@@ -1498,8 +1588,8 @@ function(
 				SWRCBRegID: regionId,
 				GrowID: lastRegNum,
 				GrowAcres: polyAcre,
-				GrowSqFt: polyAcre * 43560//,
-				//InterpDate: new Date()
+				GrowSqFt: polyAcre * 43560,
+				InterpDate: dateToday
 			},
 			"geometry": {
 				x: center.x,
@@ -1535,23 +1625,37 @@ function(
 		}));	
 	};
 	
-	app.createNewSiteFeature = function(lastRegNum, regionId, baseParcel, attrGrowSiteID, attrGrowSiteKey, callback) {
+	app.createNewSiteFeature = function(lastRegNum, regionId, baseParcel, baseParcelSource, attrGrowSiteID, attrGrowSiteKey, callback) {
 		// Create object for writing new Site features
 
-		console.log(baseParcel);
 		var polygon = baseParcel.features[0].geometry; /// new Polygon(graphic.rings);
-		var center = new Point(baseParcel.features[0].geometry.getCentroid());
+		var center = new Point(polygon.getCentroid());
+
+		if (baseParcelSource === "default") {
+			var APN = baseParcel.features[0].attributes.APN;
+			var DateCoDataAcquired = baseParcel.features[0].attributes.DateCoDataAcquired;
+			var CountyName = baseParcel.features[0].attributes.CountyName;
+		} else {
+			var APN = baseParcel.features[0].attributes.PARNO;
+			var DateCoDataAcquired = null;
+			var CountyName = null;
+		}
+		
+		//console.log(baseParcel);
+		//var polygon = baseParcel.features[0].geometry; /// new Polygon(graphic.rings);
+		//var center = new Point(baseParcel.features[0].geometry.getCentroid());
 		//console.log(center);
 		var addFeature = {
 			"attributes": {
 				GrowSiteKey: attrGrowSiteKey,
 				SWRCBRegID: regionId,
 				GrowSiteID: attrGrowSiteID,
-				APN: baseParcel.features[0].attributes.APN,
-				DateCoDataAcquired: baseParcel.features[0].attributes.DateCoDataAcquired,
-				CountyName: baseParcel.features[0].attributes.CountyName //,
+				APN: APN,
+				DateCoDataAcquired: DateCoDataAcquired,
+				CountyName: CountyName,
+				LastUpdate: dateToday
 				//DateCoDataAcquired: baseParcel.features[0].attributes.DateCoDataAcquired,
-				//LastUpdate: new Date()
+				//
 			},
 			"geometry": {
 				rings: polygon.rings
@@ -1562,7 +1666,8 @@ function(
 			"attributes": {
 				GrowSiteKey: attrGrowSiteKey,
 				SWRCBRegID: regionId,
-				GrowSiteID: attrGrowSiteID//, 
+				GrowSiteID: attrGrowSiteID, 
+				LastUpDate: dateToday
 				//GrowSiteStatus: "",
 				//InspectionDate: "",
 				//Notes: "",
@@ -1571,7 +1676,7 @@ function(
 				//PermitStatus: "",
 				//PermitTier: "",
 				//PermitID: ""//,
-				//LastUpDate: new Date()
+				
 			},
 			"geometry": {
 				x: center.x,
@@ -1621,9 +1726,9 @@ function(
 				var addFeature = {
 					"attributes": {
 						SWRCBRegID: attrRegion,
-						DisturbedAreasAcres: attrAcreage//,
-						//InterpMethod: "Aerial Imagery"//,
-						//InterpDate: new Date()
+						DisturbedAreasAcres: attrAcreage,
+						InterpMethod: "Field Observation",
+						InterpDate: dateToday
 					},
 					"geometry": {
 						rings: polygon.rings
@@ -1651,8 +1756,8 @@ function(
 					"attributes": {
 						SWRCBRegID: attrRegion,
 						ReserviorAcres: attrAcreage,
-						InterpMethod: "Aerial Imagery"//,
-						//InterpDate: new Date()
+						InterpMethod: "Field Observation",
+						InterpDate: dateToday
 					},
 					"geometry": {
 						rings: polygon.rings
@@ -1675,9 +1780,9 @@ function(
 				$("#stopEdit").hide();
 				var addFeature = {
 					"attributes": {
-						SWRCBRegID: attrRegion//,
-						//InterpMethod: "Aerial Imagery",
-						//InterpDate: new Date()
+						SWRCBRegID: attrRegion,
+						InterpMethod: "Field Observation",
+						InterpDate: dateToday
 					},
 					"geometry": {
 						x: graphic.geometry.x,

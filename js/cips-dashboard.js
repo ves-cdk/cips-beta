@@ -327,7 +327,7 @@ function(
             // create results for Region-specific charts
             var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
             var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
-            var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0;
+            var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0, totalGrowPotential = 0, totalGrowSiteParcels = 0, totalGrowSites = 0;
             
             totalInterpAreas = sumRegion[regNum].NumInterpAreas;
             totalInterpWatersheds = sumRegion[regNum].NumHuc12InInterpAreas;
@@ -340,6 +340,10 @@ function(
             totalLevel1 = sumRegion[regNum].NumCultAreaScore1Grows;
             totalLevel2 = sumRegion[regNum].NumCultAreaScore2Grows;
             totalLevel3 = sumRegion[regNum].NumCultAreaScore3Grows;
+            totalGrowSiteParcels += sumRegion[regNum].NumGrowSiteParcels;
+            totalGrowSites += sumRegion[regNum].NumGrowSites;
+            
+            totalGrowPotential = totalNumGrows - totalGrowOutdoor - totalGrowGreenhouse;
             
             // set the values on the page
             dojo.byId("sumTitleR" + regNum).innerHTML = "Region <b>" + regNum + "</b> Summary";
@@ -348,6 +352,8 @@ function(
             dojo.byId("quickStatTotalAcreageR" + regNum).innerHTML = app.numberWithCommas(totalInterpAcreage);
             dojo.byId("quickStatGrowsR" + regNum).innerHTML = app.numberWithCommas(totalNumGrows);
             dojo.byId("quickStatGrowAcreageR" + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
+            dojo.byId('quickStatGrowAcreageR' + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
+            dojo.byId('quickStatGrowSiteParcelsR' + regNum).innerHTML = app.numberWithCommas(totalGrowSiteParcels);
         
             // build pie chart1
             var chart1Data = [{
@@ -360,6 +366,12 @@ function(
                 color : "#e1b474",
                 highlight : "#f8c884",
                 label : "Outdoor"
+            },
+            {
+                value: totalGrowPotential,
+                color: "#727272",
+                highlight: "#949494",
+                label: "Potential"
             }];
             dojo.byId("titleChart1R" + regNum).innerHTML = "Outdoor vs Greenhouse";
             var chart1 = document.getElementById("chart1R" + regNum).getContext("2d");
