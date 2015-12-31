@@ -13,11 +13,11 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.8826,
+        -125.3635,
         38.5933
       ],
       [
-        -118.8459,
+        -119.365,
         41.7078
       ]
     ]
@@ -59,52 +59,13 @@ appWebMap = {
           "minScale": 13889686,
           "maxScale": 432384
         },
-        "popupInfo": {
-          "title": "CIPS_BASE_SWRCB_Regions: {RBNAME}",
-          "fieldInfos": [
-            {
-              "fieldName": "OBJECTID",
-              "label": "OBJECTID",
-              "tooltip": "",
-              "visible": false,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "RB",
-              "label": "RB",
-              "tooltip": "",
-              "visible": true,
-              "format": {
-                "places": 0,
-                "digitSeparator": true
-              },
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "RBNAME",
-              "label": "RBNAME",
-              "tooltip": "",
-              "visible": true,
-              "stringFieldOption": "textbox"
-            },
-            {
-              "fieldName": "Shape",
-              "label": "Shape",
-              "tooltip": "",
-              "visible": false,
-              "stringFieldOption": "textbox"
-            }
-          ],
-          "description": null,
-          "showAttachments": true,
-          "mediaInfos": []
-        }
+        "disablePopup": true
       },
       {
         "id": "CIPS_Base_4449",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Base/MapServer/1",
-        "visibility": true,
+        "visibility": false,
         "opacity": 1,
         "mode": 1,
         "title": "Watershed Boundaries (HUC12)",
@@ -491,7 +452,7 @@ appWebMap = {
         "id": "CIPS_Operational_7838",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/6",
-        "visibility": true,
+        "visibility": false,
         "opacity": 1,
         "mode": 1,
         "title": "Prioritization Areas",
@@ -1230,7 +1191,7 @@ appWebMap = {
         "id": "CIPS_Operational_rev1_5949",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/9",
-        "visibility": false,
+        "visibility": true,
         "opacity": 1,
         "mode": 1,
         "title": "Grow Site Parcels",
@@ -1770,7 +1731,7 @@ appWebMap = {
               "label": "GrowSiteKey",
               "isEditable": false,
               "isEditableOnLayer": true,
-              "visible": false,
+              "visible": true,
               "stringFieldOption": "textbox"
             },
             {
@@ -2153,7 +2114,7 @@ appWebMap = {
         "id": "CIPS_Operational_rev1_4974",
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/8",
-        "visibility": false,
+        "visibility": true,
         "opacity": 1,
         "mode": 1,
         "title": "Grow Sites",
@@ -2719,6 +2680,7 @@ appWebMap = {
     }
   }
 }
+
 	// **** End section ---------------------------------------------------------------------------------------------------------- **** 
     // **** Copy  webmap2Json output into the section above ****
 };

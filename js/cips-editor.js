@@ -322,7 +322,7 @@ function(
         	//console.log("onSetFeatures");
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8"];
+        	var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -417,13 +417,11 @@ function(
             			bootbox.confirm("<b>Warning</b> you will permanently delete the selected feature from the " + editFtr._layer.name + " layer? <br/><br/>Click OK to proceed, or click Cancel and keep the feature.", function(result) {
             				if (result) {
             					
-            					
             					// If deleting grow polygon, need to also delete any grow site that is related, as long as the grow site isnt used for other Grows
             					if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
             						var GrowKey = editFtr.attributes.GrowKey;
             						var query = new Query();
 									query.where = "GrowSiteKey = '" + GrowKey + "'";
-									//layers[growLyrIndex].layer.queryFeatures(query);
 									layers[growLyrIndex].layer.queryFeatures(query, function(featureset) {
 										console.log(featureset);
 										var resultCount = featureset.features.length;
@@ -435,50 +433,70 @@ function(
 											});
 											layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(ftrSiteParcel) {
 												console.log("delete site parcel:", ftrSiteParcel);
-												app.deleteFeature(ftrSiteParcel.features[0], false);
+												$.each(ftrSiteParcel.features, function(i) {
+													app.deleteFeature(ftrSiteParcel.features[i], false);
+												});
 											});
 										}
 										app.deleteFeature(editFtr, true);
 									});
             					} else {
-            						app.deleteFeature(editFtr, true);
-            					};
-
-            					// If deleting grow polygon, need to also delete the point feature associated with it:
-            					//   NOTE - this is commented out - the relationship class should take care of this.
-            					/*if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_FOOTPRINTS) {
-            						var GrowKey = editFtr.attributes.GrowKey;
-            						// Query the point feature to get the objectId for deleting
-            						$.when(app.runQuery(appConfig.URL_EDIT_GROW_POINTS, "GrowKey='" + GrowKey + "'", function(callback) {
-            							// Now delete with an ajax call to the rest service
-										var url = appConfig.URL_EDIT_GROW_POINTS + "/deleteFeatures";
-										var params = "OBJECTID = " + callback.features[0].attributes.OBJECTID;
-										var dataString = {
-											f: "json",
-											where: params,
-											token: token
-										};
-									    $.ajax({
-									        url: url,
-									        type: "POST",
-									        dataType: "json",
-									        data: dataString,
-									        success: function (data) {
-									        	console.log("delete grow point successful");
-									        	
-									        },
-									        error: function (response) {
-									        	console.log("An error occurred trying to delete Grow Point feature");
-									        }
-									    });
-									    $.each(layers, function(layer) {
-											//console.log(layers[layer].layer.url);
-											if (layers[layer].layer.url === appConfig.URL_EDIT_GROW_POINTS) {
-												layers[layer].layer.refresh();
+            						
+	            					// If deleting grow site, need to also delete grow site parcel.
+	            					if (editFtr._layer._url.path === appConfig.URL_EDIT_GROW_SITES) {
+	            						// find any grows that are associated with this grow site
+	            						var GrowSiteKey = editFtr.attributes.GrowSiteKey;
+	            						var query = new Query();
+										query.where = "GrowSiteKey = '" + GrowSiteKey + "'";
+										layers[growLyrIndex].layer.queryFeatures(query, function(featureset) {
+											console.log(featureset);
+											var resultCount = featureset.features.length;
+											if (resultCount > 0) {
+												bootbox.confirm(resultCount + " Grow(s) is associated with this Grow Site. Deleting the Grow Site will remove the association. Click OK to continue with delete.", function(result) {
+						            				if (result) {
+						            					console.log(featureset);
+						            					layers[growSiteLyrIndex].layer.queryFeatures(query, function(ftrSite) {
+															console.log("delete site:", ftrSite);
+															app.deleteFeature(ftrSite.features[0], false);
+														});
+														layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(ftrSiteParcel) {
+															console.log("delete site parcel:", ftrSiteParcel);
+															$.each(ftrSiteParcel.features, function(i) {
+																app.deleteFeature(ftrSiteParcel.features[i], false);
+															});
+														});
+														$.each(featureset.features, function(ii) {
+															//featureset.features[ii].attributes.GrowSiteKey = null;
+															//featureset.features[ii].attributes.GrowSiteID = null;
+															//layers[growLyrIndex].layer.applyEdits(null, growFtr, null);
+															$.when(app.updateAttributes(appConfig.URL_EDIT_GROW_FOOTPRINTS, featureset.features[ii].attributes.OBJECTID, "GrowSiteKey", null, null, function(updCallback1) {
+																console.log("updated:", updCallback1);	
+															}));
+														});
+														
+						            				} else {
+						            					popup.clearFeatures();
+						            					esri.hide(loading);
+						            				}
+						            			});
+											} else {
+												layers[growSiteLyrIndex].layer.queryFeatures(query, function(ftrSite) {
+													console.log("delete site:", ftrSite);
+													app.deleteFeature(ftrSite.features[0], false);
+												});
+												layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(ftrSiteParcel) {
+													console.log("delete site parcel:", ftrSiteParcel);
+													$.each(ftrSiteParcel.features, function(i) {
+														app.deleteFeature(ftrSiteParcel.features[i], false);
+													});
+												});
 											}
 										});
-            						}));
-            					}*/
+		            				} else {
+		            					// feature to delete is neither grows or grow sites, OK to delete the feature
+		            					app.deleteFeature(editFtr, true);
+	            					};
+	            				}
             					
             				} else {
             					popup.clearFeatures();
@@ -491,6 +509,12 @@ function(
             			esri.hide(loading);
             		}
         		break;
+        		case "optionsRadios9": 
+        			$(".esriPopupWrapper").css("display","none");
+            		var growFtr = popup.getSelectedFeature();
+            		app.createGrowSite(growFtr);
+        		break;
+        		
         		default:
         		// Default popup behavior
         			$(".esriPopupWrapper").css("display","block");
@@ -1138,6 +1162,7 @@ function(
 		$("#editRadios6").hide();
 		$("#editRadios7").hide();
 		$("#editRadios8").hide();
+		$("#editRadios9").hide();
 		$("#editLabelEdit").hide();
 		$("#editLabelDelete").hide();
 		$("#stopEdit").show();
@@ -1185,6 +1210,25 @@ function(
 		$("#editButtons").show();
 	};
 	
+	app.startGrowSite = function() {
+		// adding a new grow site from the "Add a New" menu item.
+		$("#editRadios1").hide();
+		$("#editRadios2").hide();
+		$("#editRadios3").hide();
+		$("#editRadios4").hide();
+		$("#editRadios5").hide();
+		$("#editRadios6").hide();
+		$("#editRadios7").hide();
+		$("#editRadios8").hide();
+		$("#editLabelEdit").hide();
+		$("#editLabelDelete").hide();
+		$("#stopEdit").show();
+		$("#editButtons").show();
+		app.isolatePopup("Grow Footprints");
+		$("#editInstructions").html("The Grow Site must be associated with an existing Grow Footprint.<br/><br/>Click on the Grow Footprint that the new Grow Site will be associated with.");
+		// on-click behavior handled under app.buildPopup function
+	};
+	
 	app.startDelete = function() {
 		// editing - initial steps for user to delete a feature
 		if (!(clickHandler)) {
@@ -1197,13 +1241,14 @@ function(
 		$("#editRadios5").hide();
 		$("#editRadios6").hide();
 		$("#editRadios7").hide();
+		$("#editRadios9").hide();
 		$("#editLabelEdit").hide();
 		$("#editLabelAdd").hide();
 		$("#stopEdit").show();
 		$("#editInstructions").html("Click on the feature you want to delete.");
 		$("#editButtons").show();
 		$("#attributesDiv").hide();
-		
+		// Delete behavior is defined in app.buildPopup
 	};
 	
 	app.deleteFeature = function(ftr, showMsg) {
@@ -1243,6 +1288,7 @@ function(
 		// editing - initial steps to edit a feature's attributes or geometry
 		switch(option) {
 			case "attribute":
+				selectLayer();
 				if (!(clickHandler)) {
 					clickHandler = dojo.connect(map, "onClick", clickListener);
 				};
@@ -1253,6 +1299,7 @@ function(
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
 				$("#editRadios8").hide();
+				$("#editRadios9").hide();
 				$("#stopEdit").show();
 				$("#editLabelAdd").hide();
 				$("#editLabelDelete").hide();
@@ -1260,6 +1307,7 @@ function(
 				$("#editButtons").show();
 			break;
 			case "shape":
+				//selectLayer();
 				dojo.disconnect(clickHandler);
 				clickHandler = null;
 				$("#attributesDiv").hide();
@@ -1270,6 +1318,7 @@ function(
 				$("#editRadios5").hide();
 				$("#editRadios7").hide();
 				$("#editRadios8").hide();
+				$("#editRadios9").hide();
 				$("#editLabelAdd").hide();
 				$("#editLabelDelete").hide();
 				$("#saveEdits").show();
@@ -1303,6 +1352,7 @@ function(
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
 				$("#editRadios8").hide();
+				$("#editRadios9").hide();
 				$("#editLabelAdd").hide();
 				$("#editLabelDelete").hide();
 				$("#saveEdits").show();
@@ -1310,8 +1360,31 @@ function(
 				$("#editInstructions").html("Single click on the Grow Site (point feature) you want to merge other sites into.<br/>"
 					+ "Additional instructions will appear after selection.");
 				$("#editButtons").show();
-				
+			break;
 		}
+		
+		function selectLayer() {
+			// create a popup list of editable layers to select from
+			var selLayers = "";
+			$.each(layerInfo, function(i) {
+				selLayers += "<option value='" + layerInfo[i].featureLayer.name + "'>" + layerInfo[i].featureLayer.name + "</option>";
+			});
+			bootbox.dialog({
+				title: "Specify the layer to be edited.",
+				message: '<select id="selLayerList" class="form-control">' +
+					selLayers +
+					'</select>',
+				buttons: {
+					success: {
+						label: "Proceed",
+						callback: function() {
+							console.log($("#selLayerList").val());
+							app.isolatePopup($("#selLayerList").val());
+						}
+					}
+				}
+			});
+		};
 	};
 	
 	app.editFeature = function(ftr, type) {
@@ -1422,7 +1495,7 @@ function(
 																					}));
 																				}));
 																				
-																				$.when(app.createNewSiteFeature(lastRegNum, regionId, baseParcel, "alternate", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
+																				$.when(app.createNewSiteFeature(regionId, baseParcel, "alternate", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
 																					console.log(callbackSite);
 																				}));
 																			}	
@@ -1453,7 +1526,7 @@ function(
 																		}));
 																	}));
 																	
-																	$.when(app.createNewSiteFeature(lastRegNum, regionId, baseParcel, "default", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
+																	$.when(app.createNewSiteFeature(regionId, baseParcel, "default", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
 																		console.log(callbackSite);
 																	}));
 																}
@@ -1520,6 +1593,84 @@ function(
 		});
 		
 		
+	};
+	
+	app.createGrowSite = function(growFtr) {
+		console.log("createGrowSite", growFtr);
+		esri.show(loading);
+		
+		var growKey = growFtr.attributes.GrowKey;
+		var regionId = growFtr.attributes.SWRCBRegID;
+		var attrGrowSiteID = growFtr.attributes.GrowID;
+		var attrGrowSiteKey = growFtr.attributes.GrowKey;		
+		
+		if (growFtr.attributes.GrowSiteKey) {
+			bootbox.alert("This Grow Footprint is already associated with a Grow Site. You will need to delete the associated Grow Site before being able to create a new one.");
+		} else {
+			var center = growFtr.geometry.getCentroid();
+			var queryParcel = new Query();
+			queryParcel.geometry = center;
+			layers[growSiteParcLyrIndex].layer.queryFeatures(queryParcel, function(siteParcel) {
+				if (siteParcel.features.length === 0) {
+					// No existing Grow Site Parcel, get one from Parcel input layer
+					layers[parcelLyrIndex].layer.queryFeatures(queryParcel, function(baseParcel) {
+						if (baseParcel.features.length === 0) {
+	
+							// ADDED THIS TO USE STATE CIO PARCEL BOUNDARIES AS AN ALTERNATIVE WHEN AVAILABLE
+							if (parcelLyrIndexAlt) {
+								// query alternate Parcel data source (if available)
+								layers[parcelLyrIndexAlt].layer.queryFeatures(queryParcel, function(baseParcelAlt) {
+									if (baseParcelAlt.features.length === 0) {
+										bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
+									} else {
+										$.when(app.createNewSiteFeature(regionId, baseParcelAlt, "alternate", attrGrowSiteID, attrGrowSiteKey, function(callbackSite) {
+											var queryIntGrows = new Query();
+											queryIntGrows.geometry = baseParcelAlt.features[0].geometry;
+											console.log(baseParcelAlt.features[0].geometry);
+											layers[growLyrIndex].layer.queryFeatures(queryIntGrows, function(intGrows) {
+												console.log(intGrows);
+												$.each(intGrows.features, function(i) {
+													var updObjectId = intGrows.features[i].attributes.OBJECTID;
+													var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + attrGrowSiteKey + "', 'GrowSiteID': " + attrGrowSiteID + "}}]";
+													$.when(app.updateAttributes(appConfig.URL_GROW_POLYS, updObjectId, null, null, updFeature, function(updCallback) {
+														//console.log("updated:", updCallback);	
+													}));
+												});
+											});
+											app.stopEdit();
+										}));
+									}	
+								});
+							} else {
+								bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>A Grow Site cannot be created.");
+								app.stopEdit();
+							}
+							
+						} else {
+							$.when(app.createNewSiteFeature(regionId, baseParcel, "default", attrGrowSiteID, attrGrowSiteKey, function(callbackSite) {
+								var queryIntGrows = new Query();
+								queryIntGrows.geometry = baseParcel.features[0].geometry;
+								console.log(baseParcel.features[0].geometry);
+								layers[growLyrIndex].layer.queryFeatures(queryIntGrows, function(intGrows) {
+									console.log(intGrows);
+									$.each(intGrows.features, function(i) {
+										var updObjectId = intGrows.features[i].attributes.OBJECTID;
+										var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + attrGrowSiteKey + "', 'GrowSiteID': " + attrGrowSiteID + "}}]";
+										$.when(app.updateAttributes(appConfig.URL_GROW_POLYS, updObjectId, null, null, updFeature, function(updCallback) {
+											//console.log("updated:", updCallback);	
+										}));
+									});
+								});
+								app.stopEdit();
+							}));
+						}
+					});
+				} else {
+					bootbox.alert("A Grow Site and Grow Site Parcel already exist.");
+					app.stopEdit();
+				}
+			});
+		}
 	};
 	
 	app.calcAcreage = function(polygon) {
@@ -1625,7 +1776,7 @@ function(
 		}));	
 	};
 	
-	app.createNewSiteFeature = function(lastRegNum, regionId, baseParcel, baseParcelSource, attrGrowSiteID, attrGrowSiteKey, callback) {
+	app.createNewSiteFeature = function(regionId, baseParcel, baseParcelSource, attrGrowSiteID, attrGrowSiteKey, callback) {
 		// Create object for writing new Site features
 
 		var polygon = baseParcel.features[0].geometry; /// new Polygon(graphic.rings);
@@ -1708,7 +1859,7 @@ function(
 						layers[layer].layer.selectFeatures(query);
 					}
 				});*/
-				callback("createNewPolyFeature complete");
+				callback(saveCallback);
 			}));
 			
 		}));	
@@ -1840,10 +1991,10 @@ function(
 	
 	app.stopEdit = function () {
 		
-		// Used for cancelling an edit, and for resetting the edit menu back to default state
+		// Used for saving and cancelling an edit, and for resetting the edit menu back to default state
 		
 		// If editing shape, discard the edits because the user clicked the cancel button
-		if ($("#optionsRadios:checked").prop("checked")) {
+		if ($("#optionsRadios6:checked").prop("checked")) {
 			if (shapeEditStatus) {
 				//console.log("shape edits discarded");
 				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
@@ -1874,6 +2025,7 @@ function(
 		$("#editRadios6").show();
 		$("#editRadios7").show();
 		$("#editRadios8").show();
+		$("#editRadios9").show();
 		$("#editLabelAdd").show();
 		$("#editLabelEdit").show();
 		$("#editLabelDelete").show();
@@ -1889,6 +2041,7 @@ function(
 		$("#optionsRadios6:checked").prop("checked",false);
 		$("#optionsRadios7:checked").prop("checked",false);
 		$("#optionsRadios8:checked").prop("checked",false);
+		$("#optionsRadios9:checked").prop("checked",false);
     	$("#editInstructions").html("Select an editing option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);
@@ -1922,13 +2075,18 @@ function(
 								if (callback1) {
 									console.log(callback1);
 									$.each(callback1.features, function(i1) {
+										
 										var updObjectId = callback1.features[i1].attributes.OBJECTID;
-										console.log("Grow Footprint to be updated: ", updObjectId);
+										//console.log("Grow Footprint to be updated: ", updObjectId);
 										var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + mergeSites[0].attributes.GrowSiteKey + "', 'GrowSiteID': " + mergeSites[0].attributes.GrowSiteID + "}}]";
-										console.log("Grow Footprint update params:", updFeature);	
+										//console.log("Grow Footprint update params:", updFeature);	
 										$.when(app.updateAttributes(appConfig.URL_EDIT_GROW_FOOTPRINTS, updObjectId, null, null, updFeature, function(updCallback1) {
 											console.log("updated:", updCallback1);	
 										}));
+										//callback1.features[i1].attributes.GrowSiteKey = mergeSites[0].attributes.GrowSiteKey;
+										//callback1.features[i1].attributes.GrowSiteID = mergeSites[0].attributes.GrowSiteID;
+										//layers[growLyrIndex].layer.applyEdits(null, callback1.features[i1], null);
+										
 									});
 								}
 								
@@ -1938,12 +2096,14 @@ function(
 									console.log(callback2);
 									$.each(callback2.features, function(i2) {
 										var updObjectId = callback2.features[i2].attributes.OBJECTID;
-										console.log("Grow Site Parcel to be updated: ", updObjectId);
+										//console.log("Grow Site Parcel to be updated: ", updObjectId);
 										var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + mergeSites[0].attributes.GrowSiteKey + "', 'GrowSiteID': " + mergeSites[0].attributes.GrowSiteID + "}}]";
-										console.log("Grow Site Parcel update params:", updFeature);	
+										//console.log("Grow Site Parcel update params:", updFeature);	
 										$.when(app.updateAttributes(appConfig.URL_EDIT_GROW_SITE_PARCELS, updObjectId, null, null, updFeature, function(updCallback2) {
 											console.log("updated:", updCallback2);	
 										}));
+										//callback2.features[i2].attributes.GrowSiteKey = mergeSites[0].attributes.GrowSiteKey;
+										//layers[growSiteParcLyrIndex].layer.applyEdits(null, callback2.features[i2], null);
 									});
 								}
 								
