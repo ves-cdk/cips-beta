@@ -216,7 +216,7 @@ function(
         // charting uses the open source Chart.js library: http://www.chartjs.org/
         
         // Get chart input data from the Region and Interpretation Summary tables
-        var queryParams = "0=0";
+        var queryParams = "DateClosed is null";
         
         var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
         //var regInterpAreas = "", regInterpWatersheds = "", regInterpAcreage = "";

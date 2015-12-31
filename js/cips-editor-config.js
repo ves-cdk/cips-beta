@@ -15,6 +15,7 @@ appConfig = {
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
     PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
     INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
+    GEOMETRY_SERVICE: "https://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
    
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.
@@ -38,6 +39,7 @@ appConfig = {
     URL_EDIT_GROW_FOOTPRINTS: urlRoot + "CIPS_Operational/FeatureServer/2",
     URL_EDIT_GROW_SITES: urlRoot + "CIPS_Operational/FeatureServer/8",
     URL_EDIT_GROW_SITE_PARCELS: urlRoot + "CIPS_Operational/FeatureServer/9",
+    URL_EDIT_PARCELS: urlRoot + "CIPS_Base/MapServer/4",
     
     // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
     //LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
