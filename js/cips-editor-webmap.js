@@ -13,12 +13,12 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.3635,
-        38.5933
+        -125.1246,
+        38.5246
       ],
       [
-        -119.365,
-        41.7078
+        -119.6039,
+        41.7734
       ]
     ]
   },
@@ -1312,8 +1312,7 @@ appWebMap = {
           "description": null,
           "showAttachments": true,
           "mediaInfos": []
-        },
-        "capabilities": "Query"
+        }
       },
       {
         "id": "CIPS_Operational_2317",

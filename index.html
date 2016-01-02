@@ -392,7 +392,7 @@
 							<!-- Search menu -->
 							<div id="menu1" class="tab-pane ribbon-bar-tab">
 								<div class="menuLevel3">
-									An address or place name
+									An address, place name, or Long/Lat (ex: -122.45, 40.25)
 									<div id="searchBasic"></div>
 								</div>
 								<div class="menuLevel3">
@@ -451,6 +451,11 @@
 										</div>
 										<div id="menu2collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu2panel3">
 											<div class="panel-body">
+												<div id="allLayerToggle">
+													<button id="toggle-layers" onclick="app.toggleAllLayers(false);" class="btn btn-block" title="Turn off all layers on the map.">
+														Turn off all map layers
+													</button><br/>
+												</div>
 												<div id="mapTocDiv"></div>
 											</div>
 										</div>
@@ -466,11 +471,27 @@
 
 							<div id="menu4" class="tab-pane ribbon-bar-tab">
 								<div class="panel-group" id="accordion4" role="tablist" aria-multiselectable="true">
+									<!-- Show Grow Site features -->
+									<div class="panel panel-default">
+										<div class="panel-heading" role="tab" id="menu4panel3">
+											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion4" href="#menu4collapse3" aria-expanded="false" aria-controls="collapseThree"> View/Summarize Grow Site</a></h4>
+										</div>
+										<div id="menu4collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu4panel3">
+											<div class="panel-body">
+												<label class="checkbox-inline">
+													<input id="sumSite-toggle" type="checkbox" data-toggle="toggle">
+													Grow Site Summary </label>
+												<div class="menuLevel3" id="sumSiteText" style="display: none;">
+													Click on a Grow Site to display summary.
+												</div>
+											</div>
+										</div>
+									</div>
 									<div class="panel panel-default">
 										<div class="panel-heading" role="tab" id="menu4panel1">
 											<h4 class="panel-title"><a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion4" href="#menu4collapse1" aria-expanded="false" aria-controls="collapseOne"> Watershed Stats</a></h4>
 										</div>
-										<div id="menu4collapse1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu4panel1">
+										<div id="menu4collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu4panel1">
 											<div class="panel-body">
 												<label class="checkbox-inline">
 													<input id="sumWshd-toggle" type="checkbox" data-toggle="toggle">

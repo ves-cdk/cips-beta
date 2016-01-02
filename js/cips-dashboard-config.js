@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Dashboard",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">DASHBOARD</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Dashboard</br></br>Version: Beta 1.5",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Dashboard</br></br>Version: Beta 1.6",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     PROXY_PAGE: "http://localhost/apps/cips-proxy-1-1-0/DotNet/proxy.ashx",
@@ -56,6 +56,8 @@ appConfig = {
     LAYER_NAME_GROW_LOCATIONS: "Grow Locations",
     LAYER_NAME_MAIN_HEATMAPS: "Grow Site Heat Maps",
     LAYER_NAME_PRIORITIZ_HEATMAPS: "Prioritization Model Heat Map",
+    LAYER_NAME_SITES: "Grow Sites",
+    LAYER_NAME_SITES_PARCELS: "Grow Site Parcels",
 
 	BASEMAPS: {
 		// Add as many basemaps as desired below using the same structure.

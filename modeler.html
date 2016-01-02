@@ -109,7 +109,7 @@
 							<!-- Search menu -->
 							<div id="menu1" class="tab-pane ribbon-bar-tab">
 								<div class="menuLevel3">
-									An address or place name
+									An address, place name, or Long/Lat (ex: -122.45, 40.25)
 									<div id="searchBasic"></div>
 								</div>
 								<div class="menuLevel3">
@@ -168,6 +168,11 @@
 										</div>
 										<div id="menu2collapse3" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="menu2panel3">
 											<div class="panel-body">
+												<div id="allLayerToggle">
+													<button id="toggle-layers" onclick="app.toggleAllLayers(false);" class="btn btn-block" title="Turn off all layers on the map.">
+														Turn off all map layers
+													</button><br/>
+												</div>
 												<div id="mapTocDiv"></div>
 											</div>
 										</div>

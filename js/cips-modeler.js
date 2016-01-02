@@ -13,6 +13,7 @@ var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrInd
 var modelFactors, paramFactors;  // modelFactors are the factors with _ separators, paramFactors hav spaces
 var priorAreaRecs; // stored records for Priortization Areas, used for loading models
 var modelNewOrEdit; // used for messaging when a Prioritization model is created
+var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8"];
 var lastModelNum, newModelNum, modelNumObjectId, regionNum;
 var loadedModelResults; // records for a loaded model, used for summary display
 var modelHeatMapLayer, imageServiceLayer; // image layer for prioritization model heat map
@@ -474,7 +475,7 @@ function(
         on(popup, "SetFeatures", function() {
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
+        	//var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -983,6 +984,13 @@ function(
 	
 	// -- Section 5: Map Functionality -------------------------------------------------------------
 
+	app.toggleAllLayers = function(option) {
+    	// turn all layers on or off by passing true or false
+    	$.each(layers, function(i) {
+    		layers[i].layer.setVisibility(option); 
+    	});
+    };
+	
 	app.syncMaps = function(mapObj) {
 		// When map changes, record the map extent in order to keep all maps synconized
 		var mapExtent = mapObj.extent;
@@ -1129,6 +1137,10 @@ function(
 	app.initModelMenu = function(option) {
 		// For Model Tools menu items - sets behavior for each radio button option
 		var selOption = option.id;
+		
+		$.each(editRadios, function(i) {
+    		$("#editRadios" + (i+1)).hide();
+    	});
 
 		switch(selOption) {
 			case "optionsRadios1":
@@ -1143,13 +1155,15 @@ function(
 					} else {
 						//console.log(result);
 						newFeatureName = result;
-						$("#editRadios2").hide();
+				    	$("#editRadios1").show();
+				    	
+						/*$("#editRadios2").hide();
 						$("#editRadios3").hide();
 						$("#editRadios4").hide();
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
-						$("#editRadios8").hide();
+						$("#editRadios8").hide();*/
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -1179,13 +1193,14 @@ function(
 						//console.log(result);
 						newFeatureName = result;
 						//map.graphics.clear();
-						$("#editRadios1").hide();
+						$("#editRadios2").show();
+						/*$("#editRadios1").hide();
 						$("#editRadios3").hide();
 						$("#editRadios4").hide();
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
-						$("#editRadios8").hide();
+						$("#editRadios8").hide();*/
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -1212,13 +1227,14 @@ function(
 						app.stopEdit();
 					} else {
 						newFeatureName = result;
-						$("#editRadios1").hide();
+						$("#editRadios3").show();
+						/*$("#editRadios1").hide();
 						$("#editRadios2").hide();
 						$("#editRadios4").hide();
 						$("#editRadios5").hide();
 						$("#editRadios6").hide();
 						$("#editRadios7").hide();
-						$("#editRadios8").hide();
+						$("#editRadios8").hide();*/
 						$("#editLabelAddModel").hide();
 						$("#editLabelDelete").hide();
 						$("#editButtons").show();
@@ -1242,13 +1258,14 @@ function(
 			case "optionsRadios4":
 				// create new prioritization area model
 				app.resetLoadModel();
-				$("#editRadios1").hide();
+				$("#editRadios4").show();
+				/*$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
-				$("#editRadios8").hide();
+				$("#editRadios8").hide();*/
 				$("#editLabelAddArea").hide();
 				$("#editLabelDelete").hide();
 				$("#editButtons").show();
@@ -1259,13 +1276,14 @@ function(
 				// edit prioritization area model
 				esri.show(loading);
 				app.resetLoadModel();
-				$("#editRadios1").hide();
+				$("#editRadios5").show();
+				/*$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios6").hide();
 				$("#editRadios7").hide();
-				$("#editRadios8").hide();
+				$("#editRadios8").hide();*/
 				$("#editLabelAddArea").hide();
 				$("#editLabelDelete").hide();
 				$("#editButtons").show();
@@ -1288,13 +1306,14 @@ function(
 			case "optionsRadios6":
 				// delete prioritization area
 				app.isolatePopup("Prioritization Areas");
-				$("#editRadios1").hide();
+				$("#editRadios6").show();
+				/*$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios7").hide();
-				$("#editRadios8").hide();
+				$("#editRadios8").hide();*/
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
@@ -1304,13 +1323,14 @@ function(
 			case "optionsRadios7":
 				// delete interpretation area
 				app.isolatePopup("Interpretation Areas");
-				$("#editRadios1").hide();
+				$("#editRadios7").show();
+				/*$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
-				$("#editRadios8").hide();
+				$("#editRadios8").hide();*/
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
@@ -1318,13 +1338,14 @@ function(
 			break;
 			case "optionsRadios8":
 				// delete model
-				$("#editRadios1").hide();
+				$("#editRadios8").show();
+				/*$("#editRadios1").hide();
 				$("#editRadios2").hide();
 				$("#editRadios3").hide();
 				$("#editRadios4").hide();
 				$("#editRadios5").hide();
 				$("#editRadios6").hide();
-				$("#editRadios7").hide();
+				$("#editRadios7").hide();*/
 				$("#editLabelAddArea").hide();
 				$("#editLabelAddModel").hide();
 				$("#editButtons").show();
@@ -2198,25 +2219,31 @@ function(
 		// Used for cancelling an edit, and for resetting the edit menu back to default state
 		app.resetPopup();
 		newFeatureName = null;
-		$("#editRadios1").show();
+		
+		$.each(editRadios, function(i) {
+    		$("#editRadios" + (i+1)).show();
+    		$("#optionsRadios" + (i+1) + ":checked").prop("checked", false);
+    	});
+    	
+		/*$("#editRadios1").show();
 		$("#editRadios2").show();
 		$("#editRadios3").show();
 		$("#editRadios4").show();
 		$("#editRadios5").show();
 		$("#editRadios6").show();
 		$("#editRadios7").show();
-		$("#editRadios8").show();
+		$("#editRadios8").show();*/
 		$("#editLabelAddArea").show();
 		$("#editLabelAddModel").show();
 		$("#editLabelDelete").show();
-		$("#optionsRadios1:checked").prop("checked",false);
+		/*$("#optionsRadios1:checked").prop("checked",false);
 		$("#optionsRadios2:checked").prop("checked",false);
 		$("#optionsRadios3:checked").prop("checked",false);
 		$("#optionsRadios4:checked").prop("checked",false);
 		$("#optionsRadios5:checked").prop("checked",false);
 		$("#optionsRadios6:checked").prop("checked",false);
 		$("#optionsRadios7:checked").prop("checked",false);
-		$("#optionsRadios8:checked").prop("checked",false);
+		$("#optionsRadios8:checked").prop("checked",false);*/
 		$("#editInstructions").html("Select an option.");
     	if (!(clickHandler)) {
 			clickHandler = dojo.connect(map, "onClick", clickListener);

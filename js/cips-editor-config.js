@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Editor",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.5",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.6",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",

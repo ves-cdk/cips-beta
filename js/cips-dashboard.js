@@ -10,7 +10,8 @@ var statsLoaded = [null,true,false,false,false,false,false,false,false,false,fal
 var sumDataRegion, sumDataInterp; // used for query results for summary statistics 
 var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing summary stats
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
-var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, heatmapLyrIndex; // used for getting onClick results from specific layers
+var wshdLyrIndex, interpLyrIndex, interpWshdLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, heatmapLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex; // used for getting onClick results from specific layers
+var editRadios = ["optionsRadios10", "optionsRadios11"];
 var myFeatureLayer;
 var loadedModelResults; // records for a loaded model, used for summary display
 var modelHeatMapLayer, imageServiceLayer; // image layer for prioritization model heat map
@@ -33,6 +34,7 @@ require([
     "esri/symbols/PictureMarkerSymbol", 
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
+    "esri/symbols/CartographicLineSymbol",
     "esri/geometry/webMercatorUtils",
     "esri/geometry/Extent",
     "esri/geometry/Point", 
@@ -87,6 +89,7 @@ function(
     PictureMarkerSymbol,
     SimpleLineSymbol,
     SimpleFillSymbol,
+    CartographicLineSymbol,
 	webMercatorUtils, 
 	Extent,  
 	Point,
@@ -564,6 +567,12 @@ function(
             	if (lyr.title === appConfig.LAYER_NAME_MAIN_HEATMAPS) {
             		heatmapLyrIndex = i;
             	}
+            	if (lyr.title === appConfig.LAYER_NAME_SITES) {
+            		growSiteLyrIndex = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_SITES_PARCELS) {
+            		growSiteParcLyrIndex = i;
+            	}
             });
  
             clickHandler = response.clickEventHandle;
@@ -924,12 +933,11 @@ function(
 	    // Customize popup behavior when editing features
         var popup = map.infoWindow;
         
-        
         on(popup, "SetFeatures", function() {
-        	console.log(popup);
+        	//console.log(popup);
         	//esri.show(loading);
         	// loop through edit options to control popup behavior
-        	var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
+        	//var editRadios = ["optionsRadios0", "optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
         	var selectedRadio;
         	$.each(editRadios, function(i) {
         		if ($("#" + editRadios[i] + ":checked").prop("checked")) {
@@ -994,9 +1002,66 @@ function(
             		}
         		break;
         		default:
-        		// Default popup behavior
-        			console.log("default");
-        			$(".esriPopupWrapper").css("display","block");
+        			// Check to see if Grow Site summary tool is active
+        			if ($("#sumSite-toggle").prop('checked') === true) {
+        				$("#sumSiteText").html("Generating Summary - please wait.");
+        				map.graphics.clear();
+        				$(".esriPopupWrapper").css("display","none");
+        				
+        				var sitePointSymbol = new SimpleMarkerSymbol();
+						sitePointSymbol.outline.setWidth(2);
+						var siteLineSymbol = new CartographicLineSymbol();
+						sitePointSymbol.outline.setColor(new Color([0,225,255,1]));
+						siteLineSymbol.setColor(new Color([0,225,255,1]));
+						
+        				var growSite = popup.getSelectedFeature();
+        				
+        				var siteGraphic = new Graphic(growSite.geometry, sitePointSymbol);
+            			map.graphics.add(siteGraphic);
+        				
+        				var GrowSiteKey = growSite.attributes.GrowSiteKey;
+						var query = new Query();
+						query.where = "GrowSiteKey = '" + GrowSiteKey + "'";
+						var sumText = "<b>Summary for Grow Site: " + GrowSiteKey + "</b><br/><br/>";
+						//console.log(GrowSiteKey);
+						layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(siteParcFeatures) {
+							var resultCount = siteParcFeatures.features.length;
+							var sumParcelText = "Grow Site Parcels:<br/>";
+							if (resultCount > 0) {
+								console.log("Site Parcels", siteParcFeatures);
+								$.each(siteParcFeatures.features, function(i) {
+									sumParcelText += "&nbsp;&nbsp;APN: " + siteParcFeatures.features[i].attributes.APN + "<br/>";
+									var siteParcelGraphic = new Graphic(siteParcFeatures.features[i].geometry, siteLineSymbol);
+									map.graphics.add(siteParcelGraphic);
+								});
+							} else {
+								sumParcelText += "&nbsp;&nbsp;No Grow Site Parcels associated with Grow Site.";
+							}
+						
+							layers[growLyrIndex].layer.queryFeatures(query, function(growFeatures) {
+								var sumGrowText = "Grows:<br/>";
+								var resultCount = growFeatures.features.length;
+								if (resultCount > 0) {
+									$.each(growFeatures.features, function(i) {
+										sumGrowText += "&nbsp;&nbsp;Grow: " + growFeatures.features[i].attributes.GrowID + ", Acres: " + growFeatures.features[i].attributes.GrowAcres + "<br/>";
+										var siteGrowGraphic = new Graphic(growFeatures.features[i].geometry, siteLineSymbol);
+										map.graphics.add(siteGrowGraphic);
+									});
+								} else {
+									sumGrowText += "&nbsp;&nbsp;No Grows associated with Grow Site.";
+								}
+								
+								popup.clearFeatures();
+								$("#sumSiteText").html(sumText + sumParcelText + sumGrowText);
+								
+							});
+						});
+						
+        				
+        			} else {
+        				// Default popup
+        				$(".esriPopupWrapper").css("display","block");
+        			}
         		break;
         	}
         });
@@ -1299,6 +1364,13 @@ function(
 	};
         
     // -- Section 6: Map Functionality -------------------------------------------------------------
+    
+    app.toggleAllLayers = function(option) {
+    	// turn all layers on or off by passing true or false
+    	$.each(layers, function(i) {
+    		layers[i].layer.setVisibility(option); 
+    	});
+    };
 	
     app.runQuery = function(layerUrl, queryWhere, geomTrueFalse, callback) {
 		// Query task
@@ -1346,6 +1418,9 @@ function(
 		map.graphics.clear();
 		tb.on("draw-end", app.addElevGraphic);
 		tb.activate(toolName);
+		if ($("#sumSite-toggle").prop('checked') === true) {
+			$("#sumSite-toggle").bootstrapToggle("off");
+		}
 		//map.disableMapNavigation();
 	};
 
@@ -1469,6 +1544,9 @@ function(
 		// Generate a summary of a watershed after map-click
 		switch(option) {
 			case true:
+				if ($("#sumSite-toggle").prop('checked') === true) {
+					$("#sumSite-toggle").bootstrapToggle("off");
+				}
 				if (epWidget) {
 					app.disableElevTool();
 					$("#elev-toggle").bootstrapToggle("off");
@@ -1544,6 +1622,37 @@ function(
 				$("#sumWshdText").html("Click on a watershed boundary to display summary.");
 			break;
 		}
+	};
+	
+	app.summarizeSite = function(option) {
+		// Summarize a Grow Site
+
+		if (!(layers[growSiteLyrIndex].layer.visible)) {
+			layers[growSiteLyrIndex].layer.setVisibility(true);
+		}
+		switch(option) {
+			case true:
+				clickHandler = dojo.connect(map, "onClick", clickListener);
+				$("#sumSiteText").show();
+				app.isolatePopup(appConfig.LAYER_NAME_SITES);
+				// Turn off any other toggles
+				if (showInfoWindow === "sumWshd") {
+					$("#sumWshd-toggle").bootstrapToggle("off");
+				};
+				if (epWidget) {
+					app.disableElevTool();
+					$("#elev-toggle").bootstrapToggle("off");
+				}	
+			break;
+			case false:
+				app.resetPopup();
+				$("#sumSiteText").hide();
+				map.graphics.clear();
+				$("#sumSiteText").html("Click on a Grow Site to display summary.");
+			break;
+		};
+		
+			
 	};
 
 	app.zoomToLayerExtent  = function(layerName) {
@@ -3396,7 +3505,10 @@ function(
             bootbox.alert(appConfig.ABOUT_TEXT);
         });
         $("#sumWshd-toggle").change(function() {
-	    	app.summarizeWshd($("#sumWshd-toggle").prop('checked'));
+	    	app.summarizeWshd($(this).prop("checked"));
+	    });
+	    $("#sumSite-toggle").change(function() {
+	    	app.summarizeSite($(this).prop("checked"));
 	    });
 	    
 	    // show or hide a loaded prioritization model heat map

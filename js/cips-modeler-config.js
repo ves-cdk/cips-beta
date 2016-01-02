@@ -8,7 +8,7 @@ appConfig = {
     APP_NAME_HTML_TITLE: "CIPS Modeler",
     APP_NAME_DIALOGUE: "CIPS",
     APP_HEADER_TITLE: '<span style="color: #335b96; font-weight: 300;">EDITOR</span>',
-    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Modeler</br></br>Version: Beta 1.5",
+    ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Modeler</br></br>Version: Beta 1.6",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
     //GEOMETRY_SERVICE: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer", 
