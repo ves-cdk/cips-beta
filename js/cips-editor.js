@@ -11,9 +11,10 @@ var sumRegion = {}, sumInterp = {}; // region and interpretation objects storing
 var featureCollection, popupInfo, featureInfoTemplate, addLayers = [], renderer, pointFtrLayer, layerFromQuery; // for dynamic layer load and rendering
 var editPointSymbol, editLineSymbol, editFillSymbol, graphicTb, addGraphicEvt, editSettings, editorWidget, attInspector, layerInfo, selLayers = ""; // editing variables
 var shapeEditLayer, shapeEditStatus, shapeEditBackup; // editing variables
-var interpLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, disturbedLyrIndex, waterTankLyrIndex, reservoirLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex, parcelLyrIndex, parcelLyrIndexAlt; // used for getting onClick results from specific layers
+var interpLyrIndex, regionLyrIndex, growLyrIndex, growLocLyrIndex, disturbedLyrIndex, waterTankLyrIndex, reservoirLyrIndex, growSiteLyrIndex, growSiteParcLyrIndex, parcelLyrIndex, parcelLyrIndexAlt, wshdLyrIndex; // used for getting onClick results from specific layers
 var mergeSites = []; // object used for merging multiple sites into a single site
 var editRadios = ["optionsRadios1", "optionsRadios2", "optionsRadios3", "optionsRadios4", "optionsRadios5", "optionsRadios6", "optionsRadios7", "optionsRadios8", "optionsRadios9", "optionsRadios10", "optionsRadios11"];
+var batchGrowSite = false; // used for batch grow site creation, developer only, not included in UI.
 var siteFtr;
 var token; // passed when write requires authentication
 var testvar; //generic variable for testing
@@ -272,6 +273,9 @@ function(
             	}
             	if (lyr.title === appConfig.LAYER_NAME_PARCELS_ALT) {
             		parcelLyrIndexAlt = i;
+            	}
+            	if (lyr.title === appConfig.LAYER_NAME_WSHD) {
+            		wshdLyrIndex = i;
             	}
             });
  
@@ -649,6 +653,12 @@ function(
         			}
         			
         		break;
+        	}
+        
+        	if (batchGrowSite) {
+        		// for batch grow site creation. Not a refined function, for developer use only.
+        		var editFtr = popup.getSelectedFeature();
+        		app.batchGrowSite(editFtr);
         	}
         });
     };
@@ -1840,6 +1850,127 @@ function(
 	
 			geometryService.labelPoints([polygon], labelSuccess, labelError);
 	
+	};
+	
+	app.initBatchGrowSite = function(wshdFtr) {
+		//app.resetPopup();
+		//app.isolatePopup("Wateshed Boundaries (HUC12)");
+		batchGrowSite = true;
+		if (!(layers[wshdLyrIndex].layer.visible)) {
+			layers[wshdLyrIndex].layer.setVisibility(true);
+		}
+	};
+	
+	app.batchGrowSite = function(wshdFtr) {
+		console.log(wshdFtr);
+		if (!(wshdFtr._layer.name === "Watershed Boundaries (HUC12)")) {
+			console.log("Watershed feature not selected, try again");	
+		} else {
+			$(".esriPopupWrapper").css("display","none");
+			var queryTaskGrow = new QueryTask(appConfig.URL_GROW_POLYS);
+			var query = new Query();
+
+			query.returnGeometry = true;
+			query.outFields = ["*"];
+			query.geometry = wshdFtr.geometry;
+			queryTaskGrow.execute(query);
+
+			queryTaskGrow.on("complete", function(evt) {
+				console.log(evt);
+				$.each(evt.featureSet.features, function(i) {
+					console.log(evt.featureSet.features[i]);
+					var growFtr = evt.featureSet.features[i];
+					
+					esri.show(loading);
+		
+					var growKey = growFtr.attributes.GrowKey;
+					var regionId = growFtr.attributes.SWRCBRegID;
+					var attrGrowSiteID = growFtr.attributes.GrowID;
+					var attrGrowSiteKey = growFtr.attributes.GrowKey;		
+					
+					if (growFtr.attributes.GrowSiteKey) {
+						console.log("Grow " + growKey + " is already associated with a Grow Site.");
+					} else {
+						
+						$.when(app.getPolyXY(growFtr, function(center) { 
+
+						var queryParcel = new Query();
+						queryParcel.geometry = center;
+						layers[growSiteParcLyrIndex].layer.queryFeatures(queryParcel, function(siteParcel) {
+							if (siteParcel.features.length === 0) {
+								// No existing Grow Site Parcel, get one from Parcel input layer
+								layers[parcelLyrIndex].layer.queryFeatures(queryParcel, function(baseParcel) {
+									if (baseParcel.features.length === 0) {
+				
+										// ADDED THIS TO USE STATE CIO PARCEL BOUNDARIES AS AN ALTERNATIVE WHEN AVAILABLE
+										if (parcelLyrIndexAlt) {
+											// query alternate Parcel data source (if available)
+											layers[parcelLyrIndexAlt].layer.queryFeatures(queryParcel, function(baseParcelAlt) {
+												if (baseParcelAlt.features.length === 0) {
+													console.log("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
+												} else {
+													console.log("ready to createNewSiteFeature", regionId, baseParcelAlt, "alternate", attrGrowSiteID, attrGrowSiteKey);
+													$.when(app.createNewSiteFeature(regionId, baseParcelAlt, "alternate", attrGrowSiteID, attrGrowSiteKey, function(callbackSite) {
+														var queryIntGrows = new Query();
+														queryIntGrows.geometry = baseParcelAlt.features[0].geometry;
+														//queryIntGrows.spatialRelationship = Query.SPATIAL_REL_WITHIN;
+														console.log(baseParcelAlt.features[0].geometry);
+														// THIS SHOULD QUERY GROW POINTS INSTEAD TO GET CENTER POINT, NOT INTERSECTING GROW
+														layers[growLyrIndex].layer.queryFeatures(queryIntGrows, function(intGrows) {
+															//console.log(intGrows);
+															$.each(intGrows.features, function(i) {
+																var updObjectId = intGrows.features[i].attributes.OBJECTID;
+																var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + attrGrowSiteKey + "', 'GrowSiteID': " + attrGrowSiteID + "}}]";
+																$.when(app.updateAttributes(appConfig.URL_GROW_POLYS, updObjectId, null, null, updFeature, function(updCallback) {
+																	//console.log("updated:", updCallback);	
+																	//layers[growLyrIndex].layer.clearSelection();
+																	//layers[growLyrIndex].layer.refresh();
+																}));
+															});
+														});
+														//app.stopEdit();
+													}));
+												}	
+											});
+										} else {
+											console.log("Note - Parcel data does not exist for this area.<br/><br/>A Grow Site cannot be created.");
+											//app.stopEdit();
+										}
+										
+									} else {
+										console.log("start createNewSiteFeature");
+										$.when(app.createNewSiteFeature(regionId, baseParcel, "default", attrGrowSiteID, attrGrowSiteKey, function(callbackSite) {
+											var queryIntGrows = new Query();
+											queryIntGrows.geometry = baseParcel.features[0].geometry;
+											//queryIntGrows.spatialRelationship = Query.SPATIAL_REL_WITHIN;
+											console.log(baseParcel.features[0].geometry);
+											layers[growLyrIndex].layer.queryFeatures(queryIntGrows, function(intGrows) {
+												//console.log(intGrows);
+												$.each(intGrows.features, function(i) {
+													var updObjectId = intGrows.features[i].attributes.OBJECTID;
+													var updFeature = "[{'attributes': { 'OBJECTID': " + updObjectId + ", 'GrowSiteKey': '" + attrGrowSiteKey + "', 'GrowSiteID': " + attrGrowSiteID + "}}]";
+													$.when(app.updateAttributes(appConfig.URL_GROW_POLYS, updObjectId, null, null, updFeature, function(updCallback) {
+														//console.log("updated:", updCallback);	
+														//layers[growLyrIndex].layer.clearSelection();
+														//layers[growLyrIndex].layer.refresh();
+													}));
+												});
+											});
+											//app.stopEdit();
+										}));
+									}
+								});
+							} else {
+								console.log("A Grow Site and Grow Site Parcel already exist.");
+								//app.stopEdit();
+							}
+						});
+						}));
+					}
+					
+				});
+			});
+		}
 	};
 	
 	app.createGrowSite = function(growFtr) {

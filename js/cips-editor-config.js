@@ -42,7 +42,7 @@ appConfig = {
     URL_EDIT_PARCELS: urlRoot + "CIPS_Base/MapServer/4",
     
     // LAYER_NAME is used to identify layers by their name, as saved in the web map JSON file. If changed here, make sure this matches the web map.
-    //LAYER_NAME_WSHD: "Watershed Boundaries - HUC12",
+    LAYER_NAME_WSHD: "Watershed Boundaries (HUC12)",
     LAYER_NAME_INTERP: "Interpretation Areas",
     //LAYER_NAME_INTERP_WSHD: "Interpretation Area Watersheds",
     LAYER_NAME_SWRCB_REGIONS: "SWRCB Regions",
