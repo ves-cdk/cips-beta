@@ -13,11 +13,11 @@ appWebMap = {
     "snippet": "CIPS",
     "extent": [
       [
-        -125.1246,
+        -124.9982,
         38.5246
       ],
       [
-        -119.6039,
+        -119.7303,
         41.7734
       ]
     ]
@@ -1521,7 +1521,7 @@ appWebMap = {
         "layerType": "ArcGISFeatureLayer",
         "url": "http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/2",
         "visibility": true,
-        "opacity": 0.8,
+        "opacity": 1,
         "mode": 1,
         "title": "Grow Footprints",
         "layerDefinition": {
@@ -1533,7 +1533,12 @@ appWebMap = {
                 {
                   "value": "Outdoor",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      255,
+                      190,
+                      190,
+                      23
+                    ],
                     "outline": {
                       "color": [
                         255,
@@ -1553,7 +1558,12 @@ appWebMap = {
                 {
                   "value": "Greenhouse",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      255,
+                      235,
+                      190,
+                      31
+                    ],
                     "outline": {
                       "color": [
                         230,
@@ -1573,7 +1583,12 @@ appWebMap = {
                 {
                   "value": "Potential",
                   "symbol": {
-                    "color": null,
+                    "color": [
+                      255,
+                      190,
+                      232,
+                      26
+                    ],
                     "outline": {
                       "color": [
                         197,
@@ -1730,7 +1745,7 @@ appWebMap = {
               "label": "GrowSiteKey",
               "isEditable": false,
               "isEditableOnLayer": true,
-              "visible": true,
+              "visible": false,
               "stringFieldOption": "textbox"
             },
             {
