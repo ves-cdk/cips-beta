@@ -3340,7 +3340,19 @@ function(
 
     // -- Section 9: Authentication ----------------------------------------------------
         
-	// Authentication - when services come from ArcGIS Online
+    // User is signed in, show content
+    // check here for editor role in editor and modeler
+	$("#appContent").show();
+	$("#appInit").hide();
+	$("#sign-out").show();
+	$("#about-cips").show();
+	$("#open-editor").show();
+	$("#open-modeler").show();
+	app.initStats();
+	app.buildMap();
+
+    // Authentication - when services come from ArcGIS Online
+    /*
 		if (appConfig.AUTH === "arcgisonline") {
 			var info = new OAuthInfo({
 				appId : appConfig.APPID,
@@ -3389,6 +3401,7 @@ function(
 			});
 		}
 	
+        
 		// Authentication - when services come from ArcGIS for Server
 		if (appConfig.AUTH === "arcgisserver") {
 	
@@ -3445,6 +3458,8 @@ function(
 			});
 	
 		}
+
+        */
 	
 		// Functions for ArcGIS for Server authentication --------------------------------
 		function storeCredentials() {
