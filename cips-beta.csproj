@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{23C198EF-9C13-4B8B-BA50-1E67B4AA4AF2}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>cips_beta</RootNamespace>
+    <AssemblyName>cips-beta</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.121.2.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>packages\Oracle.ManagedDataAccess.12.1.2400\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.Web, Version=4.121.2.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>packages\Oracle.Web.12.1.2400\lib\net40\Oracle.Web.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Editor.aspx" />
+    <Content Include="editor.html" />
+    <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\font-awesome\fonts\FontAwesome.otf" />
+    <Content Include="fonts\font-awesome\less\animated.less" />
+    <Content Include="fonts\font-awesome\less\bordered-pulled.less" />
+    <Content Include="fonts\font-awesome\less\core.less" />
+    <Content Include="fonts\font-awesome\less\fixed-width.less" />
+    <Content Include="fonts\font-awesome\less\font-awesome.less" />
+    <Content Include="fonts\font-awesome\less\icons.less" />
+    <Content Include="fonts\font-awesome\less\larger.less" />
+    <Content Include="fonts\font-awesome\less\list.less" />
+    <Content Include="fonts\font-awesome\less\mixins.less" />
+    <Content Include="fonts\font-awesome\less\path.less" />
+    <Content Include="fonts\font-awesome\less\rotated-flipped.less" />
+    <Content Include="fonts\font-awesome\less\stacked.less" />
+    <Content Include="fonts\font-awesome\less\variables.less" />
+    <Content Include="fonts\font-awesome\scss\font-awesome.scss" />
+    <Content Include="fonts\font-awesome\scss\_animated.scss" />
+    <Content Include="fonts\font-awesome\scss\_bordered-pulled.scss" />
+    <Content Include="fonts\font-awesome\scss\_core.scss" />
+    <Content Include="fonts\font-awesome\scss\_fixed-width.scss" />
+    <Content Include="fonts\font-awesome\scss\_icons.scss" />
+    <Content Include="fonts\font-awesome\scss\_larger.scss" />
+    <Content Include="fonts\font-awesome\scss\_list.scss" />
+    <Content Include="fonts\font-awesome\scss\_mixins.scss" />
+    <Content Include="fonts\font-awesome\scss\_path.scss" />
+    <Content Include="fonts\font-awesome\scss\_rotated-flipped.scss" />
+    <Content Include="fonts\font-awesome\scss\_stacked.scss" />
+    <Content Include="fonts\font-awesome\scss\_variables.scss" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Index.aspx" />
+    <Content Include="index.html" />
+    <Content Include="modeler.html" />
+    <Content Include="_temp_Export.html" />
+    <Content Include="_temp_ft.html" />
+    <Content Include="_temp_index-placeholder.html" />
+    <Content Include="_temp_testimage.html" />
+    <Content Include="packages.config" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="css\bootstrap-toggle.min.css" />
+    <Content Include="css\bootstrap.min.css" />
+    <Content Include="css\bootstrapmap.css" />
+    <Content Include="css\cips-dashboard_back.css" />
+    <Content Include="css\cips.css" />
+    <Content Include="css\font-awesome.min.css" />
+    <Content Include="fonts\font-awesome\css\font-awesome.css" />
+    <Content Include="fonts\font-awesome\css\font-awesome.min.css" />
+    <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Global.asax" />
+    <Content Include="img\app-editor.png" />
+    <Content Include="img\app-modeler.png" />
+    <Content Include="img\app-viewer.png" />
+    <Content Include="img\base-image-05.png" />
+    <Content Include="img\base-image-09.png" />
+    <Content Include="img\base-image-10.png" />
+    <Content Include="img\base-image-12.png" />
+    <Content Include="img\base-image-14.png" />
+    <Content Include="img\base-image-trans.png" />
+    <Content Include="img\base-infra.png" />
+    <Content Include="img\base-ndvi.png" />
+    <Content Include="img\favicon.png" />
+    <Content Include="img\imagery.jpg" />
+    <Content Include="img\imagery_hybrid.jpg" />
+    <Content Include="img\loading.gif" />
+    <Content Include="img\logo-bottom.png" />
+    <Content Include="img\logo-footer.png" />
+    <Content Include="img\logo-right.png" />
+    <Content Include="img\logo.png" />
+    <Content Include="img\natgeo.jpg" />
+    <Content Include="img\topo_map_2.jpg" />
+    <Content Include="js\agsjs\css\agsjs.css" />
+    <Content Include="js\agsjs\dijit\css\TOC.css" />
+    <Content Include="js\agsjs\dijit\templates\tocNode.html" />
+    <Content Include="js\agsjs\dijit\TOC.js" />
+    <Content Include="js\cips-dashboard-config.js" />
+    <Content Include="js\cips-dashboard-webmap.js" />
+    <Content Include="js\cips-dashboard.js" />
+    <Content Include="js\cips-editor-config.js" />
+    <Content Include="js\cips-editor-webmap.js" />
+    <Content Include="js\cips-editor.js" />
+    <Content Include="js\cips-modeler-config.js" />
+    <Content Include="js\cips-modeler-webmap.js" />
+    <Content Include="js\cips-modeler.js" />
+    <Content Include="js\lib\bootbox.min.js" />
+    <Content Include="js\lib\bootstrap-datetimepicker.js" />
+    <Content Include="js\lib\bootstrap-toggle.min.js" />
+    <Content Include="js\lib\bootstrap.js" />
+    <Content Include="js\lib\bootstrap.min.js" />
+    <Content Include="js\lib\bootstrapmap.js" />
+    <Content Include="js\lib\Chart.min.js" />
+    <Content Include="js\lib\ClusterFeatureLayer.js" />
+    <Content Include="js\lib\collapse.js" />
+    <Content Include="js\lib\jquery-1.11.3.min.js" />
+    <Content Include="js\lib\jquery-ui-1.10.3.custom.min.js" />
+    <Content Include="js\lib\jquery-ui.min.js" />
+    <Content Include="js\lib\jquery.blockUI.js" />
+    <Content Include="js\lib\jquery.js" />
+    <Content Include="js\lib\jquery.kinetic.min.js" />
+    <Content Include="js\lib\jquery.mousewheel.js" />
+    <Content Include="js\lib\jquery.mousewheel.min.js" />
+    <Content Include="js\lib\jquery.smoothdivscroll-1.3-min.js" />
+    <Content Include="js\lib\moment.js" />
+    <Content Include="js\lib\npm.js" />
+    <Content Include="js\lib\transition.js" />
+    <Content Include="js\my\bootstrapmap.js" />
+    <Content Include="js\my\counter.js" />
+    <Content Include="js\my\old_bootstrapmap.js" />
+    <Content Include="js\_archived\backup_js_content.js" />
+    <Content Include="js\_archived\bootstrap.min.js" />
+    <Content Include="js\_archived\bootstrapmap.js" />
+    <Content Include="js\_archived\cips-modeler-back.js" />
+    <Content Include="js\_archived\cips-modeler-config-back.js" />
+    <Content Include="js\_archived\cips-modeler-webmap-back.js" />
+    <Content Include="js\_archived\clusterfeaturelayer.js" />
+    <Content Include="js\_archived\ClusterLayer.js" />
+    <Content Include="js\_archived\FlareClusterLayer.js" />
+    <Content Include="js\_archived\jquery.js" />
+    <Content Include="Login.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Editor.aspx.cs">
+      <DependentUpon>Editor.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Editor.aspx.designer.cs">
+      <DependentUpon>Editor.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Index.aspx.cs">
+      <DependentUpon>Index.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Index.aspx.designer.cs">
+      <DependentUpon>Index.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Login.aspx.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Login.aspx.designer.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>2387</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:2335/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

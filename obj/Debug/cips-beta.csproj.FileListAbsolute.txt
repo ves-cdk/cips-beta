@@ -1,0 +1,14 @@
+D:\git\cips-beta\cips-beta\bin\cips-beta.dll.config
+D:\git\cips-beta\cips-beta\bin\cips-beta.dll
+D:\git\cips-beta\cips-beta\bin\cips-beta.pdb
+D:\git\cips-beta\cips-beta\obj\Debug\cips-beta.csprojResolveAssemblyReference.cache
+D:\git\cips-beta\cips-beta\obj\Debug\cips-beta.dll
+D:\git\cips-beta\cips-beta\obj\Debug\cips-beta.pdb
+D:\Git\cips-beta\bin\cips-beta.dll.config
+D:\Git\cips-beta\bin\cips-beta.dll
+D:\Git\cips-beta\bin\cips-beta.pdb
+D:\Git\cips-beta\obj\Debug\cips-beta.dll
+D:\Git\cips-beta\obj\Debug\cips-beta.pdb
+D:\Git\cips-beta\bin\Oracle.ManagedDataAccess.dll
+D:\Git\cips-beta\bin\Oracle.Web.dll
+D:\Git\cips-beta\obj\Debug\cips-beta.csprojResolveAssemblyReference.cache

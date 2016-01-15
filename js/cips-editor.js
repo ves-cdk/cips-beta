@@ -887,12 +887,32 @@ function(
 		editToolbar.on("deactivate", function(evt) {
 			if (shapeEditStatus === true) {
 				//console.log(shapeEditStatus);
+
+                //ATPNOTE: use the new edited geometry to move the grow point, if it's the grow layer being edited
+                
+
 				shapeEditLayer.applyEdits(null, [evt.graphic], null, function success() {
 					console.log("update feature successful");
 					shapeEditStatus = null;
 					shapeEditBackup = null;
 					app.stopEdit();
-					shapeEditLayer.refresh();	
+					shapeEditLayer.refresh();
+
+                    if (shapeEditLayer.id === appConfig.LAYER_NAME_GROW_LOCATIONS) {
+                        app.runQuery(appConfig.URL_EDIT_GROW_POINTS, queryWhere, function(res) {
+                            if (res.features.length > 0) {
+                                var updatePointFeature = res.features[0];
+                                if (res.length > 1) { alert("more than one grow point found for this polygon"); }
+                                //update the geometry x,y to the centroid from evt.graphic
+
+                                app.updateFeature(updatePointFeature, appConfig.URL_EDIT_GROW_POINTS, function(saveCallback2) {
+                                    map.graphics.clear();
+                                    // loop through map layers to find matching edited layer, then refresh it.
+                                    layers[growLocLyrIndex].layer.refresh();
+                                }); 
+                            }
+                        });                         
+                    }
 				}, function error() {
 					console.log("error");
 				});
@@ -1621,53 +1641,29 @@ function(
 										$.when(app.runQuery(appConfig.URL_GROW_NUM, "0=0", function(callback) {
 											var regAttr = "Reg" + regionId.toString() + "LastGrowIDAssigned";
 											// LastPrioritizAreaIDAssigned
-											$.each(callback.features[0].attributes, function(i) {
-												if (i === regAttr) {
-													var lastRegNum = callback.features[0].attributes[i];
-													var objId = callback.features[0].attributes.OBJECTID;
-													lastRegNum += 1;
-													console.log(lastRegNum);
+											//$.each(callback.features[0].attributes, function(i) {
+												//if (i === regAttr) {
+                                            var i = regAttr;
+											var lastRegNum = callback.features[0].attributes[i];
+											var objId = callback.features[0].attributes.OBJECTID;
+											lastRegNum += 1;
+											console.log("lastRegNum = " + lastRegNum);
 
-													// Assign a SiteID based on parcel boundary that the Grow center point intersects with
-													var queryParcel = new Query();
-													queryParcel.geometry = center;
-													layers[growSiteParcLyrIndex].layer.queryFeatures(queryParcel, function(siteParcel) {
-														if (siteParcel.features.length === 0) {
-															// No existing Grow Site Parcel, get one from Parcel input layer
-															layers[parcelLyrIndex].layer.queryFeatures(queryParcel, function(baseParcel) {
-																if (baseParcel.features.length === 0) {
+											// Assign a SiteID based on parcel boundary that the Grow center point intersects with
+											var queryParcel = new Query();
+											queryParcel.geometry = center;
+											layers[growSiteParcLyrIndex].layer.queryFeatures(queryParcel, function(siteParcel) {
+												if (siteParcel.features.length === 0) {
+													// No existing Grow Site Parcel, get one from Parcel input layer
+													layers[parcelLyrIndex].layer.queryFeatures(queryParcel, function(baseParcel) {
+														if (baseParcel.features.length === 0) {
 
-																	// ADDED THIS TO USE STATE CIO PARCEL BOUNDARIES AS AN ALTERNATIVE WHEN AVAILABLE
-																	if (parcelLyrIndexAlt) {
-																		// query alternate Parcel data source (if available)
-																		layers[parcelLyrIndexAlt].layer.queryFeatures(queryParcel, function(baseParcel) {
-																			//console.log(baseParcel);
-																			if (baseParcel.features.length === 0) {
-																				bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
-
-																				$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, null, null, function(callback1) {
-																					//console.log(callback1);
-																					$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
-																						//console.log(callback2);
-																						esri.hide(loading);
-																					}));
-																				}));
-																			} else {
-																				$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, lastRegNum, regionId + "_" + lastRegNum, function(callback1) {
-																					//console.log(callback1);
-																					$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
-																						//console.log(callback2);
-																						esri.hide(loading);
-																					}));
-																				}));
-
-																				$.when(app.createNewSiteFeature(regionId, baseParcel, "alternate", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
-																					console.log(callbackSite);
-																				}));
-																			}
-																		});
-																	} else {
-
+															// CDK: ADDED THIS TO USE STATE CIO PARCEL BOUNDARIES AS AN ALTERNATIVE WHEN AVAILABLE
+															if (parcelLyrIndexAlt) {
+																// query alternate Parcel data source (if available)
+																layers[parcelLyrIndexAlt].layer.queryFeatures(queryParcel, function(baseParcel) {
+																	//console.log(baseParcel);
+																	if (baseParcel.features.length === 0) {
 																		bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
 
 																		$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, null, null, function(callback1) {
@@ -1677,37 +1673,82 @@ function(
 																				esri.hide(loading);
 																			}));
 																		}));
+																	} else {
+                                                                        app.runQuery(appConfig.URL_GROW_SITE_NUM, "0=0", function(result) {
+                                                                            var regSiteAttr = "Reg" + regionId.toString() + "LastSiteIDAssigned";
+                                                                            var lastRegSiteNum = result.features[0].attributes[regSiteAttr];
+                                                                            var objIdSite = result.features[0].attributes.OBJECTID;
+                                                                            lastRegSiteNum += 1;
+                                                                            console.log("lastRegSiteNum = " + lastRegSiteNum);
 
+                                                                            app.createNewSiteFeature(regionId, baseParcel, "alternate", lastRegSiteNum, regionId + "_" + lastRegSiteNum, function(siteResult) {
+                                                                                //console.log("createNewSiteFeature result = " + siteResult);
+                                                                                app.updateAttributes(appConfig.URL_GROW_SITE_NUM, objId, regSiteAttr, lastRegSiteNum, null, function(siteNumResult) {
+                                                                                    //console.log(siteNumResult);
+                                                                                    //esri.hide(loading);
+                                                                                });
+
+                                                                                app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, lastRegSiteNum, regionId + "_" + lastRegSiteNum, function(growResult) {
+                                                                                    //console.log(growResult);
+                                                                                    app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(growNumResult) {
+                                                                                        //console.log(growNumResult);
+                                                                                        esri.hide(loading);
+                                                                                    });
+                                                                                });
+                                                                            });
+                                                                        });
 																	}
+																});
+															} else {
+																bootbox.alert("Note - Parcel data does not exist for this area.<br/><br/>This Grow will not be assigned a Grow Site and Grow Site Parcel.");
 
-																} else {
-																	$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, lastRegNum, regionId + "_" + lastRegNum, function(callback1) {
-																		//console.log(callback1);
-																		$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
-																			//console.log(callback2);
-																			esri.hide(loading);
-																		}));
+																$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, null, null, function(callback1) {
+																	//console.log(callback1);
+																	$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
+																		//console.log(callback2);
+																		esri.hide(loading);
 																	}));
-
-																	$.when(app.createNewSiteFeature(regionId, baseParcel, "default", lastRegNum, regionId + "_" + lastRegNum, function(callbackSite) {
-																		console.log(callbackSite);
-																	}));
-																}
-															});
-														} else {
-
-															$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, siteParcel.features[0].attributes.GrowSiteID, siteParcel.features[0].attributes.GrowSiteKey, function(callback1) {
-																//console.log(callback1);
-																$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
-																	//console.log(callback2);
-																	esri.hide(loading);
 																}));
-															}));
+															}
+														} else {
+                                                            app.runQuery(appConfig.URL_GROW_SITE_NUM, "0=0", function(result) {
+                                                                var regSiteAttr = "Reg" + regionId.toString() + "LastSiteIDAssigned";
+                                                                var lastRegSiteNum = result.features[0].attributes[regSiteAttr];
+                                                                var objIdSite = result.features[0].attributes.OBJECTID;
+                                                                lastRegSiteNum += 1;
+                                                                console.log("lastRegSiteNum = " + lastRegSiteNum);
+
+                                                                app.createNewSiteFeature(regionId, baseParcel, "default", lastRegSiteNum, regionId + "_" + lastRegSiteNum, function(siteResult) {
+                                                                    //console.log("createNewSiteFeature result = " + siteResult);
+                                                                    app.updateAttributes(appConfig.URL_GROW_SITE_NUM, objId, regSiteAttr, lastRegSiteNum, null, function(siteNumResult) {
+                                                                        //console.log(callback2);
+                                                                        //esri.hide(loading);
+                                                                    });
+
+                                                                    app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, lastRegSiteNum, regionId + "_" + lastRegSiteNum, function(growResult) {
+                                                                        //console.log(growResult);
+                                                                        app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(growNumResult) {
+                                                                            //console.log(growNumResult);
+                                                                            esri.hide(loading);
+                                                                        });
+                                                                    });
+                                                                });
+                                                            });
 														}
 													});
-
+												} else {
+													$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, siteParcel.features[0].attributes.GrowSiteID, siteParcel.features[0].attributes.GrowSiteKey, function(callback1) {
+														//console.log(callback1);
+														$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
+															//console.log(callback2);
+															esri.hide(loading);
+														}));
+													}));
 												}
 											});
+
+												//}
+											//});
 										}));
 
 									}
@@ -1718,15 +1759,16 @@ function(
 					}
 				});
 
-				writeGrowFeature = function(attrGrowSiteID, attrGrowSiteKey) {
-					$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, attrGrowSiteID, attrGrowSiteKey, function(callback1) {
-						console.log(callback1);
-						$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
-							console.log(callback2);
-							esri.hide(loading);
-						}));
-					}));
-				};
+                // ATPNOTE: this is outdated? and not referenced anywhere.
+				// writeGrowFeature = function(attrGrowSiteID, attrGrowSiteKey) {
+				// 	$.when(app.createNewGrowFeature(lastRegNum, regionId, polyAcre, addGraphicEvt.geometry, growType, attrGrowSiteID, attrGrowSiteKey, function(callback1) {
+				// 		console.log(callback1);
+				// 		$.when(app.updateAttributes(appConfig.URL_GROW_NUM, objId, i, lastRegNum, null, function(callback2) {
+				// 			console.log(callback2);
+				// 			esri.hide(loading);
+				// 		}));
+				// 	}));
+				// };
 
 			}
 			if ($("#optionsRadios2:checked").prop("checked")) {
@@ -2077,7 +2119,7 @@ function(
 				InterpMethod: "Aerial Imagery",
 				GrowType: growType,
 				//StatusInterpArea: "In Initial Review",
-				GrowYear: 2014, //new Date("1/1/2014"),
+				GrowYear: 2014, //new Date("1/1/2014"),  ATPNOTE: hardcoded date
 				GrowKey: regionId + "_" + lastRegNum,
 				SWRCBRegID: regionId,
 				GrowID: lastRegNum,
@@ -2100,7 +2142,7 @@ function(
 				InterpMethod: "AField Observation",
 				GrowType: growType,
 				//StatusInterpArea: "In Initial Review",
-				GrowYear: 2014, //new Date("1/1/2014"),
+				GrowYear: 2014, //new Date("1/1/2014"),  ATPNOTE: hardcoded date
 				GrowKey: regionId + "_" + lastRegNum,
 				SWRCBRegID: regionId,
 				GrowID: lastRegNum,
@@ -2117,6 +2159,9 @@ function(
 		// Write first to the grow polygons layer
 		$.when(app.saveNewFeature(addFeature, appConfig.URL_EDIT_GROW_FOOTPRINTS, function(saveCallback) {
 			
+            // ATPNOTE: adding new point feature for new grow polygon
+            //          look for where grow polygons are edited and see if this happens there
+
 			// then, write to grow points layer
 			// Note that currently, any changes made to the poly's attributes will not be updated to the point feature.
 			$.when(app.saveNewFeature(addPointFeature, appConfig.URL_EDIT_GROW_POINTS, function(saveCallback2) {
@@ -2186,16 +2231,16 @@ function(
 		};
 		
 		// Write first to the Grow Site Parcels polygons layer
-		$.when(app.saveNewFeature(addFeature, appConfig.URL_EDIT_GROW_SITE_PARCELS, function(saveCallback) {
+		$.when(app.saveNewFeature(addFeature, appConfig.URL_EDIT_GROW_SITE_PARCELS, function(parcelResonse) {
 			
 			// then, write to Grow Sites layer
 			// Note that currently, any changes made to the poly's attributes will not be updated to the point feature.
-			$.when(app.saveNewFeature(addPointFeature, appConfig.URL_EDIT_GROW_SITES, function(saveCallback2) {
+			$.when(app.saveNewFeature(addPointFeature, appConfig.URL_EDIT_GROW_SITES, function(siteResponse) {
 				map.graphics.clear();
 				// loop through map layers to find matching edited layer, then refresh it.
 				layers[growSiteLyrIndex].layer.refresh();
 				layers[growSiteParcLyrIndex].layer.refresh();
-				callback(saveCallback);
+				callback(parcelResonse);
 			}));
 			
 		}));	
@@ -2325,6 +2370,9 @@ function(
 		if ($("#optionsRadios6:checked").prop("checked")) {
 			if (shapeEditStatus) {
 				//console.log("shape edits discarded");
+                
+                // ATPNOTE: use the new edited geometry to move the grow point, if it's the grow layer being edited
+
 				shapeEditLayer.applyEdits(null, shapeEditBackup, null, function success() {
 					console.log("update feature successful");
 					shapeEditStatus = null;
@@ -2467,6 +2515,36 @@ function(
 	        }
 	    });
 	};
+
+    app.updateFeature = function(feature, url, callback) {
+        // Write new feature to layer using object created in createNewFeature
+        // NOTES: token removed from addParams below, necessary with move of data from AGOL to AGS
+        //        Added "[" and "]" to addFeature, necessary with move of data from AGOL to AGS
+        var updFeature = "[" + JSON.stringify(feature) + "]";
+        console.log(updFeature);
+        var urlEdit = url + "/updateFeatures";
+        var addParams = {
+            f: "json",
+            features: updFeature//,
+            //token: token
+        };
+        
+        testvar = updFeature;
+    
+        // Add feature
+        $.ajax({
+            url: urlEdit,
+            type: "POST",
+            dataType: "json",
+            data: addParams,
+            success: function (data) {
+                callback(data);
+            },
+            error: function (response) {
+                callback(response);
+            }
+        });
+    };
 	
     // -- Section 7: Authentication ----------------------------------------------------
 
