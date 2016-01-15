@@ -30,6 +30,7 @@ appConfig = {
 
 	URL_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/7",
 	URL_GROW_NUM: urlRoot + "CIPS_Operational/FeatureServer/10",
+    URL_GROW_SITE_NUM: urlRoot + "CIPS_Operational/FeatureServer/22",
 	URL_SUMMARY_REGION: urlRoot + "CIPS_Operational/FeatureServer/21",
     URL_SUMMARY_INTERP_AREA: urlRoot + "CIPS_Operational/FeatureServer/13", //urlRoot + "CIPS_20151015/FeatureServer/11",
     URL_EDIT_WATER_TANK: urlRoot + "CIPS_Operational/FeatureServer/0",
