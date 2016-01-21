@@ -109,6 +109,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="Index.aspx" />
     <Content Include="index.html" />
+    <Content Include="Modeler.aspx" />
     <Content Include="modeler.html" />
     <Content Include="_temp_Export.html" />
     <Content Include="_temp_ft.html" />
@@ -232,6 +233,13 @@
     </Compile>
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Modeler.aspx.cs">
+      <DependentUpon>Modeler.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Modeler.aspx.designer.cs">
+      <DependentUpon>Modeler.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

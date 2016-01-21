@@ -887,37 +887,41 @@ function(
 		editToolbar.on("deactivate", function(evt) {
 			if (shapeEditStatus === true) {
 				//console.log(shapeEditStatus);
-
-                //ATPNOTE: use the new edited geometry to move the grow point, if it's the grow layer being edited
                 
+			    //ATPNOTE: use the new edited geometry to move the grow point, if it's the grow footprint layer being edited
+			    if (shapeEditLayer.name === appConfig.LAYER_NAME_GROW_FOOTPRINTS) {
+			        var cent = evt.graphic.geometry.getCentroid();
+			        var queryWhere = "GrowKey = '" + evt.graphic.attributes.GrowKey + "'";
+			        app.runQuery(appConfig.URL_EDIT_GROW_POINTS, queryWhere, function (res) {
+			            if (res.features.length > 0) {
+			                var updatePointFeature = res.features[0];
+			                if (res.length > 1) { alert("more than one grow point found for this polygon"); }
 
-				shapeEditLayer.applyEdits(null, [evt.graphic], null, function success() {
+			                updatePointFeature.geometry = cent;
+			                app.updateFeature(updatePointFeature, appConfig.URL_EDIT_GROW_POINTS, function (resUpdate) {
+			                    //map.graphics.clear();
+			                    // loop through map layers to find matching edited layer, then refresh it.
+			                    layers[growLocLyrIndex].layer.refresh();
+			                });
+			            }
+			        });
+
+			        //evt.graphic.attributes["PreProcStatus"] = "Not PreProcessed";
+			    }			    
+
+				shapeEditLayer.applyEdits(null, [evt.graphic], null, function(adds, updates, deletes) {
 					console.log("update feature successful");
 					shapeEditStatus = null;
 					shapeEditBackup = null;
 					app.stopEdit();
 					shapeEditLayer.refresh();
 
-                    if (shapeEditLayer.id === appConfig.LAYER_NAME_GROW_LOCATIONS) {
-                        app.runQuery(appConfig.URL_EDIT_GROW_POINTS, queryWhere, function(res) {
-                            if (res.features.length > 0) {
-                                var updatePointFeature = res.features[0];
-                                if (res.length > 1) { alert("more than one grow point found for this polygon"); }
-                                //update the geometry x,y to the centroid from evt.graphic
-
-                                app.updateFeature(updatePointFeature, appConfig.URL_EDIT_GROW_POINTS, function(saveCallback2) {
-                                    map.graphics.clear();
-                                    // loop through map layers to find matching edited layer, then refresh it.
-                                    layers[growLocLyrIndex].layer.refresh();
-                                }); 
-                            }
-                        });                         
-                    }
-				}, function error() {
+					if (shapeEditLayer.name === appConfig.LAYER_NAME_GROW_FOOTPRINTS) {
+					    app.updateAttributes(appConfig.URL_EDIT_GROW_FOOTPRINTS, updates[0].objectId, "PreProcStatus", "Not PreProcessed", false, function (resp) { });
+					}
+				}, function() {
 					console.log("error");
-				});
-				
-				
+				});				
 			} else {
 				$.each(layerInfo, function(i) {
 					layerInfo[i].featureLayer.refresh();
