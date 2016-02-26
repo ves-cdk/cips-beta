@@ -327,6 +327,7 @@ a:focus {
     height: 0;
     opacity: 0;
     border-radius: 0 0 5px 5px;
+    max-width: 500px
 }
 .tab-content .ribbon-bar-tab.slide-out {
     height: auto;

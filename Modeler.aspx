@@ -37,13 +37,13 @@
 					<a id="about-cips" class="action" style="display: none;"><i class="fa fa-info-circle fa-lg" title="About CIPS"></i></a>
 				</li>
 				<li>
-				<a id="cips-dashboard" class="action" href="index.html" style="display: none;"><i class="fa fa-dashboard fa-lg" title="Return to CIPS Dashboard"></i></a>
+				<a id="cips-dashboard" class="action" href="index.aspx" style="display: none;"><i class="fa fa-dashboard fa-lg" title="Return to CIPS Dashboard"></i></a>
 				</li>
 				<li id="openEditor">
-					<a id="open-editor" class="action" href="editor.html" style="display: none;"><i class="fa fa-pencil-square-o fa-lg" title="Launch CIPS Editor"></i></a>
+					<a id="open-editor" class="action" href="editor.aspx" style="display: none;"><i class="fa fa-pencil-square-o fa-lg" title="Launch CIPS Editor"></i></a>
 				</li>
 				<li id="personalizedPanel">
-					<a id="sign-out" class="action" style="display: none;"><i class="fa fa-sign-out fa-lg" title="Sign Out"></i></a>
+					<a id="sign-out" class="action" style="display: none;" href="Logout.aspx"><i class="fa fa-sign-out fa-lg" title="Sign Out"></i></a>
 				</li>
 			</ul>
 			<div class="navbar-header pull-right">
@@ -51,7 +51,7 @@
 			</div>
 		</div>
 
-		<div id="appInit" class="sectionLogin text-center">
+		<div id="appInit" class="sectionLogin text-center" style="display: none;">
 			Access to CIPS is restricted to authorized users only.
 			<br/>
 			<br/>
@@ -207,7 +207,7 @@
 										</div>
 										<div id="menu5collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="menu5panel2">
 											<div class="panel-body">
-												Print Function under construction
+Click the button below to begin the printing process. When complete, the printout will automatically load in a new window — or the Print button will turn into a "Printout" link. Click the link to launch the printed PDF in a new window.
 												<div id="printButton"></div>
 											</div>
 										</div>

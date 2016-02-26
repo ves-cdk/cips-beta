@@ -1,7 +1,7 @@
 // Application configuration settings
 
 var appConfig = dojo.getObject('appConfig', true);
-var urlRoot = "http://mapserver.vestra.com/arcgis/rest/services/CIPS/";
+var urlRoot = "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/CIPS/";
 
 appConfig = {
 	APP_NAME: "CIPS",
@@ -11,11 +11,11 @@ appConfig = {
     ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Editor</br></br>Version: Beta 1.6",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
-    PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
+    PROXY_PAGE: "http://wb-sb-gisapp-int.ca.epa.local/agsproxy/DotNet/proxy.ashx",
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
-    PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
+    PRINT_SERVICE: "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
     INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
-    GEOMETRY_SERVICE: "https://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
+    GEOMETRY_SERVICE: "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/Utilities/Geometry/GeometryServer",
    
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
     APPID: "p9Ro4eKhR5pNK3Ci", // if using ArcGIS Online authentication, this is the registered id for the app.

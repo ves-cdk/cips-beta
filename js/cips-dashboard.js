@@ -66,6 +66,7 @@ require([
     "esri/dijit/FeatureTable",
     "esri/layers/ArcGISImageServiceLayer", 
     "esri/layers/ImageServiceParameters",
+    "esri/layers/ArcGISDynamicMapServiceLayer",
     //"./js/ClusterLayer.js",
     //"./js/clusterfeaturelayer.js",
     "./js/lib/ClusterFeatureLayer.js",
@@ -73,7 +74,6 @@ require([
     "dojo/dom", "dojo/on", "dojo/_base/array", "dojo/_base/lang", "dijit/registry", "dojo/dom-construct", "./js/agsjs/dijit/TOC.js", "dojo/domReady!"], 
 
 function(
-
     arcgisUtils,
     esriConfig,
     BasemapGallery, 
@@ -121,6 +121,7 @@ function(
     FeatureTable,
     ArcGISImageServiceLayer, 
     ImageServiceParameters,
+    ArcGISDynamicMapServiceLayer,
     //ClusterLayer,
     ClusterFeatureLayer,
     BootstrapMap,
@@ -138,14 +139,13 @@ function(
     esriConfig.defaults.geometryService = new GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
     esriConfig.defaults.io.alwaysUseProxy = false;
     esriConfig.defaults.io.corsEnabledServers.push("tasks.arcgisonline.com");
-    esriConfig.defaults.io.corsEnabledServers.push("mapserver2.vestra.com");
-    esriConfig.defaults.io.corsEnabledServers.push("mapserver.vestra.com");    
+    esriConfig.defaults.io.corsEnabledServers.push("wb-sb-gisapp-int.ca.epa.local");
     esriConfig.defaults.io.corsEnabledServers.push("map.dfg.ca.gov");
     esriConfig.defaults.io.corsEnabledServers.push("utility.arcgisonline.com");
     //esriConfig.defaults.io.corsEnabledServers.push("sampleserver6.arcgisonline.com");
     esriConfig.defaults.io.corsEnabledServers.push("localhost");  
     esriConfig.defaults.io.timeout = 120000;   
-    //esriConfig.defaults.io.proxyUrl = appConfig.PROXY_PAGE;
+    esriConfig.defaults.io.proxyUrl = appConfig.PROXY_PAGE;
     
     urlUtils.addProxyRule({
 	  urlPrefix: "tasks.arcgisonline.com",
@@ -230,31 +230,31 @@ function(
             sumDataRegion = qryResultsRegion;
             // put the attribute: value pairs for each region into an object
             $.each(qryResultsRegion.features, function(i) {
-                var regionId = qryResultsRegion.features[i].attributes.SWRCBRegID;
+                var regionId = qryResultsRegion.features[i].attributes.SWRCBREGID;
                 sumRegion[regionId] = qryResultsRegion.features[i].attributes;
             });
             $.when(app.runQuery(appConfig.URL_SUMMARY_INTERP_AREA, queryParams, false, function(qryResultsInterp) {
                 sumDataInterp = qryResultsInterp;
                 // put the attribute: value pairs for each interpretation area into an object
                 $.each(qryResultsInterp.features, function(i) {
-                    var interpId = qryResultsInterp.features[i].attributes.InterpAreaKey;
+                    var interpId = qryResultsInterp.features[i].attributes.INTERPAREAKEY;
                     sumInterp[interpId] = qryResultsInterp.features[i].attributes;
                 });
                 // loop through the value pairs for each region and get totals
                 $.each(sumRegion, function(i) {
-                    totalInterpAreas += sumRegion[i].NumInterpAreas;
-                    totalInterpWatersheds += sumRegion[i].NumHuc12InInterpAreas;
-                    totalInterpAcreage += sumRegion[i].TotalAcreageInterpAreas;
-                    totalNumGrows += sumRegion[i].NumGrows;
-                    totalGrowAcreage += sumRegion[i].TotalAcreageGrows;
-                    totalGrowOutdoor += sumRegion[i].NumOutdoorGrows;
-                    totalGrowGreenhouse += sumRegion[i].NumGreenHouseGrows;
-                    totalWaterUse += sumRegion[i].AnnualWaterUse_acft;
-                    totalLevel1 += sumRegion[i].NumCultAreaScore1Grows;
-                    totalLevel2 += sumRegion[i].NumCultAreaScore2Grows;
-                    totalLevel3 += sumRegion[i].NumCultAreaScore3Grows;
-                    totalGrowSiteParcels += sumRegion[i].NumGrowSiteParcels;
-                    totalGrowSites += sumRegion[i].NumGrowSites;
+                    totalInterpAreas += sumRegion[i].NUMINTERPAREAS;
+                    totalInterpWatersheds += sumRegion[i].NUMHUC12ININTERPAREAS;
+                    totalInterpAcreage += sumRegion[i].TOTALACREAGEINTERPAREAS;
+                    totalNumGrows += sumRegion[i].NUMGROWS;
+                    totalGrowAcreage += sumRegion[i].TOTALACREAGEGROWS;
+                    totalGrowOutdoor += sumRegion[i].NUMOUTDOORGROWS;
+                    totalGrowGreenhouse += sumRegion[i].NUMGREENHOUSEGROWS;
+                    totalWaterUse += sumRegion[i].ANNUALWATERUSE_ACFT;
+                    totalLevel1 += sumRegion[i].NUMCULTAREASCORE1GROWS;
+                    totalLevel2 += sumRegion[i].NUMCULTAREASCORE2GROWS;
+                    totalLevel3 += sumRegion[i].NUMCULTAREASCORE3GROWS;
+                    totalGrowSiteParcels += sumRegion[i].NUMGROWSITEPARCELS;
+                    totalGrowSites += sumRegion[i].NUMGROWSITES;
                 });
                 
                 totalGrowPotential = totalNumGrows - totalGrowOutdoor - totalGrowGreenhouse;
@@ -322,130 +322,129 @@ function(
                     responsive : false,
                     animation: false
                 });
-                }));
             }));
-        };
+        }));
+    };
         
-        app.initStatsReg = function(regNum) {
-            // create results for Region-specific charts
-            var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
-            var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
-            var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0, totalGrowPotential = 0, totalGrowSiteParcels = 0, totalGrowSites = 0;
+    app.initStatsReg = function(regNum) {
+        // create results for Region-specific charts
+        var totalInterpAreas = 0, totalInterpWatersheds = 0, totalInterpAcreage = 0;
+        var totalNumGrows = 0, totalGrowAcreage = 0, totalGrowOutdoor = 0, totalGrowGreenhouse = 0;
+        var totalWaterUse = 0, totalLevel1 = 0, totalLevel2 = 0, totalLevel3 = 0, totalGrowPotential = 0, totalGrowSiteParcels = 0, totalGrowSites = 0;
             
-            totalInterpAreas = sumRegion[regNum].NumInterpAreas;
-            totalInterpWatersheds = sumRegion[regNum].NumHuc12InInterpAreas;
-            totalInterpAcreage = sumRegion[regNum].TotalAcreageInterpAreas;
-            totalNumGrows = sumRegion[regNum].NumGrows;
-            totalGrowAcreage = sumRegion[regNum].TotalAcreageGrows;
-            totalGrowOutdoor = sumRegion[regNum].NumOutdoorGrows;
-            totalGrowGreenhouse = sumRegion[regNum].NumGreenHouseGrows;
-            totalWaterUse = sumRegion[regNum].AnnualWaterUse_acft;
-            totalLevel1 = sumRegion[regNum].NumCultAreaScore1Grows;
-            totalLevel2 = sumRegion[regNum].NumCultAreaScore2Grows;
-            totalLevel3 = sumRegion[regNum].NumCultAreaScore3Grows;
-            totalGrowSiteParcels += sumRegion[regNum].NumGrowSiteParcels;
-            totalGrowSites += sumRegion[regNum].NumGrowSites;
+        totalInterpAreas = sumRegion[regNum].NUMINTERPAREAS;
+        totalInterpWatersheds = sumRegion[regNum].NUMHUC12ININTERPAREAS;
+        totalInterpAcreage = sumRegion[regNum].TOTALACREAGEINTERPAREAS;
+        totalNumGrows = sumRegion[regNum].NUMGROWS;
+        totalGrowAcreage = sumRegion[regNum].TOTALACREAGEGROWS;
+        totalGrowOutdoor = sumRegion[regNum].NUMOUTDOORGROWS;
+        totalGrowGreenhouse = sumRegion[regNum].NUMGREENHOUSEGROWS;
+        totalWaterUse = sumRegion[regNum].ANNUALWATERUSE_ACFT;
+        totalLevel1 = sumRegion[regNum].NUMCULTAREASCORE1GROWS;
+        totalLevel2 = sumRegion[regNum].NUMCULTAREASCORE2GROWS;
+        totalLevel3 = sumRegion[regNum].NUMCULTAREASCORE3GROWS;
+        totalGrowSiteParcels += sumRegion[regNum].NUMGROWSITEPARCELS;
+        totalGrowSites += sumRegion[regNum].NUMGROWSITES;
             
-            totalGrowPotential = totalNumGrows - totalGrowOutdoor - totalGrowGreenhouse;
+        totalGrowPotential = totalNumGrows - totalGrowOutdoor - totalGrowGreenhouse;
             
-            // set the values on the page
-            dojo.byId("sumTitleR" + regNum).innerHTML = "Region <b>" + regNum + "</b> Summary";
-            dojo.byId("quickStatInterpAreaR" + regNum).innerHTML = totalInterpAreas;
-            dojo.byId("quickStatWatershedsR" + regNum).innerHTML = app.numberWithCommas(totalInterpWatersheds);
-            dojo.byId("quickStatTotalAcreageR" + regNum).innerHTML = app.numberWithCommas(totalInterpAcreage);
-            dojo.byId("quickStatGrowsR" + regNum).innerHTML = app.numberWithCommas(totalNumGrows);
-            dojo.byId("quickStatGrowAcreageR" + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
-            dojo.byId('quickStatGrowAcreageR' + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
-            dojo.byId('quickStatGrowSiteParcelsR' + regNum).innerHTML = app.numberWithCommas(totalGrowSiteParcels);
+        // set the values on the page
+        dojo.byId("sumTitleR" + regNum).innerHTML = "Region <b>" + regNum + "</b> Summary";
+        dojo.byId("quickStatInterpAreaR" + regNum).innerHTML = totalInterpAreas;
+        dojo.byId("quickStatWatershedsR" + regNum).innerHTML = app.numberWithCommas(totalInterpWatersheds);
+        dojo.byId("quickStatTotalAcreageR" + regNum).innerHTML = app.numberWithCommas(totalInterpAcreage);
+        dojo.byId("quickStatGrowsR" + regNum).innerHTML = app.numberWithCommas(totalNumGrows);
+        dojo.byId("quickStatGrowAcreageR" + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
+        dojo.byId('quickStatGrowAcreageR' + regNum).innerHTML = app.numberWithCommas(totalGrowAcreage);
+        dojo.byId('quickStatGrowSiteParcelsR' + regNum).innerHTML = app.numberWithCommas(totalGrowSiteParcels);
         
-            // build pie chart1
-            var chart1Data = [{
-                value : totalGrowGreenhouse,
-                color : "#58eb7b",
-                highlight : "#aafbbd",
-                label : "Greenhouse"
-            }, {
-                value : totalGrowOutdoor,
-                color : "#e1b474",
-                highlight : "#f8c884",
-                label : "Outdoor"
-            },
-            {
-                value: totalGrowPotential,
-                color: "#727272",
-                highlight: "#949494",
-                label: "Potential"
-            }];
-            dojo.byId("titleChart1R" + regNum).innerHTML = "Outdoor vs Greenhouse";
-            var chart1 = document.getElementById("chart1R" + regNum).getContext("2d");
-            window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
-                responsive : false
-            });
+        // build pie chart1
+        var chart1Data = [{
+            value : totalGrowGreenhouse,
+            color : "#58eb7b",
+            highlight : "#aafbbd",
+            label : "Greenhouse"
+        }, {
+            value : totalGrowOutdoor,
+            color : "#e1b474",
+            highlight : "#f8c884",
+            label : "Outdoor"
+        },
+        {
+            value: totalGrowPotential,
+            color: "#727272",
+            highlight: "#949494",
+            label: "Potential"
+        }];
+        dojo.byId("titleChart1R" + regNum).innerHTML = "Outdoor vs Greenhouse";
+        var chart1 = document.getElementById("chart1R" + regNum).getContext("2d");
+        window.myDoughnut = new Chart(chart1).Doughnut(chart1Data, {
+            responsive : false
+        });
         
-            // build pie chart2
-            var chart2Data = [{
-                value : totalLevel1,
-                color : "#fee6ce",
-                highlight : "#fdd0a2",
-                label : "Level 1"
-            }, {
-                value : totalLevel2,
-                color : "#fdae6b",
-                highlight : "#fd8d3c",
-                label : "Level 2"
-            }, {
-                value : totalLevel3,
-                color : "#f16913",
-                highlight : "#d94801",
-                label : "Level 3"
-            }];
-            dojo.byId("titleChart2R" + regNum).innerHTML = "Cultivated Area";
-            var chart2 = document.getElementById("chart2R" + regNum).getContext("2d");
-            window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
-                responsive : false
-            });
-        };
+        // build pie chart2
+        var chart2Data = [{
+            value : totalLevel1,
+            color : "#fee6ce",
+            highlight : "#fdd0a2",
+            label : "Level 1"
+        }, {
+            value : totalLevel2,
+            color : "#fdae6b",
+            highlight : "#fd8d3c",
+            label : "Level 2"
+        }, {
+            value : totalLevel3,
+            color : "#f16913",
+            highlight : "#d94801",
+            label : "Level 3"
+        }];
+        dojo.byId("titleChart2R" + regNum).innerHTML = "Cultivated Area";
+        var chart2 = document.getElementById("chart2R" + regNum).getContext("2d");
+        window.myDoughnut = new Chart(chart2).Doughnut(chart2Data, {
+            responsive : false
+        });
+    };
         
-        app.initStatsWater = function() {
-        // Generate water usage estimates
+    app.initStatsWater = function() {
+    // Generate water usage estimates
         
-            var totalWaterUse = 0, totalWaterUseScore1Grows = 0, totalWaterUseScore2Grows = 0, totalWaterUseScore3Grows = 0;
-            var numWaterUseScore1Grows = 0, numWaterUseScore2Grows = 0, numWaterUseScore3Grows = 0;
+        var totalWaterUse = 0, totalWaterUseScore1Grows = 0, totalWaterUseScore2Grows = 0, totalWaterUseScore3Grows = 0;
+        var numWaterUseScore1Grows = 0, numWaterUseScore2Grows = 0, numWaterUseScore3Grows = 0;
         
-            $.each(sumRegion, function(i) {
-               totalWaterUse += sumRegion[i].AnnualWaterUse_acft;
-               totalWaterUseScore1Grows += sumRegion[i].NumWaterUseScore1Grows;
-               totalWaterUseScore2Grows += sumRegion[i].NumWaterUseScore2Grows;
-               totalWaterUseScore3Grows += sumRegion[i].NumWaterUseScore3Grows;
-               numWaterUseScore1Grows += sumRegion[i].PeakMoWaterUseScore1Grows;
-               numWaterUseScore2Grows += sumRegion[i].PeakMoWaterUseScore2Grows;
-               numWaterUseScore3Grows += sumRegion[i].PeakMoWaterUseScore3Grows;
-            });
+        $.each(sumRegion, function(i) {
+            totalWaterUse += sumRegion[i].ANNUALWATERUSE_ACFT;
+            totalWaterUseScore1Grows += sumRegion[i].NUMWATERUSESCORE1GROWS;
+            totalWaterUseScore2Grows += sumRegion[i].NUMWATERUSESCORE2GROWS;
+            totalWaterUseScore3Grows += sumRegion[i].NUMWATERUSESCORE3GROWS;
+            numWaterUseScore1Grows += sumRegion[i].PEAKMOWATERUSESCORE1GROWS;
+            numWaterUseScore2Grows += sumRegion[i].PEAKMOWATERUSESCORE2GROWS;
+            numWaterUseScore3Grows += sumRegion[i].PEAKMOWATERUSESCORE3GROWS;
+        });
         
-            var totalWaterUseGal = totalWaterUse * 325851;
+        var totalWaterUseGal = totalWaterUse * 325851;
         
-            // set the values on the page
-            dojo.byId('quickStatWaterAcFt').innerHTML = app.numberWithCommas(totalWaterUse);
-            dojo.byId('quickStatWaterGal').innerHTML = app.numberWithCommas(totalWaterUseGal);
-            dojo.byId('quickStatWaterNumScore1').innerHTML = app.numberWithCommas(numWaterUseScore1Grows);
-            dojo.byId('quickStatWaterTotScore1').innerHTML = app.numberWithCommas(totalWaterUseScore1Grows);
-            dojo.byId('quickStatWaterNumScore2').innerHTML = app.numberWithCommas(numWaterUseScore2Grows);
-            dojo.byId('quickStatWaterTotScore2').innerHTML = app.numberWithCommas(totalWaterUseScore2Grows);
-            dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
-            dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
+        // set the values on the page
+        dojo.byId('quickStatWaterAcFt').innerHTML = app.numberWithCommas(totalWaterUse);
+        dojo.byId('quickStatWaterGal').innerHTML = app.numberWithCommas(totalWaterUseGal);
+        dojo.byId('quickStatWaterNumScore1').innerHTML = app.numberWithCommas(numWaterUseScore1Grows);
+        dojo.byId('quickStatWaterTotScore1').innerHTML = app.numberWithCommas(totalWaterUseScore1Grows);
+        dojo.byId('quickStatWaterNumScore2').innerHTML = app.numberWithCommas(numWaterUseScore2Grows);
+        dojo.byId('quickStatWaterTotScore2').innerHTML = app.numberWithCommas(totalWaterUseScore2Grows);
+        dojo.byId('quickStatWaterNumScore3').innerHTML = app.numberWithCommas(numWaterUseScore3Grows);
+        dojo.byId('quickStatWaterTotScore3').innerHTML = app.numberWithCommas(totalWaterUseScore3Grows);
             
-            var valR1S1 = sumRegion[1].NumWaterUseScore1Grows;
-            var valR1S2 = sumRegion[1].NumWaterUseScore2Grows;
-            var valR1S3 = sumRegion[1].NumWaterUseScore3Grows;
-            var valR5S1 = sumRegion[5].NumWaterUseScore1Grows;
-            var valR5S2 = sumRegion[5].NumWaterUseScore2Grows;
-            var valR5S3 = sumRegion[5].NumWaterUseScore3Grows;
+        var valR1S1 = sumRegion[1].NUMWATERUSESCORE1GROWS;
+        var valR1S2 = sumRegion[1].NUMWATERUSESCORE2GROWS;
+        var valR1S3 = sumRegion[1].NUMWATERUSESCORE3GROWS;
+        var valR5S1 = sumRegion[5].NUMWATERUSESCORE1GROWS;
+        var valR5S2 = sumRegion[5].NUMWATERUSESCORE2GROWS;
+        var valR5S3 = sumRegion[5].NUMWATERUSESCORE3GROWS;
             
-            console.log(valR1S1, valR1S2, valR1S3,valR5S1,valR5S2,valR5S3);
-            
-            
-            // Bar Chart for Water Use by Risk Level
-            var barChartData = {
+        console.log(valR1S1, valR1S2, valR1S3,valR5S1,valR5S2,valR5S3);
+ 
+        // Bar Chart for Water Use by Risk Level
+        var barChartData = {
             labels : ["Risk Level 1","Risk Level 2", "Risk Level 3"],
             datasets : [
                 {
@@ -483,7 +482,7 @@ function(
     // -- Section 5: Build Map Elements -------------------------------------------------------------
         
     // Initialize the map
-    app.buildMap = function() {
+    app.buildMap = function(token) {
     	
     	loading = dojo.byId("mapLoading");
 		esri.show(loading);
@@ -534,6 +533,29 @@ function(
             
             mapResponse = response;
             map = response.map;
+
+            var soilMapServiceLayer = new ArcGISDynamicMapServiceLayer('http://landscape1.arcgis.com/arcgis/rest/services/USA_Soil_Mapunits_2014/MapServer?token=' + token, {
+                "opacity" : 0.5
+            });
+
+            var geoMapServiceLayer = new ArcGISDynamicMapServiceLayer('http://landscape1.arcgis.com/arcgis/rest/services/USA_Geology_Units/MapServer?token=' + token, {
+                "opacity" : 0.5
+            });
+
+            $("#soilLayerOnOff").change(function () {
+                if($(this).prop('checked'))
+                    map.addLayer(soilMapServiceLayer);
+                else
+                    map.removeLayer(soilMapServiceLayer);
+            });
+
+            $("#geoLayerOnOff").change(function () {
+                if($(this).prop('checked'))
+                    map.addLayer(geoMapServiceLayer);
+                else
+                    map.removeLayer(geoMapServiceLayer);
+            });
+           
             
             // defining the layers allows for access to attributes per layer
             layers = esri.arcgis.utils.getLegendLayers(response);
@@ -609,7 +631,6 @@ function(
             alert("An error occurred loading the map. Refresh the page and try again.");
         });
         
-        
     };
     
     app.buildMapItems = function (response) {
@@ -619,7 +640,7 @@ function(
     	app.buildBasemap();
     	app.buildSearch();
     	app.buildSearchWatershed();
-    	//app.buildPrint();
+    	app.buildPrint();
     	app.buildMeasure();
     	
     	$.when(app.buildClusterLayer(appConfig.GROW_POINTS_NAME, appConfig.URL_GROW_POINTS, appConfig.GROW_POINTS_SCALE, null, function(callback) {
@@ -937,13 +958,13 @@ function(
         			$(".esriPopupWrapper").css("display","none");
         			var selCount = popup.count;
             		var modelFtr = popup.getSelectedFeature();
-            		var modelFtrName = modelFtr.attributes.PrioritizAreaName;
+            		var modelFtrName = modelFtr.attributes.PRIORITIZAREANAME;
             		//console.log(modelFtr, modelFtrName);
             		if ((modelFtr._layer._url.path).toLowerCase() === (appConfig.URL_PRIOR_AREA).toLowerCase()) {
             			if (selCount === 1) { // one Pr Area exists under the map click
             				bootbox.confirm("<b>" + modelFtrName + "</b> was selected, continue with this Prioritization Area?", function(result) {
 	            				if (result) {
-	 								app.loadModel(modelFtr.attributes.PrioritizAreaKey, modelFtrName);
+	 								app.loadModel(modelFtr.attributes.PRIORITIZAREAKEY, modelFtrName);
 	            				} else {
 	            					popup.clearFeatures();
 	            					esri.hide(loading);
@@ -961,7 +982,7 @@ function(
             				var selectArea;
 							var modelList = "";
 							$.each(modelFtrMult, function(i) {
-								modelList += "<option value='" + i + "'>" + modelFtrMult[i].attributes.PrioritizAreaName + "</option>";
+								modelList += "<option value='" + i + "'>" + modelFtrMult[i].attributes.PRIORITIZAREANAME + "</option>";
 							});
             				bootbox.dialog({
 								title: "Multiple Prioritization Areas exist at this location, please select one, then click 'Proceed'",
@@ -973,7 +994,7 @@ function(
 										label: "Proceed",
 										callback: function() {
 											selectArea = $("#selAreaList").val();
-											app.loadModel(modelFtrMult[selectArea].attributes.PrioritizAreaKey, modelFtrMult[selectArea].attributes.PrioritizAreaName);
+											app.loadModel(modelFtrMult[selectArea].attributes.PRIORITIZAREAKEY, modelFtrMult[selectArea].attributes.PRIORITIZAREANAME);
 										}
 									}
 								}
@@ -1004,9 +1025,9 @@ function(
         				var siteGraphic = new Graphic(growSite.geometry, sitePointSymbol);
             			map.graphics.add(siteGraphic);
         				
-        				var GrowSiteKey = growSite.attributes.GrowSiteKey;
+        				var GrowSiteKey = growSite.attributes.GROWSITEKEY;
 						var query = new Query();
-						query.where = "GrowSiteKey = '" + GrowSiteKey + "'";
+						query.where = "GROWSITEKEY = '" + GrowSiteKey + "'";
 						var sumText = "<b>Summary for Grow Site: " + GrowSiteKey + "</b><br/><br/>";
 						//console.log(GrowSiteKey);
 						layers[growSiteParcLyrIndex].layer.queryFeatures(query, function(siteParcFeatures) {
@@ -1028,7 +1049,7 @@ function(
 								var resultCount = growFeatures.features.length;
 								if (resultCount > 0) {
 									$.each(growFeatures.features, function(i) {
-										sumGrowText += "&nbsp;&nbsp;Grow: " + growFeatures.features[i].attributes.GrowID + ", Acres: " + growFeatures.features[i].attributes.GrowAcres + "<br/>";
+										sumGrowText += "&nbsp;&nbsp;Grow: " + growFeatures.features[i].attributes.GROWID + ", Acres: " + growFeatures.features[i].attributes.GROWACRES + "<br/>";
 										var siteGrowGraphic = new Graphic(growFeatures.features[i].geometry, siteLineSymbol);
 										map.graphics.add(siteGrowGraphic);
 									});
@@ -1121,7 +1142,7 @@ function(
 		
 	};
 	
-	app.createPrint = function (){
+	/*app.createPrint = function (){
         //Set up print stuff
         var printUrl = "http://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task";
         var printTask = new esri.tasks.PrintTask(printUrl, {async: true});
@@ -1142,7 +1163,7 @@ function(
         //dojo.connect(map, "onLoad", function() {//Fire the print task
         //printTask.execute(params, printResult, printError);
         setTimeout(function(){printTask.execute(params, printResult, printError);},2500);
-    };
+    };*/
 
     function printResult(result){
         console.log(result.url);
@@ -1249,7 +1270,7 @@ function(
 	app.buildFeatureTable = function(tblSource, defExp) {
 		// TEST - show an attribute table using the featureTable widget
 		//   Call by passing the url of a layer, and a definition expression (optional). 
-		//   Example: app.buildFeatureTable("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/7", "InterpAreaKey = '1_1'");
+		//   Example: app.buildFeatureTable("http://mapserver.vestra.com/arcgis/rest/services/CIPS/CIPS_Operational/FeatureServer/7", "INTERPAREAKEY = '1_1'");
 		
 		$("#modalTable").modal("show");
 
@@ -1575,11 +1596,11 @@ function(
 					var totalOutdoor = 0, totalGreenhouse = 0, totalArea = 0;
 					$.each(evt.featureSet.features, function(i) {
 						var ftrAttr = evt.featureSet.features[i].attributes;
-						totalArea += ftrAttr.GrowSqFt;
-						if (ftrAttr.GrowType === "Outdoor") {
+						totalArea += ftrAttr.GROWSQFT;
+						if (ftrAttr.GROWTYPE === "Outdoor") {
 							totalOutdoor += 1;
 						}
-						if (ftrAttr.GrowType === "Greenhouse") {
+						if (ftrAttr.GROWTYPE === "Greenhouse") {
 							totalGreenhouse += 1;
 						}
 					});
@@ -1800,10 +1821,10 @@ function(
 		// Populates drop down lists based on regions and models available
 		var regionList = [];
 		regionList += "<option value=''>Select a Region</option>";
-		$.when(app.runQueryDistinctVal(appConfig.URL_PRIOR_MODELS, "0=0", "SWRCBRegID", false, function(res1) {
+		$.when(app.runQueryDistinctVal(appConfig.URL_PRIOR_MODELS, "0=0", "SWRCBREGID", false, function(res1) {
 			$.each(res1.features, function(i) {
 				//console.log(res.features[i].attributes.ModelRunName);
-				regionList += "<option value='" + res1.features[i].attributes.SWRCBRegID + "'>" + res1.features[i].attributes.SWRCBRegID + "</option>";
+				regionList += "<option value='" + res1.features[i].attributes.SWRCBREGID + "'>" + res1.features[i].attributes.SWRCBREGID + "</option>";
 				//modelList += "<option value='" + res.features[i].attributes.ModelRunKey + "'>" + res.features[i].attributes.ModelRunName + "</option>";
 			});
 			$("#selectLoadPrRegion").html(regionList);
@@ -1823,8 +1844,8 @@ function(
 		var modelList = [];
 		modelList += "<option value=''>Select a Prioritization Area</option>";
 		$.each(priorAreaRecs.features, function(i) {
-			if (priorAreaRecs.features[i].attributes.SWRCBRegID === $("#selectLoadPrRegion").val()) {
-				modelList += "<option value='" + priorAreaRecs.features[i].attributes.PrioritizAreaKey + "'>" + priorAreaRecs.features[i].attributes.PrioritizAreaName + "</option>";
+			if (priorAreaRecs.features[i].attributes.SWRCBREGID === $("#selectLoadPrRegion").val()) {
+				modelList += "<option value='" + priorAreaRecs.features[i].attributes.PRIORITIZAREAKEY + "'>" + priorAreaRecs.features[i].attributes.PRIORITIZAREANAME + "</option>";
 			}
 		});
 		$("#selectLoadPrModel").html(modelList);
@@ -1899,7 +1920,7 @@ function(
 		esri.show(loading);
 		//console.log(prioritizAreaID, modelFtrName);
 		// Loads a prioritization model - the PrioritizationGrows polygons + related results
-		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PrioritizAreaKey = '" + prioritizAreaID + "'", false, function(resModels) {
+		$.when(app.runQuery(appConfig.URL_PRIOR_MODELS, "PRIORITIZAREAKEY = '" + prioritizAreaID + "'", false, function(resModels) {
 			//console.log(resModels);
 			var modelCount = resModels.features.length;
 			if (modelCount === 0) {
@@ -1912,7 +1933,7 @@ function(
 					var selectModel;
 					var modelList = "";
 					$.each(resModels.features, function(i) {
-						modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.ModelRunName + "</option>";
+						modelList += "<option value='" + i + "'>" + resModels.features[i].attributes.MODELRUNNAME + "</option>";
 					});
 					bootbox.dialog({
 						title: "Multiple models exist for this prioritization area. Select one.",
@@ -1925,9 +1946,9 @@ function(
 								callback: function() {
 									selectModel = $("#selModelList").val();
 									//console.log(selectModel);
-									selectModelName = resModels.features[selectModel].attributes.ModelRunName;
-									if (resModels.features[selectModel].attributes.ModelRunCompleted) {
-										$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[selectModel].attributes.ModelRunKey + "'", false, function(resSummary) {
+									selectModelName = resModels.features[selectModel].attributes.MODELRUNNAME;
+									if (resModels.features[selectModel].attributes.MODELRUNCOMPLETED) {
+										$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "MODELRUNKEY = '" + resModels.features[selectModel].attributes.MODELRUNKEY + "'", false, function(resSummary) {
 											showResults(resSummary.features[0].attributes);
 										}));
 									} else {
@@ -1943,7 +1964,7 @@ function(
 				} else {
 					selectModelName = resModels.features[0].attributes.ModelRunName;
 					if (resModels.features[0].attributes.ModelRunCompleted) {
-						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "ModelRunKey = '" + resModels.features[0].attributes.ModelRunKey + "'", false, function(resSummary) {
+						$.when(app.runQuery(appConfig.URL_PRIOR_MODELS_SUMMARY, "MODELRUNKEY = '" + resModels.features[0].attributes.MODELRUNKEY + "'", false, function(resSummary) {
 							showResults(resSummary.features[0].attributes);
 						}));
 					} else {
@@ -1964,8 +1985,8 @@ function(
 			var inputList = [];
 			inputList += "<option value='0'>Weighted Average Score</option>";
 			for (i = 1; i < appConfig.PRIOR_MODEL_NUM_FACTORS + 1; i++) { 
-				var attrRecord = sumAttr["Input" + i + "DataSourceName"];
-			    if (!(attrRecord === "")) {
+				var attrRecord = sumAttr["INPUT" + i + "DATASOURCENAME"];
+			    if (attrRecord !== "" && attrRecord !== null) {
 			    	//console.log(attrRecord);
 			    	inputList += "<option value='" + i + "'>" + attrRecord + "</option>";
 			    }
@@ -1981,16 +2002,16 @@ function(
 			var totalsSummary = ""
 				+ "Totals:"
 				+ "<dl class='dl-horizontal'>"
-				+ "<dt>Total Grow Count</dt><dd>" + sumAttr.NumGrows + "</dd>"
-				+ "<dt>Outdoor Grows</dt><dd>" + sumAttr.NumOutdoorGrows + "</dd>"
-				+ "<dt>Greenhouse Grows</dt><dd>" + sumAttr.NumGreenHouseGrows + "</dd>"
-				+ "<dt>Total Grow Acreage</dt><dd>" + app.numberWithCommas(sumAttr.TotalAcreageGrows) + "</dd>"
+				+ "<dt>Total Grow Count</dt><dd>" + sumAttr.NUMGROWS + "</dd>"
+				+ "<dt>Outdoor Grows</dt><dd>" + sumAttr.NUMOUTDOORGROWS + "</dd>"
+				+ "<dt>Greenhouse Grows</dt><dd>" + sumAttr.NUMGREENHOUSEGROWS + "</dd>"
+				+ "<dt>Total Grow Acreage</dt><dd>" + app.numberWithCommas(sumAttr.TOTALACREAGEGROWS) + "</dd>"
 				+ "</dl>";
 			$("#modelResultsSumTotals").html(totalsSummary);
 
-			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", selectModelName, function(complete) {
+			$.when(app.createAppendedLayer(appConfig.URL_PRIOR_MODELS_RESULTS, appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "MODELRUNKEY='" + sumAttr.MODELRUNKEY + "'", "PRIORITIZGROWKEY", selectModelName, function(complete) {
 				
-				$.when(app.polyToPointLayer(selectModelName + " - point", appConfig.URL_PRIOR_MODELS_RESULTS, "ModelRunKey='" + sumAttr.ModelRunKey + "'", appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "ModelRunKey='" + sumAttr.ModelRunKey + "'", "PrioritizGrowKey", function(ptCallback) {
+				$.when(app.polyToPointLayer(selectModelName + " - point", appConfig.URL_PRIOR_MODELS_RESULTS, "MODELRUNKEY='" + sumAttr.MODELRUNKEY + "'", appConfig.URL_PRIOR_MODELS_RESULTS_RELATE, "MODELRUNKEY='" + sumAttr.MODELRUNKEY + "'", "PRIORITIZGROWKEY", function(ptCallback) {
 					
 					app.updateRenderer();
 					$("#optionsRadios10:checked").prop("checked",false);
@@ -2008,7 +2029,7 @@ function(
 					//layers[growLocLyrIndex].layer.setVisibility(false);
 					map.graphics.clear();
 					
-					app.loadModelHeatMap("Name = 'CIPS_PrioritizModel_"+ sumAttr.ModelRunKey + "'");
+					app.loadModelHeatMap("Name = 'CIPS_PrioritizModel_"+ sumAttr.MODELRUNKEY + "'");
 					
 				}));
 			}));
@@ -2078,9 +2099,9 @@ function(
 		//if (selFactor === "0") {
 		//	$("#modelResultsIndividual").html("");
 		//} else {
-			var level1Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level1"];
-			var level2Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level2"];
-			var level3Grows = loadedModelResults["NumGrowsInput" + selFactor + "Level3"];
+			var level1Grows = loadedModelResults["NUMGROWSINPUT" + selFactor + "LEVEL1"];
+			var level2Grows = loadedModelResults["NUMGROWSINPUT" + selFactor + "LEVEL2"];
+			var level3Grows = loadedModelResults["NUMGROWSINPUT" + selFactor + "LEVEL3"];
 			
 			var factorSummary = ""
 					+ "Total Grow Count by Selected Factor:"
@@ -2110,7 +2131,7 @@ function(
 					relateLayerAttr.push(relateLayer.features[i].attributes);
 					
 					// Dynamically counting the totals for the Weighted Average Score since this isn't done in the summary table
-					var valWtAveScore = relateLayer.features[i].attributes.WtAveScore;
+					var valWtAveScore = relateLayer.features[i].attributes.WTAVESCORE;
 					if (valWtAveScore < 2) {
 						threat1 += 1;
 					};
@@ -2123,9 +2144,9 @@ function(
 				});
 				
 				// Adding the totals to the object used for displaying summary totals.
-				loadedModelResults.NumGrowsInput0Level1 = threat1;
-				loadedModelResults.NumGrowsInput0Level2 = threat2;
-				loadedModelResults.NumGrowsInput0Level3 = threat3;
+				loadedModelResults.NUMGROWSINPUT0LEVEL1 = threat1;
+				loadedModelResults.NUMGROWSINPUT0LEVEL2 = threat2;
+				loadedModelResults.NUMGROWSINPUT0LEVEL3 = threat3;
 				
 				//console.log(threat1, threat2, threat3);
 
@@ -2246,8 +2267,8 @@ function(
 	};
 	
 	app.updateRenderer = function() {
-		app.classBreakRendererPoly("Input" + $("#modelDisplayBy").val() + "PreProcScore", prModelPoly);
-		app.classBreakRendererPoint("Input" + $("#modelDisplayBy").val() + "PreProcScore", prModelPoint);
+		app.classBreakRendererPoly("INPUT" + $("#modelDisplayBy").val() + "PREPROCSCORE", prModelPoly);
+		app.classBreakRendererPoint("INPUT" + $("#modelDisplayBy").val() + "PREPROCSCORE", prModelPoint);
 		app.updateModelSummary();
 		if ($("#modelDisplayBy").val() === "0") {
 			$("#factor-toggle").bootstrapToggle("off");
@@ -2259,8 +2280,8 @@ function(
 	};
 	
 	app.classBreakRendererPoly = function(renderField, renderLayer) {
-		if (renderField === "Input0PreProcScore" || renderField === "WtAveScore") {
-			renderField = "WtAveScore";
+		if (renderField === "INPUT0PREPROCSCORE" || renderField === "WTAVESCORE") {
+			renderField = "WTAVESCORE";
 			// simple class break renderer with 3 classes
 			var symbol = new SimpleFillSymbol();
 			symbol.setColor(new Color([150, 150, 150, 0.5]));
@@ -2314,8 +2335,8 @@ function(
 	};
 	
 	app.classBreakRendererPoint = function(renderField, renderLayer) {
-		if (renderField === "Input0PreProcScore" || renderField === "WtAveScore") {
-			renderField = "WtAveScore";
+		if (renderField === "INPUT0PREPROCSCORE" || renderField === "WTAVESCORE") {
+			renderField = "WTAVESCORE";
 			var ptSymbol = new SimpleMarkerSymbol();
 	        ptSymbol.setColor(new Color([150, 150, 150, 0.5]));
 			var renderer = new ClassBreaksRenderer(ptSymbol, renderField);
@@ -2552,14 +2573,24 @@ function(
         
     // User is signed in, show content
     // check here for editor role in editor and modeler
+
+	var info = new OAuthInfo({
+	    appId: appConfig.APPID,
+	    popup: false
+	});
+	esriId.registerOAuthInfos([info]);
+
 	$("#appContent").show();
 	$("#appInit").hide();
 	$("#sign-out").show();
 	$("#about-cips").show();
 	$("#open-editor").show();
 	$("#open-modeler").show();
-	app.initStats();
-	app.buildMap();
+
+    appWebMap.initLoginAndToken(function (token) { 
+        app.initStats();
+        app.buildMap(token);
+    });
 
     // Authentication - when services come from ArcGIS Online
     /*

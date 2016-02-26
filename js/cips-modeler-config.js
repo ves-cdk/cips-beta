@@ -1,7 +1,7 @@
 // Application configuration settings
 
 var appConfig = dojo.getObject('appConfig', true);
-var urlRoot = "http://mapserver.vestra.com/arcgis/rest/services/CIPS/"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/";
+var urlRoot = "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/CIPS/"; //"http://services.arcgis.com/pc0EXLr0PbESBcyz/arcgis/rest/services/";
 
 appConfig = {
 	APP_NAME: "CIPS",
@@ -11,11 +11,10 @@ appConfig = {
     ABOUT_TEXT: "Cannabis Identification and Prioritization System (CIPS) Modeler</br></br>Version: Beta 1.6",
     ORGANIZATION_NAME: "California State Water Resources Control Board",
     
-    //GEOMETRY_SERVICE: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer", 
-    GEOMETRY_SERVICE: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
-    PROXY_PAGE: "http://localhost/apps/cipsproxy/DotNet/proxy.ashx",
+    GEOMETRY_SERVICE: "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/Utilities/Geometry/GeometryServer",
+    PROXY_PAGE: "http://wb-sb-gisapp-int.ca.epa.local/agsproxy/DotNet/proxy.ashx",
     //PROXY_PAGE: "http://mapserver2.vestra.com/demo/cipsproxy/DotNet/proxy.ashx",
-    PRINT_SERVICE: "http://mapserver.vestra.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
+    PRINT_SERVICE: "http://wb-sb-gisapp-int.ca.epa.local/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", //"http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task", 
     INIT_EXTENT: { xmin: 	-14033566.61705768, ymin: 4664918.866412182, xmax: -13173191.426679777, ymax: 5168791.756868039, spatialReference: { wkid: 102100 } },
     
     AUTH: "arcgisonline", // "arcgisonline" if using OAuth to arcgis.com, "arcgisserver" if using server
@@ -36,8 +35,8 @@ appConfig = {
 	URL_PRIOR_PREPROC_INPUTS: urlRoot + "CIPS_Operational/FeatureServer/15", //"CIPS_20151123/FeatureServer/13",
 	URL_PRIOR_MODEL_NUMBER: urlRoot + "CIPS_Operational/FeatureServer/19", //"CIPS_20151123/FeatureServer/9",
 	
-	URL_GP_MODEL_PRIOR_GROWS: urlRoot + "ModelPrioritizGrows/GPServer/ModelPrioritizGrows",
-	URL_PRIOR_MODELS_HEATMAP: urlRoot + "CIPS_PrtizModel_HeatMap/ImageServer",
+	URL_GP_MODEL_PRIOR_GROWS: urlRoot + "ModelPrioritizGrows/GPServer/Model_Prioritiz_Grows",
+	URL_PRIOR_MODELS_HEATMAP: urlRoot + "CIPS_CIPS_PrtizMod_HeatMap/ImageServer",
 	PRIOR_MODEL_NUM_FACTORS: 10, //Total number of prioritization model factors available to select from. Used for looping through options during model editing/creation.
 	
 	URL_REGION: urlRoot + "CIPS_Base/MapServer/0", //1

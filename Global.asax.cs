@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Principal;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -23,6 +24,26 @@ namespace cips_beta
                 CdnSupportsSecureConnection = true,
                 LoadSuccessExpression = "window.jQuery"
             });
+        }
+
+        protected void Application_OnPostAuthenticateRequest(object sender, EventArgs e)
+        {
+            // Get a reference to the current User
+            IPrincipal currentUser = HttpContext.Current.User;
+
+            // If we are dealing with an authenticated forms authentication request
+            if (currentUser.Identity.IsAuthenticated)
+            {
+                // Create a CustomIdentity based on the FormsAuthenticationTicket           
+                var identity = (FormsIdentity)currentUser.Identity; // new CustomIdentity(((FormsIdentity)currentUser.Identity).Ticket);
+
+                // Create the CustomPrincipal
+                var user = new GenericPrincipal(identity, null);
+                
+                // Attach the CustomPrincipal to HttpContext.User and Thread.CurrentPrincipal
+                HttpContext.Current.User = user;
+                //Thread.CurrentPrincipal = user;
+            }
         }
 
         protected void Session_Start(object sender, EventArgs e)

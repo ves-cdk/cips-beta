@@ -1,0 +1,65 @@
+@media(min-width:768px) {
+    body {
+        padding-top: 100px; /* Required padding for .navbar-fixed-top. Change if height of navigation changes. */
+    }
+    .navbar-fixed-top .navbar-brand {
+        padding: 15px 0;
+    }
+}
+.navbar {
+	height: 75px;
+}
+.navbar-header {
+	margin: 15px 0 0 48px;
+    font-size: 28px;
+    color: white;
+}
+.footer {
+    background-color: #f5f5f5;
+    bottom: 0;
+    height: 60px;
+    position: absolute;
+    width: 100%;
+}
+.footerPanel {
+	padding-top: 20px;
+	text-align: center;
+}
+#sign-out, #sign-in, #sign-in-text, #welcome-header, #main-content, #save-json {
+	display: none;
+}
+.col-title {
+    text-align: center;
+}
+#webmap-list {
+    height:700px; 
+    width:100%;
+    overflow:hidden; 
+    overflow-y:scroll;
+    border: 1px solid black;
+}
+#webmap-list option{
+    height:30px;
+    padding-top: 8px;
+}
+.webmap-container {
+    padding: 10px;
+}
+.webmap-title {
+    font-size: 20px;
+}
+
+#json-content {
+    height: 700px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+#save-json {
+    margin-top: 10px;
+}
+#status{
+    float: right;
+    color: white;
+    margin-top: 2%;
+    font-size: 19px;
+}

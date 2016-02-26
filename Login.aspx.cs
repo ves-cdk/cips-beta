@@ -23,8 +23,10 @@ namespace cips_beta
         public void Logon_Click(object sender, EventArgs e)
         {
 
-            //Username: cipsuser
-            //Password: Password1
+            //cipsuser / Password1            
+            //cipseditor / cipseditor1
+            //cipsmodeler / cipsmodeler1
+
 
             bool useDBLogin;
             useDBLogin = Convert.ToBoolean(ConfigurationManager.AppSettings["dbLogin"]);
@@ -172,9 +174,17 @@ namespace cips_beta
                                     roles = roles + oRdr.GetString(oRdr.GetOrdinal("user_role_group")) + "::";
                                 }
                             }
-                            else if (theBusinessFunc == ConfigurationManager.AppSettings["GISBusinessFunction"])
+                            else if (theBusinessFunc == ConfigurationManager.AppSettings["CipsViewerFunction"])
                             {
-                                roles = roles + oRdr.GetString(oRdr.GetOrdinal("user_role_group")) + "::";
+                                roles = roles + theBusinessFunc + "::";
+                            }
+                            else if (theBusinessFunc == ConfigurationManager.AppSettings["CipsEditorFunction"])
+                            {
+                                roles = roles + theBusinessFunc + "::";
+                            }
+                            else if (theBusinessFunc == ConfigurationManager.AppSettings["CipsModelerFunction"])
+                            {
+                                roles = roles + theBusinessFunc + "::";
                             }
 
                             theRowNum = theRowNum + 1;
@@ -204,9 +214,15 @@ namespace cips_beta
                                 // Hash the cookie for transport over the wire
                                 // First parameter = name of auth cookie (it's the name specified in web.config)
                                 string sHash = FormsAuthentication.Encrypt(fTicket);
-                                HttpCookie oCookie = new HttpCookie(FormsAuthentication.FormsCookieName, sHash);
+                                HttpCookie oCookie = new HttpCookie(FormsAuthentication.FormsCookieName, sHash)
+                                {
+                                    Domain = FormsAuthentication.CookieDomain,
+                                    Path = FormsAuthentication.FormsCookiePath,
+                                    HttpOnly = true,
+                                    Secure = FormsAuthentication.RequireSSL
+                                };
 
-                                Response.Cookies.Add(oCookie);
+                                System.Web.HttpContext.Current.Response.Cookies.Add(oCookie);
 
                                 // Set the cookie's expiration time to the tickets expiration time
                                 if (fTicket.IsPersistent)
@@ -224,8 +240,8 @@ namespace cips_beta
                                 // Don't call the FormsAuthentication.RedirectFromLoginPage here, since it could
                                 // replace the custom authentication ticket we just added...
                                 //e.Authenticated = true;
-                                //Response.Redirect(returnUrl);
-                                FormsAuthentication.RedirectFromLoginPage(UserEmail.Text, Persist.Checked);
+                                Response.Redirect(returnUrl);
+                                //FormsAuthentication.RedirectFromLoginPage(UserEmail.Text, Persist.Checked);
                             }
                             else
                             {

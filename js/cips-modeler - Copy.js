@@ -1724,87 +1724,84 @@ function(
 						map.graphics.clear();
 						map.graphics.add(new Graphic(result, editFillSymbol));
 						esri.hide(loading);
-					    //bootbox.alert("union completed");
-
-						app.getPolyXY(result, function (center) {
-						    switch (outputLayer) {
-						        case "interpretation":
-						            // new interpretation area being created
-						            //console.log("save interpretation ", newFeatureName, result);
-						            //testObj = result;
-						            //var center = result.getCentroid();
-
-						            //get the Region that the new interp area falls within
-						            var query = new Query();
-						            query.geometry = center;
-						            layers[regionLyrIndex].layer.queryFeatures(query, function (featureset) {
-						                //console.log("region query results", featureset);
-						                var regionId = featureset.features[0].attributes.RB;
-						                //console.log("regionid", regionId);
-						                $.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", false, function (callback) {
-						                    //console.log("interp num callback", callback);
-						                    //testObj = callback.features[0];
-
-						                    //var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
-						                    //console.log(lastNum);
-						                    var regAttr = "REG" + regionId.toString() + "LASTINTERPAREAIDASSIGNED";
-						                    $.each(callback.features[0].attributes, function (i) {
-						                        if (i === regAttr) {
-						                            var lastRegNum = callback.features[0].attributes[i];
-						                            var objId = callback.features[0].attributes.OBJECTID;
-						                            lastRegNum += 1;
-						                            //console.log(regAttr, lastRegNum);
-						                            $.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_INTERP_AREA, function (callback) {
-						                                $.when(app.updateAttributes(appConfig.URL_INTERP_AREA_NUM, objId, i, lastRegNum, function (callback) {
-						                                    esri.hide(loading);
-						                                    bootbox.alert(newFeatureName + " Interpretation Area successfully created.");
-						                                    layers[3].layer.refresh();
-						                                    app.stopEdit();
-						                                }));
-						                            }));
-						                        }
-						                    });
-						                }));
-						            });
-						            break;
-						        case "prioritization":
-						            //console.log("save prioritization ", newFeatureName, result);
-						            //var center = result.getCentroid();
-
-						            //get the Region that the new interp area falls within
-						            var query = new Query();
-						            query.geometry = center;
-						            layers[regionLyrIndex].layer.queryFeatures(query, function (featureset) {
-						                //console.log("region query results", featureset);
-						                var regionId = featureset.features[0].attributes.RB;
-						                //console.log("regionid", regionId);
-						                $.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", false, function (callback) {
-						                    //console.log("interp num callback", callback);
-						                    //testObj = callback.features[0];
-
-						                    //var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
-						                    //console.log(lastNum);
-						                    var regAttr = "R" + regionId.toString() + "LASTPRIORITIZAREAIDASSIGNED"; // LastPrioritizAreaIDAssigned 
-						                    $.each(callback.features[0].attributes, function (i) {
-						                        if (i === regAttr) {
-						                            var lastRegNum = callback.features[0].attributes[i];
-						                            var objId = callback.features[0].attributes.OBJECTID;
-						                            lastRegNum += 1;
-						                            //console.log(regAttr, lastRegNum);
-						                            $.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_PRIOR_AREA, function (callback) {
-						                                $.when(app.updateAttributes(appConfig.URL_PRIOR_AREA_NUM, objId, i, lastRegNum, function (callback) {
-						                                    esri.hide(loading);
-						                                    bootbox.alert(newFeatureName + " Prioritization Area successfully created.");
-						                                    app.stopEdit();
-						                                }));
-						                            }));
-						                        }
-						                    });
-						                }));
-						            });
-						            break;
-						    }
-						});
+						//bootbox.alert("union completed");
+						switch(outputLayer) {
+							case "interpretation":
+								// new interpretation area being created
+								//console.log("save interpretation ", newFeatureName, result);
+								//testObj = result;
+								var center = result.getCentroid();
+								
+								//get the Region that the new interp area falls within
+								var query = new Query();
+								query.geometry = center;
+								layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+									//console.log("region query results", featureset);
+									var regionId = featureset.features[0].attributes.RB;
+									//console.log("regionid", regionId);
+									$.when(app.runQuery(appConfig.URL_INTERP_AREA_NUM, "0=0", false, function(callback) {
+										//console.log("interp num callback", callback);
+										//testObj = callback.features[0];
+										
+										//var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+										//console.log(lastNum);
+										var regAttr = "REG" + regionId.toString() + "LASTINTERPAREAIDASSIGNED";
+										$.each(callback.features[0].attributes, function(i) { 
+											if (i === regAttr) {
+												var lastRegNum = callback.features[0].attributes[i];
+												var objId = callback.features[0].attributes.OBJECTID;
+												lastRegNum += 1;
+												//console.log(regAttr, lastRegNum);
+												$.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_INTERP_AREA, function(callback) {
+													$.when(app.updateAttributes(appConfig.URL_INTERP_AREA_NUM, objId, i, lastRegNum, function(callback) {
+														esri.hide(loading);
+														bootbox.alert(newFeatureName + " Interpretation Area successfully created.");
+														layers[3].layer.refresh();
+														app.stopEdit();
+													}));
+												}));
+											}
+										});
+									}));
+								});
+							break;
+							case "prioritization":
+								//console.log("save prioritization ", newFeatureName, result);
+								var center = result.getCentroid();
+								
+								//get the Region that the new interp area falls within
+								var query = new Query();
+								query.geometry = center;
+								layers[regionLyrIndex].layer.queryFeatures(query, function(featureset) {
+									//console.log("region query results", featureset);
+									var regionId = featureset.features[0].attributes.RB;
+									//console.log("regionid", regionId);
+									$.when(app.runQuery(appConfig.URL_PRIOR_AREA_NUM, "0=0", false, function(callback) {
+										//console.log("interp num callback", callback);
+										//testObj = callback.features[0];
+										
+										//var lastNum = callback.features[0].attributes."Reg" + regionId.toString() + "LastInterpAreaIDAssigned";
+										//console.log(lastNum);
+										var regAttr = "R" + regionId.toString() + "LASTPRIORITIZAREAIDASSIGNED"; // LastPrioritizAreaIDAssigned 
+										$.each(callback.features[0].attributes, function(i) { 
+											if (i === regAttr) {
+												var lastRegNum = callback.features[0].attributes[i];
+												var objId = callback.features[0].attributes.OBJECTID;
+												lastRegNum += 1;
+												//console.log(regAttr, lastRegNum);
+												$.when(app.createNewPolyFeature(outputLayer, lastRegNum, regionId, result, appConfig.URL_PRIOR_AREA, function(callback) {
+													$.when(app.updateAttributes(appConfig.URL_PRIOR_AREA_NUM, objId, i, lastRegNum, function(callback) {
+														esri.hide(loading);
+														bootbox.alert(newFeatureName + " Prioritization Area successfully created.");
+														app.stopEdit();
+													}));
+												}));
+											}
+										});
+									}));
+								});
+							break;
+						}
 					}, function(error) {
 						bootbox.alert("An error occurred, please try again.");
 					});
@@ -3006,7 +3003,7 @@ function(
 				function loadData() {
 					var features = [];
 					var count = 0;
-					$.each(qryResultsLyr.features, function (i) {
+					$.each(qryResultsLyr.features, function(i) {
 						var geom = qryResultsLyr.features[i].geometry.getCentroid();
 						var graphic = new Graphic();
 						graphic.setAttributes(qryResultsLyr.features[i].attributes);
@@ -3111,44 +3108,6 @@ function(
 		}));
 	};
 	
-	app.getPolyXY = function (geom, callback) {
-	    // Get the center of a polygon, returns a Point feature
-	    // Uses the Geometry Service labelPoints function, more accurate than getCentroid. If labelPoints fails, it uses GetCentroid
-	    polygon = new Polygon();
-	    polygon.addRing(geom.rings[0]);
-	    polygon.spatialReference = map.spatialReference;
-
-	    var geomX, geomY;
-	    var geometryService = new esri.tasks.GeometryService(appConfig.GEOMETRY_SERVICE);
-
-	    function labelSuccess(point) {
-	        //console.log("geomeetryService.labelPoints succeeded: ", point);
-	        geomX = point[0].x;
-	        geomY = point[0].y;
-	        console.log("geometryService.labelPoints succeeded, x: ", geomX, " and y: ", geomY);
-	        var center = new Point();
-	        center.x = geomX;
-	        center.y = geomY;
-	        center.spatialReference = map.spatialReference;
-	        callback(center);
-	    }
-
-	    function labelError(error) {
-	        //console.log("geomeetryService.labelPoints failed: ", error);
-	        var centroid = polygon.getCentroid();
-	        geomX = centroid.x;
-	        geomY = centroid.y;
-	        console.log("geometryService.labelPoints failed, using centroid x: ", geomX, " and y: ", geomY);
-	        var center = new Point();
-	        center.x = geomX;
-	        center.y = geomY;
-	        center.spatialReference = map.spatialReference;
-	        callback(center);
-	    }
-
-	    geometryService.labelPoints([polygon], labelSuccess, labelError);
-	};
-
 	app.appendRecsToPoint = function(relateUrl, queryParamsRelate, ftrLayer, relateField, callback) {
 		// Called from app.polyToPointLayer, This appends related records to the point feature being created from a poly
 		//  in a separate function to force syncronous behavior

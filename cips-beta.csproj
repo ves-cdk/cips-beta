@@ -68,6 +68,7 @@
   <ItemGroup>
     <Content Include="Editor.aspx" />
     <Content Include="editor.html" />
+    <Content Include="Editor_Unauthorized.aspx" />
     <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.eot" />
     <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.ttf" />
     <Content Include="fonts\font-awesome\fonts\fontawesome-webfont.woff" />
@@ -109,8 +110,10 @@
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="Index.aspx" />
     <Content Include="index.html" />
+    <Content Include="Logout.aspx" />
     <Content Include="Modeler.aspx" />
     <Content Include="modeler.html" />
+    <Content Include="Modeler_Unauthorized.aspx" />
     <Content Include="_temp_Export.html" />
     <Content Include="_temp_ft.html" />
     <Content Include="_temp_index-placeholder.html" />
@@ -217,6 +220,13 @@
     <Compile Include="Editor.aspx.designer.cs">
       <DependentUpon>Editor.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Editor_Unauthorized.aspx.cs">
+      <DependentUpon>Editor_Unauthorized.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Editor_Unauthorized.aspx.designer.cs">
+      <DependentUpon>Editor_Unauthorized.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -234,12 +244,26 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Logout.aspx.cs">
+      <DependentUpon>Logout.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Logout.aspx.designer.cs">
+      <DependentUpon>Logout.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Modeler.aspx.cs">
       <DependentUpon>Modeler.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Modeler.aspx.designer.cs">
       <DependentUpon>Modeler.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Modeler_Unauthorized.aspx.cs">
+      <DependentUpon>Modeler_Unauthorized.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Modeler_Unauthorized.aspx.designer.cs">
+      <DependentUpon>Modeler_Unauthorized.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
